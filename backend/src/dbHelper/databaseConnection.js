@@ -9,6 +9,7 @@ pg.types.setTypeParser(pg.types.builtins.NUMERIC, Number);
 pg.types.setTypeParser(pg.types.builtins.DATE, (value) => value);
 
 export const uniqueViolationErrorCode = '23505';
+export const foreignKeyViolationErrorCode = '23503';
 
 export function createDatabasePool(connectionString, certificateAuthorityPath) {
   return new pg.Pool({

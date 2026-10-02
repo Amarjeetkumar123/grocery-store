@@ -1,6 +1,6 @@
 import { normalizeIndianMobileNumber, readOptionalText, readPositiveInteger, readRequiredText } from './commonValidation.js';
 
-function readCoordinates(body, fieldErrors) {
+export function readCoordinates(body, fieldErrors) {
   const { latitude, longitude } = body;
   const latitudeMissing = latitude === undefined || latitude === null;
   const longitudeMissing = longitude === undefined || longitude === null;

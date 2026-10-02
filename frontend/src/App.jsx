@@ -8,12 +8,17 @@ import { CategoryPage } from './pages/CategoryPage.jsx';
 import { ProductPage } from './pages/ProductPage.jsx';
 import { SearchPage } from './pages/SearchPage.jsx';
 import { ProfilePage } from './pages/ProfilePage.jsx';
+import { CartPage } from './pages/CartPage.jsx';
+import { OrdersPage } from './pages/OrdersPage.jsx';
+import { OrderDetailPage } from './pages/OrderDetailPage.jsx';
 import { StaffPlaceholderPage } from './pages/StaffPlaceholderPage.jsx';
 import { AdminHomeRedirect, AdminLayout } from './pages/admin/AdminLayout.jsx';
 import { AdminProductsPage } from './pages/admin/AdminProductsPage.jsx';
 import { AdminProductFormPage } from './pages/admin/AdminProductFormPage.jsx';
 import { AdminBulkImportPage } from './pages/admin/AdminBulkImportPage.jsx';
 import { AdminStockPage } from './pages/admin/AdminStockPage.jsx';
+import { AdminZonesPage } from './pages/admin/AdminZonesPage.jsx';
+import { AdminStoreSettingsPage } from './pages/admin/AdminStoreSettingsPage.jsx';
 
 const ownerOnly = (page) => <RequireRole allowedRoles={['owner']}>{page}</RequireRole>;
 
@@ -26,6 +31,8 @@ function adminRoutes() {
       <Route path="products/import" element={ownerOnly(<AdminBulkImportPage />)} />
       <Route path="products/:productId" element={ownerOnly(<AdminProductFormPage />)} />
       <Route path="stock" element={<AdminStockPage />} />
+      <Route path="zones" element={ownerOnly(<AdminZonesPage />)} />
+      <Route path="store-settings" element={ownerOnly(<AdminStoreSettingsPage />)} />
     </Route>
   );
 }
@@ -42,6 +49,9 @@ export function App() {
         <Route path="/product/:productId" element={<ProductPage />} />
         <Route path="/search" element={<SearchPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+        <Route path="/cart" element={<CartPage />} />
+        <Route path="/orders" element={<OrdersPage />} />
+        <Route path="/orders/:orderNumber" element={<OrderDetailPage />} />
         {adminRoutes()}
         <Route path="/rider" element={<RequireRole allowedRoles={['rider']}><StaffPlaceholderPage title="My deliveries" /></RequireRole>} />
       </Route>

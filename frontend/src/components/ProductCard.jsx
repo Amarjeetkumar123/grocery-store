@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router';
 import { categoryImageFor } from '../categoryImages.js';
 import { formatRupees, percentOff } from '../formatting.js';
+import { QuantityStepper } from './QuantityStepper.jsx';
 
 export function ProductImage({ product, className }) {
   const fallback = categoryImageFor(product.categoryName);
@@ -38,7 +39,10 @@ export function ProductCard({ product }) {
         <Link to={`/product/${product.id}`} className="product-card-name">{product.name}</Link>
         {product.brand && <p className="hint">{product.brand}</p>}
         <PackSizePicker product={product} chosenPackSizeId={packSize.id} onChoose={setChosenPackSizeId} />
-        <PriceLine packSize={packSize} />
+        <div className="price-row">
+          <PriceLine packSize={packSize} />
+          <QuantityStepper packSize={packSize} productName={product.name} />
+        </div>
         <StockStatus packSize={packSize} />
       </div>
     </article>

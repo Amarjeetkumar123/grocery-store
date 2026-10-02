@@ -1,10 +1,9 @@
 import { findCustomerProfileByUserId, upsertCustomerProfile } from '../dbHelper/customerDbHelper.js';
 import { findNotifyMeCategoryIds, saveNotifyMe } from '../dbHelper/notifyMeDbHelper.js';
-import { findStoreLocation } from '../dbHelper/storeSettingsDbHelper.js';
 import { findActiveZoneById, isTowerInZone } from '../dbHelper/zoneDbHelper.js';
 import { readPositiveInteger } from '../validators/commonValidation.js';
 import { validateProfileInput } from '../validators/profileValidation.js';
-import { distanceInKilometers } from '../utils/geography.js';
+import { checkDeliveryDistance } from './deliveryDistance.js';
 import { ServiceError, throwIfFieldErrors } from './serviceError.js';
 
 // Who is signed in, their role, saved address and "notify me" requests.
@@ -16,17 +15,6 @@ async function getAccount({ database }, user, staffMember) {
     profile: await findCustomerProfileByUserId(database, user.id),
     notifyMeCategoryIds: await findNotifyMeCategoryIds(database, user.id),
   };
-}
-
-// Returns an error message when the location is beyond the delivery
-// distance, or null when it is fine (or the store location is not set).
-async function checkDeliveryDistance(database, latitude, longitude) {
-  const store = await findStoreLocation(database);
-  if (store.latitude === null) return null;
-  const distance = distanceInKilometers(store, { latitude, longitude });
-  if (distance <= store.maximumDeliveryDistanceKilometers) return null;
-  return `This location is ${distance.toFixed(1)} km from our store. `
-    + `We deliver within ${store.maximumDeliveryDistanceKilometers} km.`;
 }
 
 // Create or update the customer's name, phone and delivery address.

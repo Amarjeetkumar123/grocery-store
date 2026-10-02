@@ -10,10 +10,16 @@ import { createCatalogueService } from './services/catalogueService.js';
 import { createProductService } from './services/productService.js';
 import { createProductImportService } from './services/productImportService.js';
 import { createStockService } from './services/stockService.js';
+import { createCheckoutService } from './services/checkoutService.js';
+import { createCustomerOrderService } from './services/customerOrderService.js';
+import { createZoneService } from './services/zoneService.js';
 import { createPublicRouter } from './routes/publicRoutes.js';
 import { createAccountRouter } from './routes/accountRoutes.js';
 import { createAdminProductRouter } from './routes/adminProductRoutes.js';
 import { createAdminStockRouter } from './routes/adminStockRoutes.js';
+import { createAdminZoneRouter } from './routes/adminZoneRoutes.js';
+import { createCheckoutRouter } from './routes/checkoutRoutes.js';
+import { createCustomerOrderRouter } from './routes/customerOrderRoutes.js';
 
 function createServices(dependencies) {
   return {
@@ -23,6 +29,9 @@ function createServices(dependencies) {
     productService: createProductService(dependencies),
     productImportService: createProductImportService(dependencies),
     stockService: createStockService(dependencies),
+    checkoutService: createCheckoutService(dependencies),
+    customerOrderService: createCustomerOrderService(dependencies),
+    zoneService: createZoneService(dependencies),
   };
 }
 
@@ -66,8 +75,10 @@ export function createApplication({ database, verifyAccessToken, productImageSto
   application.get('/api/health', (request, response) => response.json({ status: 'ok' }));
   application.use('/api', createPublicRouter(services));
   application.use('/api/account', signedIn, createAccountRouter(services));
+  application.use('/api/checkout', signedIn, createCheckoutRouter(services));
+  application.use('/api/orders', signedIn, createCustomerOrderRouter(services));
   application.use('/api/admin', signedIn, requireRole('owner', 'packer'),
-    createAdminStockRouter(services), createAdminProductRouter(services));
+    createAdminStockRouter(services), createAdminProductRouter(services), createAdminZoneRouter(services));
 
   applyErrorHandling(application);
   return application;

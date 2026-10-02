@@ -1,5 +1,5 @@
 const customerProfileQuery = `
-  select customer.name, customer.phone, customer.phone_confirmed, customer.blocked,
+  select customer.id, customer.name, customer.phone, customer.phone_confirmed, customer.blocked,
          customer.zone_id, zone.name as zone_name, customer.zone_type,
          customer.tower_id, tower.name as tower_name, customer.flat_number,
          customer.house_number, customer.street, customer.landmark, customer.floor,
@@ -58,6 +58,13 @@ function toCustomerProfile(row) {
 export async function findCustomerProfileByUserId(executor, userId) {
   const result = await executor.query(customerProfileQuery, [userId]);
   return result.rows[0] ? toCustomerProfile(result.rows[0]) : null;
+}
+
+// For placing and viewing orders: { customerId, profile } or null.
+export async function findCustomerWithProfileByUserId(executor, userId) {
+  const result = await executor.query(customerProfileQuery, [userId]);
+  const row = result.rows[0];
+  return row ? { customerId: row.id, profile: toCustomerProfile(row) } : null;
 }
 
 // Returns false when the customer is blocked (nothing is changed).

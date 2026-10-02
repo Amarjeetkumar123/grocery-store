@@ -99,3 +99,37 @@ function toStockItem(row) {
     expiringSoon: row.expiring_soon,
   };
 }
+
+// Pack sizes in a cart, with current prices and stock. "available" is
+// false for hidden products or packs and coming-soon categories.
+// lockRows (inside a transaction) holds the rows until the order is saved;
+// rows are locked in id order so two orders never wait on each other.
+export async function findPackSizesForCart(executor, packSizeIds, { lockRows = false } = {}) {
+  const result = await executor.query(
+    `select pack.id, pack.label, pack.price, pack.maximum_retail_price, pack.stock, pack.low_stock_level,
+            product.id as product_id, product.name as product_name, product.brand, product.image_path,
+            category.name as category_name,
+            (pack.active and product.active and not category.coming_soon) as available
+     from pack_sizes pack
+     join products product on product.id = pack.product_id
+     join categories category on category.id = product.category_id
+     where pack.id = any($1::bigint[])
+     order by pack.id
+     ${lockRows ? 'for update of pack' : ''}`,
+    [packSizeIds],
+  );
+  return result.rows.map((row) => ({
+    id: row.id,
+    label: row.label,
+    price: row.price,
+    maximumRetailPrice: row.maximum_retail_price,
+    stock: row.stock,
+    lowStockLevel: row.low_stock_level,
+    productId: row.product_id,
+    productName: row.product_name,
+    brand: row.brand,
+    imagePath: row.image_path,
+    categoryName: row.category_name,
+    available: row.available,
+  }));
+}

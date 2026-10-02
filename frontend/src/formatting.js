@@ -28,3 +28,59 @@ export function formatMonthYear(isoDate) {
   const [year, month] = isoDate.split('-').map(Number);
   return new Date(year, month - 1, 1).toLocaleDateString('en-IN', { month: 'short', year: 'numeric' });
 }
+
+const indianDateFormatter = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' });
+
+// Today's date in India as "2026-10-03".
+export function todayInIndia() {
+  return indianDateFormatter.format(new Date());
+}
+
+function addDays(isoDate, days) {
+  const date = new Date(`${isoDate}T00:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + days);
+  return date.toISOString().slice(0, 10);
+}
+
+// "2026-10-04" -> "Today", "Tomorrow" or "Sat 4 Oct"
+export function formatDeliveryDay(isoDate) {
+  const today = todayInIndia();
+  if (isoDate === today) return 'Today';
+  if (isoDate === addDays(today, 1)) return 'Tomorrow';
+  return new Date(`${isoDate}T00:00:00Z`).toLocaleDateString('en-IN', {
+    weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC',
+  }).replace(',', '');
+}
+
+function splitTime(time) {
+  const [hours, minutes] = time.split(':').map(Number);
+  const hour = hours % 12 || 12;
+  return { clock: minutes ? `${hour}:${String(minutes).padStart(2, '0')}` : String(hour), meridiem: hours < 12 ? 'AM' : 'PM' };
+}
+
+// "07:00" -> "7 AM", "18:30" -> "6:30 PM"
+export function formatTime(time) {
+  const { clock, meridiem } = splitTime(time);
+  return `${clock} ${meridiem}`;
+}
+
+// ("07:00", "09:00") -> "7–9 AM"; ("11:00", "13:00") -> "11 AM–1 PM"
+export function formatTimeRange(startTime, endTime) {
+  const start = splitTime(startTime);
+  const end = splitTime(endTime);
+  if (start.meridiem === end.meridiem) return `${start.clock}–${end.clock} ${end.meridiem}`;
+  return `${start.clock} ${start.meridiem}–${end.clock} ${end.meridiem}`;
+}
+
+// When a slot stops taking orders: "10 PM today", "2 PM tomorrow".
+export function formatCutoff(cutoffAt) {
+  const moment = new Date(cutoffAt);
+  const time = moment.toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata', hour: 'numeric', minute: '2-digit' })
+    .replace(':00', '').toUpperCase();
+  return `${time} ${formatDeliveryDay(indianDateFormatter.format(moment)).toLowerCase()}`;
+}
+
+// "2026-09-28T10:20:00Z" -> "28 Sep"
+export function formatShortDate(isoTimestamp) {
+  return new Date(isoTimestamp).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', timeZone: 'Asia/Kolkata' });
+}

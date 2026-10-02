@@ -1,0 +1,31 @@
+Category,Product name,Brand,Pack size,Maximum retail price (MRP),Price,Stock,Low stock alert,Best before (YYYY-MM-DD),Manufacturer,Description
+Oils & Ghee,Sunflower Oil,Fortune,1 L,180,155,40,5,2027-03-31,Adani Wilmar,Light refined sunflower oil for everyday cooking.
+Oils & Ghee,Sunflower Oil,Fortune,5 L,850,740,10,3,2027-03-31,Adani Wilmar,Light refined sunflower oil for everyday cooking.
+Oils & Ghee,Kachi Ghani Mustard Oil,Fortune,1 L,210,185,35,5,2027-02-28,Adani Wilmar,Cold pressed mustard oil with a strong aroma.
+Oils & Ghee,Kachi Ghani Mustard Oil,Fortune,5 L,1000,899,8,3,2027-02-28,Adani Wilmar,Cold pressed mustard oil with a strong aroma.
+Oils & Ghee,Refined Soyabean Oil,Fortune,1 L,165,145,30,5,2027-01-31,Adani Wilmar,Refined soyabean oil for frying and cooking.
+Oils & Ghee,Pure Cow Ghee,Amul,500 ml,330,310,20,5,2027-04-30,Gujarat Cooperative Milk Marketing Federation,Rich and granular cow ghee.
+Oils & Ghee,Pure Cow Ghee,Amul,1 L,650,615,12,3,2027-04-30,Gujarat Cooperative Milk Marketing Federation,Rich and granular cow ghee.
+Oils & Ghee,Groundnut Oil,Dhara,1 L,230,205,4,5,2027-01-31,Mother Dairy,Filtered groundnut oil.
+Oils & Ghee,Extra Virgin Olive Oil,Figaro,500 ml,899,749,6,3,2027-08-31,Deoleo,Imported olive oil for salads and light cooking.
+Atta & Flours,Shudh Chakki Atta,Aashirvaad,5 kg,290,265,25,5,2027-01-31,ITC,Whole wheat atta for soft rotis.
+Atta & Flours,Shudh Chakki Atta,Aashirvaad,10 kg,560,520,18,5,2027-01-31,ITC,Whole wheat atta for soft rotis.
+Atta & Flours,Chakki Fresh Atta,Pillsbury,5 kg,280,249,15,5,2027-01-31,General Mills,Whole wheat chakki atta.
+Atta & Flours,Besan,Rajdhani,500 g,75,68,30,5,2027-02-28,Rajdhani Flour Mills,Fine gram flour for pakoras and kadhi.
+Atta & Flours,Besan,Rajdhani,1 kg,145,130,20,5,2027-02-28,Rajdhani Flour Mills,Fine gram flour for pakoras and kadhi.
+Atta & Flours,Maida,Rajdhani,1 kg,60,55,0,5,2027-02-28,Rajdhani Flour Mills,Refined wheat flour.
+Atta & Flours,Sooji,Rajdhani,500 g,45,40,25,5,2027-02-28,Rajdhani Flour Mills,Semolina for upma and halwa.
+Rice,Classic Basmati Rice,India Gate,1 kg,210,185,25,5,2028-03-31,KRBL,Long grain aged basmati rice.
+Rice,Classic Basmati Rice,India Gate,5 kg,999,875,10,3,2028-03-31,KRBL,Long grain aged basmati rice.
+Rice,Rozana Basmati Rice,Daawat,5 kg,499,435,12,3,2028-01-31,LT Foods,Everyday basmati rice.
+Rice,Organic Sona Masoori Rice,24 Mantra Organic,1 kg,120,110,15,5,2026-10-25,Sresta Natural Bioproducts,Light and aromatic South Indian rice.
+Dals & Pulses,Toor Dal,Tata Sampann,1 kg,185,165,30,5,2027-02-28,Tata Consumer Products,Unpolished arhar dal.
+Dals & Pulses,Moong Dal,Tata Sampann,1 kg,170,152,20,5,2027-02-28,Tata Consumer Products,Unpolished split yellow moong.
+Dals & Pulses,Chana Dal,Tata Sampann,1 kg,120,108,3,5,2027-02-28,Tata Consumer Products,Unpolished split chana.
+Dals & Pulses,Masoor Dal,Rajdhani,1 kg,130,115,18,5,2027-03-31,Rajdhani Flour Mills,Red lentils that cook quickly.
+Dals & Pulses,Rajma Chitra,Rajdhani,500 g,95,86,22,5,2027-03-31,Rajdhani Flour Mills,Speckled kidney beans.
+Dals & Pulses,Kabuli Chana,Rajdhani,1 kg,160,145,14,5,2027-03-31,Rajdhani Flour Mills,Large white chickpeas for chole.
+Grains & Millets,Poha,Rajdhani,500 g,50,45,25,5,2027-01-31,Rajdhani Flour Mills,Thick flattened rice.
+Grains & Millets,Daliya,Rajdhani,500 g,45,40,20,5,2027-01-31,Rajdhani Flour Mills,Broken wheat for porridge and khichdi.
+Grains & Millets,Organic Ragi,24 Mantra Organic,500 g,85,75,10,3,2027-03-31,Sresta Natural Bioproducts,Whole finger millet.
+Grains & Millets,Organic Foxtail Millet,24 Mantra Organic,500 g,110,99,8,3,2027-03-31,Sresta Natural Bioproducts,Foxtail millet for rice and upma.

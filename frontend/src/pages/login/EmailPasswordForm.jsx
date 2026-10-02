@@ -44,28 +44,22 @@ export function EmailPasswordForm() {
   const [mode, setMode] = useState('signIn');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  const [message, setMessage] = useState(null);
-  const [errorMessage, setErrorMessage] = useState(null);
+  const [status, setStatus] = useState({ submitting: false, message: null, errorMessage: null });
+  const { submitting, message, errorMessage } = status;
   const { submitLabel, needsPassword } = formModes[mode];
 
   function changeMode(newMode) {
     setMode(newMode);
-    setMessage(null);
-    setErrorMessage(null);
+    setStatus({ submitting: false, message: null, errorMessage: null });
   }
 
   async function handleSubmit(event) {
     event.preventDefault();
-    setSubmitting(true);
-    setMessage(null);
-    setErrorMessage(null);
+    setStatus({ submitting: true, message: null, errorMessage: null });
     try {
-      setMessage(await submitToSupabase(mode, email.trim(), password));
+      setStatus({ submitting: false, message: await submitToSupabase(mode, email.trim(), password), errorMessage: null });
     } catch (error) {
-      setErrorMessage(error.message);
-    } finally {
-      setSubmitting(false);
+      setStatus({ submitting: false, message: null, errorMessage: error.message });
     }
   }
 

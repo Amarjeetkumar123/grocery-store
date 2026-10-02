@@ -5,6 +5,8 @@ import { formatMonthYear, formatRupees } from '../formatting.js';
 import { PageBar } from '../components/PageBar.jsx';
 import { LoadingOrError } from '../components/LoadingOrError.jsx';
 import { PriceLine, ProductImage, StockStatus } from '../components/ProductCard.jsx';
+import { QuantityStepper } from '../components/QuantityStepper.jsx';
+import { CartBar } from '../components/CartBar.jsx';
 
 function PackSizeChoices({ packSizes, chosenPackSize, onChoose }) {
   return (
@@ -55,13 +57,17 @@ export function ProductPage() {
               <h2 className="product-title">{product.name}</h2>
             </div>
             <PackSizeChoices packSizes={product.packSizes} chosenPackSize={packSize} onChoose={setChosenPackSizeId} />
-            <PriceLine packSize={packSize} />
+            <div className="price-row">
+              <PriceLine packSize={packSize} />
+              <QuantityStepper packSize={packSize} productName={product.name} large />
+            </div>
             <StockStatus packSize={packSize} />
             {product.description && <p className="hint">{product.description}</p>}
             <PackDetails product={product} packSize={packSize} />
           </>
         )}
       </div>
+      <CartBar />
     </main>
   );
 }

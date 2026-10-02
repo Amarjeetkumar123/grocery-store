@@ -4,10 +4,12 @@ import { useStoreDetails } from '../../useStoreDetails.js';
 import { Icon } from '../../Icon.jsx';
 import logoImage from '../../assets/logo.png';
 
-// Orders, zones, staff and reports join this menu in Weeks 3 to 5.
+// The order board, staff and reports join this menu in Weeks 4 and 5.
 const navigationItems = [
   { path: '/admin/products', label: 'Products', icon: 'tag', roles: ['owner'] },
   { path: '/admin/stock', label: 'Stock', icon: 'layers', roles: ['owner', 'packer'] },
+  { path: '/admin/zones', label: 'Zones & slots', icon: 'pin', roles: ['owner'] },
+  { path: '/admin/store-settings', label: 'Store settings', icon: 'settings', roles: ['owner'] },
 ];
 
 const roleLabels = { owner: 'Owner', packer: 'Packer' };

@@ -24,6 +24,11 @@ export class ServiceError extends Error {
     return new ServiceError(404, message);
   }
 
+  // The request was fine but the shop has changed, e.g. a slot just filled up.
+  static conflict(message, extraResponseFields) {
+    return new ServiceError(409, message, extraResponseFields);
+  }
+
   static unavailable(message) {
     return new ServiceError(503, message);
   }

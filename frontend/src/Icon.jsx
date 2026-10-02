@@ -55,6 +55,17 @@ const iconShapes = {
   bell: <path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4" />,
   logout: <path d="M10 4H5v16h5M14 8l4 4-4 4M18 12H9" />,
   mail: <path d="M3 6h18v12H3zM3 6l9 7 9-7" />,
+  cart: (
+    <>
+      <path d="M3 4h2l2.2 10.5h10.6L20 7H6.2" />
+      <circle cx="9" cy="19" r="1.5" />
+      <circle cx="17" cy="19" r="1.5" />
+    </>
+  ),
+  box: <path d="m12 3 8 4.5v9L12 21l-8-4.5v-9zM4 7.5l8 4.5 8-4.5M12 12v9" />,
+  chat: <path d="M4 20l1.4-4A8 8 0 1 1 8.5 19z" />,
+  settings: <path d="M4 7h10M18 7h2M4 17h4M12 17h8M14 4v6M8 14v6" />,
+  close: <path d="M6 6l12 12M18 6 6 18" />,
 };
 
 export function Icon({ name, size = 20 }) {
