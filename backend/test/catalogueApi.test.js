@@ -5,9 +5,9 @@ import assert from 'node:assert/strict';
 import { fakeProductImageStorage, skipWithoutDatabase as skip, startTestServer } from './testServer.js';
 
 const usersByToken = {
-  'owner-token': { id: 'aaaaaaaa-0000-0000-0000-000000000001', email: 'owner@example.com', emailConfirmed: true },
-  'packer-token': { id: 'aaaaaaaa-0000-0000-0000-000000000002', email: 'packer@example.com', emailConfirmed: true },
-  'customer-token': { id: 'aaaaaaaa-0000-0000-0000-000000000003', email: 'riya@example.com', emailConfirmed: true },
+  'owner-token': { id: 'aaaaaaaa-0000-0000-0000-000000000001', email: 'owner@example.com', emailVerifiedByGoogle: true },
+  'packer-token': { id: 'aaaaaaaa-0000-0000-0000-000000000002', email: 'packer@example.com', emailVerifiedByGoogle: true },
+  'customer-token': { id: 'aaaaaaaa-0000-0000-0000-000000000003', email: 'riya@example.com', emailVerifiedByGoogle: true },
 };
 
 let testServer;

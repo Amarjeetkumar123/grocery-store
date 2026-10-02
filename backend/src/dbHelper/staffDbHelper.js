@@ -1,5 +1,5 @@
 // Staff rows are created by the owner with an email address. The first
-// time that person signs in with a confirmed email, the row is linked
+// time that person signs in with Google (see toVerifiedUser), the row is linked
 // to their login id; after that only the login id is trusted.
 const findOrLinkStaffMemberQuery = `
   with linked_staff as (
@@ -14,6 +14,6 @@ const findOrLinkStaffMemberQuery = `
 
 // Returns { id, name, role } for active staff, or null.
 export async function findActiveStaffMemberForUser(executor, user) {
-  const result = await executor.query(findOrLinkStaffMemberQuery, [user.id, user.email, user.emailConfirmed]);
+  const result = await executor.query(findOrLinkStaffMemberQuery, [user.id, user.email, user.emailVerifiedByGoogle]);
   return result.rows[0] ?? null;
 }

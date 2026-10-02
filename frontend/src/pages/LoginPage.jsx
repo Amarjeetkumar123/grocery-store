@@ -6,6 +6,7 @@ import { useStoreDetails } from '../useStoreDetails.js';
 import logoImage from '../assets/logo.png';
 import groceriesImage from '../assets/login-groceries.png';
 import { Icon } from '../Icon.jsx';
+import { EmailPasswordForm } from './login/EmailPasswordForm.jsx';
 
 function GoogleLogo() {
   return (
@@ -32,6 +33,7 @@ export function LoginPage() {
   const { session } = useAuthentication();
   const store = useStoreDetails();
   const [errorMessage, setErrorMessage] = useState(null);
+  const [showEmailForm, setShowEmailForm] = useState(false);
   if (session) return <Navigate to="/" replace />;
 
   async function signInWithGoogle() {
@@ -57,6 +59,12 @@ export function LoginPage() {
         <button type="button" className="button button-large button-google" onClick={signInWithGoogle}>
           <GoogleLogo /> Continue with Google
         </button>
+        <p className="login-divider"><span>or</span></p>
+        {showEmailForm ? <EmailPasswordForm /> : (
+          <button type="button" className="button button-large button-outline" onClick={() => setShowEmailForm(true)}>
+            <Icon name="mail" /> Continue with email
+          </button>
+        )}
       </div>
     </main>
   );

@@ -4,9 +4,9 @@ import assert from 'node:assert/strict';
 import { skipWithoutDatabase as skip, startTestServer } from './testServer.js';
 
 const usersByToken = {
-  'customer-token': { id: '11111111-1111-1111-1111-111111111111', email: 'riya@example.com', emailConfirmed: true },
-  'owner-token': { id: '22222222-2222-2222-2222-222222222222', email: 'owner@example.com', emailConfirmed: true },
-  'unconfirmed-owner-token': { id: '33333333-3333-3333-3333-333333333333', email: 'owner@example.com', emailConfirmed: false },
+  'customer-token': { id: '11111111-1111-1111-1111-111111111111', email: 'riya@example.com', emailVerifiedByGoogle: true },
+  'owner-token': { id: '22222222-2222-2222-2222-222222222222', email: 'owner@example.com', emailVerifiedByGoogle: true },
+  'unconfirmed-owner-token': { id: '33333333-3333-3333-3333-333333333333', email: 'owner@example.com', emailVerifiedByGoogle: false },
 };
 
 let testServer;

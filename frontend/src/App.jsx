@@ -1,6 +1,7 @@
 import { Navigate, Route, Routes } from 'react-router';
 import { RequireRole, RequireSignedIn } from './RouteGuards.jsx';
 import { LoginPage } from './pages/LoginPage.jsx';
+import { ResetPasswordPage } from './pages/ResetPasswordPage.jsx';
 import { HomePage } from './pages/HomePage.jsx';
 import { AddressPage } from './pages/AddressPage.jsx';
 import { CategoryPage } from './pages/CategoryPage.jsx';
@@ -33,6 +34,7 @@ export function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route element={<RequireSignedIn />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/address" element={<AddressPage />} />

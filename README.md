@@ -49,7 +49,20 @@ Use Node 24: run `nvm use` in this folder (it reads `.nvmrc`).
    `http://localhost:5173`, and add `http://localhost:5173/**` to Redirect URLs.
    Add your real website address here when you go live.
 
-### 3. Settings files
+### 3. Email and password sign-in
+
+The login page also offers email + password (create account, forgot
+password). The Email provider is on by default in Supabase.
+
+Supabase's built-in mailer only sends to your own team's addresses and only
+a few emails an hour, so customers won't get sign-up or reset links. Add a
+free mail service: Supabase → Authentication → Emails → **SMTP Settings**
+(for example Brevo, 300 emails a day free). Keep **Confirm email** turned on.
+
+Staff (owner, packer, riders) must sign in with **Google**. Password
+accounts are never linked to a staff row.
+
+### 4. Settings files
 
 ```bash
 cp backend/.env.example backend/.env

@@ -12,12 +12,20 @@ export function createSupabaseTokenVerifier(supabaseUrl, publishableKey) {
     if (response.status === 401 || response.status === 403) return null;
     if (!response.ok) throw new Error(`Supabase auth check failed with status ${response.status}`);
 
-    const user = await response.json();
-    return {
-      id: user.id,
-      email: user.email ? user.email.toLowerCase() : null,
-      emailConfirmed: Boolean(user.email_confirmed_at),
-    };
+    return toVerifiedUser(await response.json());
+  };
+}
+
+// Staff rows are linked by email only when the login is Google alone. A
+// password account could have been opened by someone else using that
+// person's email before they ever signed in.
+export function toVerifiedUser(supabaseUser) {
+  const identities = supabaseUser.identities ?? [];
+  const googleOnly = identities.length > 0 && identities.every((identity) => identity.provider === 'google');
+  return {
+    id: supabaseUser.id,
+    email: supabaseUser.email ? supabaseUser.email.toLowerCase() : null,
+    emailVerifiedByGoogle: googleOnly && Boolean(supabaseUser.email_confirmed_at),
   };
 }
 

@@ -54,6 +54,7 @@ const iconShapes = {
   edit: <path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4" />,
   bell: <path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4" />,
   logout: <path d="M10 4H5v16h5M14 8l4 4-4 4M18 12H9" />,
+  mail: <path d="M3 6h18v12H3zM3 6l9 7 9-7" />,
 };
 
 export function Icon({ name, size = 20 }) {
