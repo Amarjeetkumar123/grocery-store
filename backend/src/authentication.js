@@ -1,0 +1,67 @@
+// Asks Supabase whether a login token is real and still valid.
+// ponytail: one Supabase call per request; switch to local JWKS verification
+// (supabase.auth.getClaims) if request volume grows.
+export function createSupabaseTokenVerifier(supabaseUrl, publishableKey) {
+  return async function verifyAccessToken(accessToken) {
+    const response = await fetch(`${supabaseUrl}/auth/v1/user`, {
+      headers: { apikey: publishableKey, Authorization: `Bearer ${accessToken}` },
+      signal: AbortSignal.timeout(5000),
+    });
+    if (response.status === 401 || response.status === 403) return null;
+    if (!response.ok) throw new Error(`Supabase auth check failed with status ${response.status}`);
+
+    const user = await response.json();
+    return {
+      id: user.id,
+      email: user.email ? user.email.toLowerCase() : null,
+      emailConfirmed: Boolean(user.email_confirmed_at),
+    };
+  };
+}
+
+// Staff rows are created by the owner with an email address. The first
+// time that person signs in with a confirmed email, the row is linked
+// to their login id; after that only the login id is trusted.
+async function findStaffMember(database, user) {
+  const result = await database.query(
+    `with linked_staff as (
+       update staff set user_id = $1
+       where user_id is null and email = $2 and $3::boolean
+       returning id, name, role, active
+     )
+     select id, name, role from linked_staff where active
+     union all
+     select id, name, role from staff where user_id = $1 and active
+     limit 1`,
+    [user.id, user.email, user.emailConfirmed],
+  );
+  return result.rows[0] ?? null;
+}
+
+export function requireSignedIn(verifyAccessToken, database) {
+  return async function checkSignedIn(request, response, next) {
+    const authorizationHeader = request.get('authorization') ?? '';
+    const accessToken = authorizationHeader.startsWith('Bearer ') ? authorizationHeader.slice('Bearer '.length) : '';
+    if (!accessToken) {
+      return response.status(401).json({ error: 'Please sign in.' });
+    }
+
+    const user = await verifyAccessToken(accessToken);
+    if (!user) {
+      return response.status(401).json({ error: 'Your session has expired. Please sign in again.' });
+    }
+
+    request.user = user;
+    request.staffMember = await findStaffMember(database, user);
+    next();
+  };
+}
+
+export function requireRole(...allowedRoles) {
+  return function checkRole(request, response, next) {
+    if (!request.staffMember || !allowedRoles.includes(request.staffMember.role)) {
+      return response.status(403).json({ error: 'You do not have access to this page.' });
+    }
+    next();
+  };
+}

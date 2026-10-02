@@ -1,0 +1,445 @@
+Yes. You can serve colonies, streets and sectors near the store as well as societies. The simplest way is to treat both as **delivery zones**:
+
+- **Society zone:** the address is society → tower → flat (same as before).
+- **Locality zone:** the address is house number, street, landmark, plus a **"Use my current location"** button. That button uses the phone's GPS and needs no map service, so it costs nothing.
+- **Same setup for both:** every zone gets its own slots, cutoff, minimum order value and delivery charge.
+- **Distance check:** when a GPS location is shared, Express rejects addresses farther than your limit (e.g. 3 km). This is a simple calculation on your server, with no map service.
+- **Directions for riders:** an "Open in Google Maps" button for locality orders. It's a plain link, so it's free.
+
+I've left out showing a map with a pin the customer can drag. GPS plus a landmark is enough for a first version; add the map later if riders struggle to find houses. Render is removed and backend hosting is now yours to arrange.
+
+Here is the full plan with zones:
+
+```text
+=====================================================================
+  GROCERY STORE FOR NEARBY SOCIETIES & LOCAL AREAS
+  FIRST VERSION PLAN (v3, EXPRESS + ZONES)
+=====================================================================
+
+1. SUMMARY
+---------------------------------------------------------------------
+Business        : One store, own stock, packaged kitchen staples
+Customers       : Residents of 5-10 nearby housing societies AND
+                  nearby local areas (colonies, sectors, streets)
+Delivery        : Scheduled slots only, set for each delivery zone
+Payment         : Pay at the door, cash or UPI (no payment gateway)
+Team            : 4 people
+Language        : English
+Goal            : No paid add-ons (SMS, WhatsApp API, gateway, maps)
+
+2. PRODUCTS
+---------------------------------------------------------------------
+Available now:
+  - Oils & Ghee        (1 L / 5 L / 15 L tins etc.)
+  - Atta & Flours      (1 kg / 5 kg / 10 kg)
+  - Rice               (1 kg / 5 kg / 25 kg)
+  - Dals & Pulses
+  - Grains & Millets
+
+Coming soon:
+  - Fruits & Vegetables, shown as a tile with a "Notify me" button.
+    Every tap is recorded with the customer's zone.
+
+Details stored for each product:
+  - Name, brand, category, photo
+  - Pack sizes, each with its own MRP, selling price and stock count
+  - Net quantity, manufacturer, best-before / expiry date
+  - Low-stock alert level
+  - Active / hidden switch
+
+3. DELIVERY ZONES
+---------------------------------------------------------------------
+A zone is any area the store delivers to. There are two kinds:
+
+  Society zone  : a gated society
+                  Address = society -> tower -> flat number
+  Locality zone : a colony, sector, street or market area
+                  Address = house/shop number, street, landmark,
+                  optional floor + "Use my current location" (GPS)
+
+Every zone has its own:
+  - Active / inactive switch
+  - Delivery slots (days, time window, cutoff, max orders)
+  - Minimum order value
+  - Delivery charge (e.g. free above Rs X)
+
+Distance check:
+  - The admin sets the store's location and the maximum delivery
+    distance (e.g. 3 km).
+  - If a customer shares their GPS location, Express works out the
+    straight-line distance from the store and rejects addresses
+    beyond the limit.
+  - If no GPS location is shared, the order is still accepted; the
+    admin checks the address when confirming.
+
+Location rules:
+  - GPS comes only from the phone (free, no map service).
+  - The customer can also type the address by hand. The landmark is
+    required for locality zones.
+  - No map display and no address-to-location lookup in the first
+    version.
+
+4. HOW THE SYSTEM IS BUILT
+---------------------------------------------------------------------
+   [Customer phone]  [Admin laptop]  [Rider phone]
+           \               |               /
+         React web app, installable (PWA), on Netlify (free)
+                           |
+           Google sign-in through Supabase Auth
+                           |
+              Every request goes to the Express API
+             (with the login token attached)
+                           |
+         Express server (Node.js), hosted by you
+                           |
+          Supabase: Postgres database + image storage
+
+Frontend : React (Vite), installable on the phone (PWA)
+             /        -> customer store
+             /admin   -> admin panel
+             /rider   -> rider screens
+           Hosted on Netlify (free).
+
+Backend  : Express (Node.js), deployed and run by you
+           - Checks the Supabase login token on every request
+           - Looks up the user's role: customer, owner, packer or
+             rider
+           - Holds all business rules: prices, stock, zones, slots,
+             cutoffs, distance check, order statuses
+           - Direct Postgres connection ("pg", or Prisma) so stock
+             and order changes run as one transaction
+           - Uploads product photos to Supabase Storage
+           - Sends web push notifications (free "web-push" library)
+           Hosting needs:
+             - Always on (no sleeping)
+             - HTTPS (the browser only allows GPS on secure sites)
+             - Secret keys kept as environment variables on the
+               server
+             - Automatic restart if the server crashes
+             - Server logs kept for checking problems
+
+Database : Supabase Postgres (free plan)
+Login    : Supabase Auth, Google sign-in (free, no OTP)
+Images   : Supabase Storage (public folder for product photos)
+
+Security rules:
+  - The Supabase service key and the database password live ONLY on
+    the Express server.
+  - The database blocks direct access from the browser; the React
+    app uses Supabase only for login.
+  - Express accepts requests only from the store's own website
+    (CORS limited to its domain).
+  - Security headers on every response (helmet).
+  - Limits on repeated requests (rate limiting) for login and
+    placing orders.
+  - Every input is checked on the server.
+  - Prices, totals, delivery charges and distance are always worked
+    out by the server, never taken from what the browser sends.
+  - Each role can reach only its own areas (section 8).
+  - Customer GPS locations and addresses are visible only to staff
+    who need them for delivery.
+  - Slot cutoffs and delivery dates use Indian time (Asia/Kolkata).
+
+5. CUSTOMER LOGIN AND ADDRESS (no OTP, no SMS cost)
+---------------------------------------------------------------------
+Main      : "Continue with Google" through Supabase Auth.
+First time: Name + phone number -> choose a zone ->
+              Society zone : tower + flat
+              Locality zone: house/shop number, street, landmark,
+                             floor (optional), "Use my current
+                             location"
+Phone check (free):
+            On the first order, a "Confirm on WhatsApp" button opens
+            WhatsApp with a ready-made message to the store number;
+            the customer taps send and the admin marks the phone as
+            confirmed. REQUIRED for locality zones, because there is
+            no society gate to vouch for the address. Optional for
+            society zones.
+Fallback  : Phone number + password through Supabase Auth, with
+            phone confirmation switched off. During setup, check
+            this works without an SMS provider; otherwise use email
+            + password (also free). Forgotten password -> reset by
+            the admin.
+Rules     : Only active zones appear in the list. One saved address
+            per customer in the first version.
+
+6. HOW AN ORDER WORKS
+---------------------------------------------------------------------
+Customer : Opens the app -> browses -> adds to cart -> picks a slot
+           for their zone -> places the order (pay at the door)
+Admin    : New order on the board -> checks the address (locality
+           zones) -> Confirm -> one-tap WhatsApp confirmation
+Packer   : Picking list -> packs -> "Packed"
+Admin    : Assigns a rider for the slot
+Rider    : Delivery list grouped by zone (society: by tower;
+           locality: by street/landmark) -> "Out for delivery" ->
+           Google Maps link for locality orders -> delivers ->
+           collects payment -> "Delivered"
+Owner    : End of day: checks cash per rider and UPI received
+
+Order statuses:
+  New -> Confirmed -> Packed -> Out for delivery -> Delivered
+  (an order can become Cancelled at any step before Delivered)
+
+Placing an order (Express does all of this as ONE transaction):
+  1. Check the zone is active and the address is inside the
+     distance limit (if a GPS location was shared)
+  2. Check the slot is still open: before the cutoff, not full
+  3. Check the zone's minimum order value
+  4. Lock the pack-size rows and check there is enough stock
+  5. Take prices from the database and work out totals and the
+     zone's delivery charge
+  6. Reduce stock
+  7. Save the order with a COPY of the address and GPS location at
+     the time of ordering, its items and a running order number
+  If any step fails, nothing is saved and the customer sees a
+  clear message.
+Cancelling: stock goes back up, also in one transaction.
+
+Admin board refresh: asks Express for new orders every 20 seconds.
+
+7. DELIVERY SLOTS
+---------------------------------------------------------------------
+Set by the admin for each zone:
+  - Delivery days       (e.g. daily, or Mon/Wed/Fri)
+  - Time window         (e.g. 7-9 AM, 6-8 PM)
+  - Order cutoff        (e.g. 10 PM the night before)
+  - Max orders per slot (rice bags and oil tins are heavy)
+Tip: put a society and the locality next to it in the SAME time
+window, so one rider covers both in one round.
+The customer sees only slots that are still open and not full.
+
+8. TEAM ROLES (4 people)
+---------------------------------------------------------------------
+Owner / Admin (1) : Everything: products, prices, stock, zones,
+                    slots, store location and distance limit, staff,
+                    reports, cash checks
+Packer (1)        : Order board, picking list, stock updates
+Rider (2)         : Only their own deliveries: address, Google Maps
+                    link, call and WhatsApp buttons, show UPI QR,
+                    mark cash/UPI received, mark delivered
+Express checks the role on every admin and rider request.
+The owner's Google account is set as Owner at first setup; the
+owner then adds the other staff.
+
+9. PAYMENT AT THE DOOR
+---------------------------------------------------------------------
+Cash : Rider collects it -> "Cash collected"
+UPI  : Rider taps "Show UPI QR" -> QR with the store's UPI ID, the
+       exact amount and the order number filled in -> customer
+       scans with any UPI app -> rider taps "UPI received"
+Tip  : PhonePe Business or Paytm for Business on the owner's phone
+       alerts the owner to every payment.
+Checking up:
+  - The order number travels with each UPI payment.
+  - End-of-day screen: cash per rider, UPI total, unpaid orders.
+  - The owner marks each rider's cash as handed over.
+
+10. NOTIFICATIONS (free)
+---------------------------------------------------------------------
+a) One-tap WhatsApp from admin/rider screens (confirmed, out for
+   delivery, delivered, item out of stock: replace or skip?).
+b) Web push sent by Express when an order's status changes.
+   - Android: works fully.
+   - iPhone: only if the app is added to the home screen
+     (iOS 16.4 or later).
+   - Staff get a push for each new order.
+c) Order status page inside the app.
+d) WhatsApp Business broadcast lists for offers (up to 256 contacts
+   per list).
+e) Society WhatsApp groups (with the RWA's permission) and local
+   area groups.
+
+11. CUSTOMER SCREENS
+---------------------------------------------------------------------
+1. Home         : Category tiles, Coming soon tile, search bar
+2. Category     : Product list with pack size, price, "Add" button
+3. Product      : Photos, brand, pack sizes, MRP vs selling price,
+                  stock status, details required on packaging
+4. Search       : By product name or brand
+5. Cart         : Items, total, minimum order check, delivery charge
+6. Slot picker  : Open slots for the customer's zone
+7. Checkout     : Confirm address, "Pay at the door (Cash/UPI)",
+                  place order
+8. Order placed : Order number + "Confirm on WhatsApp" (first order)
+9. My Orders    : List, status, details, one-tap "Reorder"
+10. Profile     : Name, phone, zone, address, "Update my location",
+                  logout
+
+12. ADMIN PANEL SCREENS
+---------------------------------------------------------------------
+1. Dashboard        : Today's orders, orders per zone and slot,
+                      sales today, low-stock alerts
+2. Order board      : Columns by status, filter by zone/slot,
+                      address check, Google Maps link, one-tap
+                      WhatsApp, cancel with a reason
+3. Picking list     : Total quantity of each item for a slot,
+                      printable
+4. Delivery list    : Orders grouped by zone (tower or street/
+                      landmark), assign a rider
+5. Products         : Add/edit, pack sizes, prices, stock, photos,
+                      expiry, active/hidden, bulk CSV upload
+6. Stock            : Add new stock, adjust counts, low-stock list
+7. Zones            : Add/edit a zone (society or locality), towers
+                      for societies, minimum order value, delivery
+                      charge, active/inactive
+8. Slots            : Days, times, cutoff, max orders per zone
+9. Store settings   : Store location, max delivery distance (km),
+                      store UPI ID, store WhatsApp number
+10. Customers       : List, search, zone, order history, confirm
+                      phone, block a customer
+11. Staff           : Add a member (Google email), assign a role,
+                      deactivate
+12. Cash & UPI check: Daily collection per rider, unpaid orders,
+                      cash handed over
+13. Reports         : Daily/monthly sales, by zone, top products,
+                      cash vs UPI
+14. Coming soon list: "Notify me" taps, grouped by zone
+
+13. RIDER SCREENS (mobile)
+---------------------------------------------------------------------
+1. My deliveries : Today's orders grouped by zone (society -> tower;
+                   locality -> street/landmark)
+2. Order detail  : Address, landmark, "Open in Google Maps" (when a
+                   GPS location was shared), items, amount, call and
+                   WhatsApp buttons
+3. Collect       : Cash collected / show UPI QR / UPI received
+4. My summary    : Delivered count, cash in hand
+
+14. EXPRESS API AREAS (plain description)
+---------------------------------------------------------------------
+Public     : Categories, products, product details, search, list of
+             active zones (and towers for societies)
+Customer   : Save/view profile and address, update location,
+             available slots for my zone, place order, my orders,
+             order details, cancel (only while New), reorder,
+             "Notify me", save push subscription
+Admin      : Products, pack sizes, stock, photo upload, bulk CSV,
+             zones, towers, slots, store settings, orders (status,
+             assign rider, cancel), picking list, delivery list,
+             customers, staff, reports, cash checks, "Notify me"
+             list
+Rider      : My deliveries, order detail, out for delivery,
+             cash/UPI received, delivered, my summary
+Every customer, admin and rider request carries the login token;
+admin and rider requests also need the right role.
+
+15. DATABASE TABLES (plain description)
+---------------------------------------------------------------------
+Store settings    : store name, store location (lat/lng), max
+                    delivery distance, UPI ID, WhatsApp number
+Zones             : name, type (society/locality), active, minimum
+                    order value, delivery charge
+Towers            : zone (society only), tower/block name
+Slots             : zone, days, start-end time, cutoff, max orders
+Customers         : login id, name, phone, phone confirmed, zone,
+                    tower + flat (society) OR house no + street +
+                    landmark + floor (locality), lat/lng (optional),
+                    blocked
+Staff             : login id / Google email, name, phone, role,
+                    active
+Categories        : name, display order, coming soon (yes/no)
+Products          : name, brand, category, description,
+                    manufacturer, photos, active
+Pack sizes        : product, size, MRP, selling price, stock count,
+                    low-stock level, expiry
+Orders            : order number, customer, zone, copy of the
+                    address + lat/lng at time of order, slot,
+                    delivery date, status, totals, delivery charge,
+                    payment method, payment status, rider, cancel
+                    reason, timestamps
+Order items       : order, pack size, quantity, price at time of
+                    order
+Payments          : order, method (cash/UPI), amount, collected by,
+                    time
+Cash handover     : rider, date, amount, received by owner
+Notify me         : customer, category, zone, date
+Push subscriptions: user, device subscription details
+
+Rules enforced by the database itself:
+  - Stock can never go below 0
+  - Order numbers are unique
+  - Price, quantity and amount must be above 0
+  - Only the allowed status values and zone types can be saved
+  - A society address needs tower + flat; a locality address needs
+    house no + street + landmark
+
+16. MONTHLY COST
+---------------------------------------------------------------------
+Frontend hosting (Netlify free)        : Rs 0
+Express hosting                        : your own setup
+Supabase free plan                     : Rs 0
+  (500 MB database, 1 GB images, 50,000 users; pauses after 7 idle
+   days, which daily orders prevent)
+GPS location / Google Maps links       : Rs 0 (no map service used)
+Domain name (.in)                      : about Rs 800-1,000 per YEAR
+SMS / WhatsApp API / gateway           : Rs 0 (not used)
+Later: Supabase Pro (~$25/month) for automatic backups.
+Until then: a weekly database export, kept by the owner.
+
+17. BEFORE LAUNCH (not software)
+---------------------------------------------------------------------
+[ ] FSSAI registration (needed to sell food)
+[ ] GST registration, if your turnover requires it
+[ ] Store UPI ID on a business UPI app (PhonePe/Paytm Business)
+[ ] WhatsApp Business app on the store number
+[ ] Product photos and details (MRP, net quantity, expiry)
+[ ] First stock count, loaded through the bulk upload
+[ ] Zone list: societies + localities, with slots for each
+[ ] Store location and max delivery distance decided
+[ ] Societies: RWA permission, riders registered for gate entry
+    (MyGate/NoBrokerHood), QR posters in lifts and at gates
+[ ] Localities: pamphlets with a QR code in newspapers, posters at
+    nearby shops, temples and parks, local WhatsApp groups
+[ ] Launch offer (free delivery above Rs X / first-order discount)
+
+18. BUILD PHASES (about 5-6 weeks, one developer)
+---------------------------------------------------------------------
+Week 1 : Supabase project, database tables and rules, Express setup
+         (security headers, CORS, request limits, login-token
+         check, role check), React + Vite setup, Google login,
+         customer profile with zone + address + GPS location
+Week 2 : Catalogue API + screens, search, Coming soon tile, admin
+         product and stock screens, photo upload, bulk CSV upload
+Week 3 : Zones, slots, store settings, distance check, cart,
+         checkout with the order transaction, My Orders, Reorder,
+         cancel
+Week 4 : Admin order board (20-second refresh), picking list,
+         delivery list by zone, staff screen, one-tap WhatsApp
+Week 5 : Rider screens, Google Maps links, UPI QR, cash/UPI
+         marking, end-of-day check, reports
+Week 6 : Web push, installable app setup, deploy (Netlify +
+         your Express server), testing with real staff, fixes
+Then   : Test run in 1 society + 1 nearby locality -> fix issues
+         -> add other zones one at a time
+
+19. LEFT OUT OF THE FIRST VERSION (for later)
+---------------------------------------------------------------------
+- Fruits & vegetables (sold by weight)
+- Online payment gateway (Razorpay etc.)
+- OTP login
+- Automated WhatsApp messages (WhatsApp Business API)
+- Map with a draggable pin, address-to-location lookup, route
+  planning
+- More than one saved address per customer
+- Delivery charge based on distance (charge is per zone for now)
+- Wallet, subscriptions, loyalty points
+- Coupons beyond a simple first-order discount
+- Live rider tracking
+- Play Store / App Store app (the Express API can serve one later)
+- Hindi or other languages
+- Multiple stores or vendors
+
+20. SUCCESS CHECKS AFTER 1 MONTH
+---------------------------------------------------------------------
+- Orders per day, in total and per zone
+- Society zones vs locality zones: orders, average order value,
+  delivery time
+- Repeat customers (% who ordered 2 or more times)
+- Cancelled orders and reasons (watch for fake orders in locality
+  zones)
+- Stock-outs per week
+- "Notify me" taps for fruits & vegetables, by zone
+- Riders' "could not find address" cases (if high, add the map pin)
+=====================================================================
+```
