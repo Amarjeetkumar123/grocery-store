@@ -1,6 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { distanceInKilometers, normalizeIndianMobileNumber, validateProfileInput } from '../src/validation.js';
+import { normalizeIndianMobileNumber } from '../src/validators/commonValidation.js';
+import { validateProfileInput } from '../src/validators/profileValidation.js';
+import { distanceInKilometers } from '../src/utils/geography.js';
 
 test('mobile numbers are normalized to 10 digits', () => {
   assert.equal(normalizeIndianMobileNumber('98765 43210'), '9876543210');

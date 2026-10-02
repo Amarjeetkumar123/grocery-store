@@ -1,3 +1,5 @@
+import { findActiveStaffMemberForUser } from './dbHelper/staffDbHelper.js';
+
 // Asks Supabase whether a login token is real and still valid.
 // ponytail: one Supabase call per request; switch to local JWKS verification
 // (supabase.auth.getClaims) if request volume grows.
@@ -19,25 +21,6 @@ export function createSupabaseTokenVerifier(supabaseUrl, publishableKey) {
   };
 }
 
-// Staff rows are created by the owner with an email address. The first
-// time that person signs in with a confirmed email, the row is linked
-// to their login id; after that only the login id is trusted.
-async function findStaffMember(database, user) {
-  const result = await database.query(
-    `with linked_staff as (
-       update staff set user_id = $1
-       where user_id is null and email = $2 and $3::boolean
-       returning id, name, role, active
-     )
-     select id, name, role from linked_staff where active
-     union all
-     select id, name, role from staff where user_id = $1 and active
-     limit 1`,
-    [user.id, user.email, user.emailConfirmed],
-  );
-  return result.rows[0] ?? null;
-}
-
 export function requireSignedIn(verifyAccessToken, database) {
   return async function checkSignedIn(request, response, next) {
     const authorizationHeader = request.get('authorization') ?? '';
@@ -52,7 +35,7 @@ export function requireSignedIn(verifyAccessToken, database) {
     }
 
     request.user = user;
-    request.staffMember = await findStaffMember(database, user);
+    request.staffMember = await findActiveStaffMemberForUser(database, user);
     next();
   };
 }

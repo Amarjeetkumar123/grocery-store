@@ -5,13 +5,21 @@ delivery slots, pay at the door (cash or UPI). The full plan is in
 [grocerystoreplan.txt](grocerystoreplan.txt); the screen designs are in [mockups/](mockups/).
 
 ```
-backend/            Express API (Node.js 24)
-  database/         SQL: 001_schema.sql (tables), 002_sample_data.sql
-  src/              server, routes, login check, input checks
+backend/
+  database/         SQL: 001_schema.sql (tables), 002_sample_data.sql (Noida sample)
+  src/
+    routes/         thin: read the request, call a service, send the result
+    services/       business rules; throw ServiceError for user-facing problems
+    dbHelper/       every SQL query lives here (and only here)
+    filters/        dynamic "where" conditions used by dbHelper (products, stock)
+    validators/     form checks (address, product, pack sizes)
+    storage/        product photo upload to Supabase Storage
+    utils/          CSV reader, distance between two points
   test/             npm test
-frontend/           React app (Vite)
+frontend/
+  public/           product-upload-template.csv for bulk upload
   src/assets/       logo, app icons, category and login images (PNG)
-  src/pages/        login, address, home, staff placeholders
+  src/pages/        shop pages; admin/ for the admin panel
 ```
 
 ## One-time setup
@@ -54,6 +62,11 @@ Project Settings → Database → SSL configuration, and save it in `backend/`.
 
 The publishable key goes in both files. The **secret** key never goes in
 the frontend.
+
+**Product photos** need `SUPABASE_SECRET_KEY` in `backend/.env` (Supabase →
+Project Settings → API Keys → Secret keys). On start-up the server creates
+the public `product-images` bucket by itself. Without the key everything
+else works; photo upload just says it is not set up.
 
 ## Run it
 

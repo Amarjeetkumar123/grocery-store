@@ -1,13 +1,7 @@
-// Runs the real API against a throwaway local database.
-// Needs TEST_DATABASE_URL (see .env.test.example); skipped without it.
+// Account and address API, against a throwaway local database.
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { createDatabasePool } from '../src/database.js';
-import { createApplication } from '../src/application.js';
-
-const testDatabaseUrl = process.env.TEST_DATABASE_URL;
-const skip = testDatabaseUrl ? false : 'TEST_DATABASE_URL is not set';
+import { skipWithoutDatabase as skip, startTestServer } from './testServer.js';
 
 const usersByToken = {
   'customer-token': { id: '11111111-1111-1111-1111-111111111111', email: 'riya@example.com', emailConfirmed: true },
@@ -15,46 +9,22 @@ const usersByToken = {
   'unconfirmed-owner-token': { id: '33333333-3333-3333-3333-333333333333', email: 'owner@example.com', emailConfirmed: false },
 };
 
+let testServer;
 let database;
-let server;
-let baseUrl;
+let callApi;
 
 before(async () => {
   if (skip) return;
-  if (!new URL(testDatabaseUrl).pathname.endsWith('_test')) {
-    throw new Error('TEST_DATABASE_URL must point to a database whose name ends with _test; it gets wiped.');
-  }
-  database = createDatabasePool(testDatabaseUrl);
-  await database.query('drop schema public cascade; create schema public;');
-  await database.query(readFileSync(new URL('../database/001_schema.sql', import.meta.url), 'utf8'));
-  await database.query(readFileSync(new URL('../database/002_sample_data.sql', import.meta.url), 'utf8'));
-  await database.query(`insert into staff (email, name, role) values ('owner@example.com', 'Sunil', 'owner')`);
-
-  const application = createApplication({
-    database,
-    verifyAccessToken: async (accessToken) => usersByToken[accessToken] ?? null,
-    allowedOrigins: ['http://localhost:5173'],
+  testServer = await startTestServer({
+    usersByToken,
+    extraSql: `insert into staff (email, name, role) values ('owner@example.com', 'Sunil', 'owner')`,
   });
-  await new Promise((resolve) => { server = application.listen(0, resolve); });
-  baseUrl = `http://localhost:${server.address().port}`;
+  ({ database, callApi } = testServer);
 });
 
 after(async () => {
-  server?.close();
-  await database?.end();
+  await testServer?.stop();
 });
-
-async function callApi(path, { token, method = 'GET', body } = {}) {
-  const response = await fetch(baseUrl + path, {
-    method,
-    headers: {
-      ...(body ? { 'Content-Type': 'application/json' } : {}),
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
-    body: body ? JSON.stringify(body) : undefined,
-  });
-  return { status: response.status, body: await response.json() };
-}
 
 async function findZone(zoneName) {
   const { body } = await callApi('/api/zones');
@@ -161,10 +131,8 @@ test('changing the phone number resets phone confirmation; blocked customers can
 
 test('unknown routes and broken JSON get clean errors', { skip }, async () => {
   assert.equal((await callApi('/api/nothing-here')).status, 404);
-  const response = await fetch(`${baseUrl}/api/account/profile`, {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json', Authorization: 'Bearer customer-token' },
-    body: '{not json',
+  const brokenJson = await callApi('/api/account/profile', {
+    token: 'customer-token', method: 'PUT', rawBody: '{not json', contentType: 'application/json',
   });
-  assert.equal(response.status, 400);
+  assert.equal(brokenJson.status, 400);
 });
