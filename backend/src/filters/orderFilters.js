@@ -8,6 +8,15 @@ export function buildAdminOrderFilter({ deliveryDate, customerId }) {
     .build();
 }
 
+// One rider's deliveries for a day, cancelled ones left out.
+export function buildRiderOrderFilter({ riderId, deliveryDate }) {
+  return createFilterBuilder()
+    .whereEquals('placed.rider_id', riderId)
+    .whereEquals('placed.delivery_date', deliveryDate)
+    .where("placed.status <> 'cancelled'")
+    .build();
+}
+
 // Customers screen search: name, phone, email or address.
 export function buildCustomerFilter({ searchText }) {
   return createFilterBuilder()

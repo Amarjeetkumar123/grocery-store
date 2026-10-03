@@ -30,6 +30,25 @@ function CardBadges({ order, isOwner, save, onChanged }) {
   );
 }
 
+// Owner at the counter, or a rider without a phone: payment and delivered in one tap.
+function OwnerDeliveredButtons({ order, save, onChanged }) {
+  async function markDelivered(method) {
+    const orderPath = `/api/admin/orders/${order.orderNumber}`;
+    if (!window.confirm(`Order #${order.orderNumber} delivered and ${formatRupees(order.total)} received${method ? ` by ${method === 'upi' ? 'UPI' : 'cash'}` : ''}?`)) return;
+    const paid = method ? await save(() => callApi(`${orderPath}/payment`, { method: 'POST', body: { method } })) : true;
+    if (paid && await save(() => callApi(`${orderPath}/delivered`, { method: 'POST', body: {} }))) onChanged();
+  }
+  if (order.paymentStatus === 'paid') {
+    return <button type="button" className="button button-compact" onClick={() => markDelivered(null)}><Icon name="check" size={18} /> Delivered</button>;
+  }
+  return (
+    <>
+      <button type="button" className="button button-compact" onClick={() => markDelivered('cash')}>Delivered · Cash</button>
+      <button type="button" className="button button-compact button-outline" onClick={() => markDelivered('upi')}>UPI</button>
+    </>
+  );
+}
+
 function CardActions({ order, role, save, onChanged }) {
   const store = useStoreDetails();
   const step = nextSteps[order.status];
@@ -44,6 +63,7 @@ function CardActions({ order, role, save, onChanged }) {
           <Icon name={step.icon} size={18} /> {step.label}
         </button>
       )}
+      {order.status === 'out_for_delivery' && role === 'owner' && <OwnerDeliveredButtons order={order} save={save} onChanged={onChanged} />}
       <a className="icon-button icon-button-outline" href={whatsAppLinkFor(order, store.name)} target="_blank" rel="noreferrer" aria-label={`WhatsApp ${order.address.customerName}`}>
         <Icon name="chat" />
       </a>
@@ -63,7 +83,7 @@ function CardDetails({ order, isOwner, save, onChanged }) {
       <ul>{order.items.map((item) => <li key={item.packSizeId}>{item.productName} · {item.packLabel} × {item.quantity}</li>)}</ul>
       <p className="hint">{order.address.customerName} · <a href={`tel:+91${order.address.customerPhone}`}>{order.address.customerPhone}</a></p>
       {order.address.landmark && <p className="hint">Near {order.address.landmark}</p>}
-      {isOwner && order.status !== 'delivered' && <button type="button" className="text-button small-text-button danger-text" onClick={cancelOrder}>Cancel order</button>}
+      {isOwner && order.status !== 'delivered' && order.paymentStatus !== 'paid' && <button type="button" className="text-button small-text-button danger-text" onClick={cancelOrder}>Cancel order</button>}
     </details>
   );
 }

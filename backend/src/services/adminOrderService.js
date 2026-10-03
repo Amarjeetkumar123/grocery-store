@@ -55,6 +55,7 @@ async function cancelOrder({ database }, orderNumberInput, body) {
     const order = orderNumber ? await lockOrder(client, { orderNumber }) : null;
     if (!order) throw ServiceError.notFound('Order not found.');
     if (['delivered', 'cancelled'].includes(order.status)) throw ServiceError.conflict(`This order is already ${order.status}.`);
+    if (order.paymentStatus === 'paid') throw ServiceError.conflict('This order is already paid. Return the money before cancelling.');
     await cancelLockedOrder(client, order, reason);
   });
   return { orderNumber, status: 'cancelled' };

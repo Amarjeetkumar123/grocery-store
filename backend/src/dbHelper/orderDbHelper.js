@@ -91,10 +91,11 @@ export async function findCustomerOrder(executor, customerId, orderNumber) {
 }
 
 // Call inside a transaction. With customerId, only that customer's order.
-// Returns { id, status, riderId, items: [{ packSizeId, quantity }] } or null.
+// Returns { id, status, riderId, total, paymentStatus, items: [{ packSizeId, quantity }] } or null.
 export async function lockOrder(executor, { orderNumber, customerId = null }) {
   const result = await executor.query(
-    'select id, status, rider_id from orders where order_number = $1 and ($2::bigint is null or customer_id = $2) for update',
+    `select id, status, rider_id, total, payment_status from orders
+     where order_number = $1 and ($2::bigint is null or customer_id = $2) for update`,
     [orderNumber, customerId],
   );
   const order = result.rows[0];
@@ -104,6 +105,8 @@ export async function lockOrder(executor, { orderNumber, customerId = null }) {
     id: order.id,
     status: order.status,
     riderId: order.rider_id,
+    total: order.total,
+    paymentStatus: order.payment_status,
     items: items.rows.map((item) => ({ packSizeId: item.pack_size_id, quantity: item.quantity })),
   };
 }

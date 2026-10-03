@@ -11,7 +11,9 @@ import { ProfilePage } from './pages/ProfilePage.jsx';
 import { CartPage } from './pages/CartPage.jsx';
 import { OrdersPage } from './pages/OrdersPage.jsx';
 import { OrderDetailPage } from './pages/OrderDetailPage.jsx';
-import { StaffPlaceholderPage } from './pages/StaffPlaceholderPage.jsx';
+import { RiderHomePage } from './pages/rider/RiderHomePage.jsx';
+import { RiderOrderPage } from './pages/rider/RiderOrderPage.jsx';
+import { RiderPaymentPage } from './pages/rider/RiderPaymentPage.jsx';
 import { AdminHomeRedirect, AdminLayout } from './pages/admin/AdminLayout.jsx';
 import { AdminProductsPage } from './pages/admin/AdminProductsPage.jsx';
 import { AdminProductFormPage } from './pages/admin/AdminProductFormPage.jsx';
@@ -24,8 +26,11 @@ import { AdminPickingListPage } from './pages/admin/AdminPickingListPage.jsx';
 import { AdminDeliveryListPage } from './pages/admin/AdminDeliveryListPage.jsx';
 import { AdminStaffPage } from './pages/admin/AdminStaffPage.jsx';
 import { AdminCustomersPage } from './pages/admin/AdminCustomersPage.jsx';
+import { AdminCashCheckPage } from './pages/admin/AdminCashCheckPage.jsx';
+import { AdminReportsPage } from './pages/admin/AdminReportsPage.jsx';
 
 const ownerOnly = (page) => <RequireRole allowedRoles={['owner']}>{page}</RequireRole>;
+const riderOnly = (page) => <RequireRole allowedRoles={['rider']}>{page}</RequireRole>;
 
 function adminRoutes() {
   return (
@@ -43,6 +48,8 @@ function adminRoutes() {
       <Route path="store-settings" element={ownerOnly(<AdminStoreSettingsPage />)} />
       <Route path="staff" element={ownerOnly(<AdminStaffPage />)} />
       <Route path="customers" element={ownerOnly(<AdminCustomersPage />)} />
+      <Route path="cash-check" element={ownerOnly(<AdminCashCheckPage />)} />
+      <Route path="reports" element={ownerOnly(<AdminReportsPage />)} />
     </Route>
   );
 }
@@ -63,7 +70,9 @@ export function App() {
         <Route path="/orders" element={<OrdersPage />} />
         <Route path="/orders/:orderNumber" element={<OrderDetailPage />} />
         {adminRoutes()}
-        <Route path="/rider" element={<RequireRole allowedRoles={['rider']}><StaffPlaceholderPage title="My deliveries" /></RequireRole>} />
+        <Route path="/rider" element={riderOnly(<RiderHomePage />)} />
+        <Route path="/rider/orders/:orderNumber" element={riderOnly(<RiderOrderPage />)} />
+        <Route path="/rider/orders/:orderNumber/pay" element={riderOnly(<RiderPaymentPage />)} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

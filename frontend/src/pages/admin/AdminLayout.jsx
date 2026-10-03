@@ -4,7 +4,6 @@ import { useStoreDetails } from '../../useStoreDetails.js';
 import { Icon } from '../../Icon.jsx';
 import logoImage from '../../assets/logo.png';
 
-// Cash check and reports join this menu in Week 5.
 const navigationGroups = [
   { title: 'Daily', items: [
     { path: '/admin/orders', label: 'Orders', icon: 'box', roles: ['owner', 'packer'] },
@@ -20,6 +19,10 @@ const navigationGroups = [
     { path: '/admin/customers', label: 'Customers', icon: 'user', roles: ['owner'] },
     { path: '/admin/staff', label: 'Staff', icon: 'building', roles: ['owner'] },
     { path: '/admin/store-settings', label: 'Store settings', icon: 'settings', roles: ['owner'] },
+  ] },
+  { title: 'Money', items: [
+    { path: '/admin/cash-check', label: 'Cash & UPI check', icon: 'cash', roles: ['owner'] },
+    { path: '/admin/reports', label: 'Reports', icon: 'tag', roles: ['owner'] },
   ] },
 ];
 
