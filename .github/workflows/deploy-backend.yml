@@ -83,7 +83,7 @@ jobs:
             ghcr.io/${{ env.IMAGE_NAME }}:latest
             ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
-      # The API listens on 127.0.0.1:3000 only; nginx on the VPS forwards to it
+      # The API listens on 127.0.0.1:3001 only (3000 is taken on the VPS); nginx on the VPS forwards to it
       # (deploy/nginx-grocery-store-api.conf). The job fails if the new
       # container does not report healthy within a minute.
       - name: Deploy to VPS
@@ -106,7 +106,7 @@ jobs:
               --name ${{ env.CONTAINER_NAME }} \
               --env-file /root/envs/grocerystore.backend.prod.env \
               --restart unless-stopped \
-              -p 127.0.0.1:3000:3000 \
+              -p 127.0.0.1:3001:3000 \
               ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
             status=starting

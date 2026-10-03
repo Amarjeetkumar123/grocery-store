@@ -140,8 +140,8 @@ Deploy Backend → Run workflow.
    as car-loans-and-sales).
 2. A free name for the API, needed for HTTPS (the Netlify site is HTTPS and
    browsers block calls from it to a plain `http://IP`): sign in at
-   [duckdns.org](https://www.duckdns.org), create e.g. `grocerystore`, and
-   set its IP to the VPS IP. You get `grocerystore.duckdns.org`.
+   [duckdns.org](https://www.duckdns.org), create `grocerystorewebapp`, and
+   set its IP to the VPS IP. You get `grocerystorewebapp.duckdns.org`.
 3. On the VPS, the settings file the container reads:
 
    ```bash
@@ -165,12 +165,12 @@ Deploy Backend → Run workflow.
    sudo cp deploy/nginx-grocery-store-api.conf /etc/nginx/sites-available/grocery-store-api
    sudo ln -s /etc/nginx/sites-available/grocery-store-api /etc/nginx/sites-enabled/
    sudo nginx -t && sudo systemctl reload nginx
-   sudo certbot --nginx -d grocerystore.duckdns.org
+   sudo certbot --nginx -d grocerystorewebapp.duckdns.org
    ```
 
    (Copy the file from the repository, or paste it with `nano`.)
 5. Push to `master` (or run the workflow), then open
-   `https://grocerystore.duckdns.org/api/health`: `{"status":"ok"}`.
+   `https://grocerystorewebapp.duckdns.org/api/health`: `{"status":"ok"}`.
 
 On the VPS: `docker logs -f grocery-store-backend` shows the API's log. To go
 back to an earlier version, run the same `docker run` line from the workflow
@@ -183,7 +183,7 @@ already sets the folder, build command and Node version. Add environment
 variables (Site configuration → Environment variables):
 
 - `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` (same as local)
-- `VITE_API_URL=https://grocerystore.duckdns.org` (your API name, no slash at the end)
+- `VITE_API_URL=https://grocerystorewebapp.duckdns.org` (your API name, no slash at the end)
 
 Netlify then deploys the app by itself on every push. Put the site's
 address in the API's `ALLOWED_ORIGINS` (in `/root/envs/grocerystore.backend.prod.env`)
