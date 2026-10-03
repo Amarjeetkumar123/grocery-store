@@ -2,8 +2,8 @@ import { Icon } from '../../Icon.jsx';
 import { formatDeliveryDay } from '../../formatting.js';
 import { LoadingOrError } from '../../components/LoadingOrError.jsx';
 import { AdminPageHeader } from './AdminLayout.jsx';
-import { BoardFilters } from './orders/BoardFilters.jsx';
-import { filterOrders, useBoardFilters, useDayOrders } from './orders/orderBoardData.js';
+import { BoardFilters, DayField } from './orders/BoardFilters.jsx';
+import { filterOrders, timeOptionsOf, useBoardFilters, useDayOrders, zoneOptionsOf } from './orders/orderBoardData.js';
 
 // Orders still to be packed.
 const toPackStatuses = ['new', 'confirmed'];
@@ -51,7 +51,9 @@ export function AdminPickingListPage() {
       <AdminPageHeader title={`Picking list · ${formatDeliveryDay(filters.date)}`}>
         <button type="button" className="button button-compact button-outline" onClick={() => window.print()}><Icon name="layers" /> Print</button>
       </AdminPageHeader>
-      <BoardFilters orders={orders} filters={filters} setFilter={setFilter} showSearch={false} />
+      <BoardFilters filters={filters} setFilter={setFilter} zoneOptions={zoneOptionsOf(orders)} timeOptions={timeOptionsOf(orders)} showSearch={false}>
+        <DayField filters={filters} setFilter={setFilter} />
+      </BoardFilters>
       <LoadingOrError loading={loading && !data} error={data ? null : error} onRetry={reload} />
       {data && (
         <>

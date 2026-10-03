@@ -24,6 +24,12 @@ export function createFilterBuilder() {
       return builder;
     },
 
+    // column >= value, column <= value …; skipped like whereEquals. The operator comes from code.
+    whereCompared(column, operator, value) {
+      if (value !== null && value !== undefined) conditions.push(`${column} ${operator} ${builder.addValue(value)}`);
+      return builder;
+    },
+
     // Matches text anywhere in any of the columns; skipped when searchText is empty.
     whereAnyContains(columns, searchText) {
       const pattern = containsPattern(searchText);

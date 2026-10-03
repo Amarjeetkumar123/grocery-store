@@ -59,6 +59,18 @@ test('the board lists a day of orders for owner and packer, not customers', { sk
   assert.equal(first.items[0].quantity, 2);
 });
 
+test('the board takes a date range (none = all orders), search and pages', { skip }, async () => {
+  const board = async (query) => (await asOwner(`/api/admin/orders/board?${query}`)).body;
+  const all = await board('page=9');
+  assert.deepEqual([all.orders.map((order) => order.orderNumber), all.page, all.pageCount], [[1002, 1001], 1, 1], 'newest first, page kept in range');
+  assert.deepEqual([all.statusCounts, all.upcomingDays], [{ new: 2 }, [{ date: tomorrow, orders: 2 }]]);
+  assert.deepEqual(all.filterOptions.timeWindows, [{ startTime: '07:00', endTime: '09:00' }]);
+  assert.deepEqual((await board(`from=${tomorrow}&to=${tomorrow}&time=07:00-09:00`)).orders.map((order) => order.orderNumber), [1001, 1002]);
+  assert.deepEqual((await board('to=2020-01-01')).orders, []);
+  assert.deepEqual((await board('search=%231002')).orders.map((order) => order.orderNumber), [1002]);
+  assert.equal((await asOwner(`/api/admin/orders/board?from=${tomorrow}&to=2020-01-01`)).status, 400);
+});
+
 test('orders move forward one step at a time, by the right person', { skip }, async () => {
   assert.equal((await moveTo(1001, 'confirmed', 'packer-token')).status, 403);
   assert.equal((await moveTo(1001, 'confirmed')).status, 200);

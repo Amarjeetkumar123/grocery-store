@@ -2,7 +2,7 @@ import { callApi } from '../../../apiClient.js';
 import { useAuthentication } from '../../../AuthenticationContext.jsx';
 import { useStoreDetails } from '../../../useStoreDetails.js';
 import { useSaveRequest } from '../../../useSaveRequest.js';
-import { formatRupees, formatTimeAgo } from '../../../formatting.js';
+import { formatDeliveryDay, formatRupees, formatTimeAgo, formatTimeRange } from '../../../formatting.js';
 import { Icon } from '../../../Icon.jsx';
 import { itemCountOf, shortAddressOf } from './orderBoardData.js';
 import { mapLinkFor, whatsAppLinkFor } from './customerContactLinks.js';
@@ -104,6 +104,7 @@ export function OrderBoardCard({ order, riders, onChanged }) {
     <article className={`board-card${order.status === 'new' && !order.customer.phoneConfirmed ? ' board-card-attention' : ''}`}>
       <div className="card-heading"><strong>#{order.orderNumber}</strong><CardCorner order={order} /></div>
       <p className="board-card-place">{order.address.zoneName} · {shortAddressOf(order)}</p>
+      <p className="hint">{formatDeliveryDay(order.deliveryDate)} · {formatTimeRange(order.slot.startTime, order.slot.endTime)}</p>
       <p className="hint">{itemCountOf(order)} items · <strong>{formatRupees(order.total)}</strong></p>
       <CardBadges {...shared} isOwner={isOwner} />
       {order.status === 'packed' && isOwner && <RiderPicker orderNumbers={[order.orderNumber]} rider={order.rider} riders={riders} save={save} onChanged={onChanged} />}

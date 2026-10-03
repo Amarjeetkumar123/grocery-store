@@ -33,3 +33,24 @@ export function readPlaceOrderRequest(body) {
   if (!slotId || !deliveryDate) return { errorMessage: 'Please choose a delivery slot.' };
   return { order: { items, slotId, deliveryDate } };
 }
+
+// Order board query: ?from=&to=&zone=&time=07:00-09:00&search=&page=. Every
+// part is optional; no dates means all orders. Returns { boardQuery } or { errorMessage }.
+export function readBoardQuery(query) {
+  const from = readOptionalDate(query.from);
+  const to = readOptionalDate(query.to);
+  if (from.invalid || to.invalid) return { errorMessage: 'Choose valid dates.' };
+  if (from.date && to.date && from.date > to.date) return { errorMessage: 'The start date is after the end date.' };
+  const timeWindow = /^(\d{2}:\d{2})-(\d{2}:\d{2})$/.exec(String(query.time ?? ''));
+  return {
+    boardQuery: {
+      fromDate: from.date,
+      toDate: to.date,
+      zoneId: readPositiveInteger(query.zone),
+      startTime: timeWindow?.[1] ?? null,
+      endTime: timeWindow?.[2] ?? null,
+      searchText: String(query.search ?? '').trim().replace(/^#/, ''),
+      page: readPositiveInteger(query.page) ?? 1,
+    },
+  };
+}

@@ -5,10 +5,10 @@ import { Icon } from '../../Icon.jsx';
 import { LoadingOrError } from '../../components/LoadingOrError.jsx';
 import { StatusPill } from '../orders/OrderParts.jsx';
 import { AdminPageHeader } from './AdminLayout.jsx';
-import { BoardFilters } from './orders/BoardFilters.jsx';
+import { BoardFilters, DayField } from './orders/BoardFilters.jsx';
 import { RiderPicker } from './orders/RiderPicker.jsx';
 import { mapLinkFor } from './orders/customerContactLinks.js';
-import { filterOrders, itemCountOf, shortAddressOf, useBoardFilters, useDayOrders, useRiders } from './orders/orderBoardData.js';
+import { filterOrders, itemCountOf, shortAddressOf, timeOptionsOf, useBoardFilters, useDayOrders, useRiders, zoneOptionsOf } from './orders/orderBoardData.js';
 
 // Confirmed orders onwards; new ones are checked by the owner first.
 const onTheListStatuses = ['confirmed', 'packed', 'out_for_delivery'];
@@ -79,7 +79,9 @@ export function AdminDeliveryListPage() {
       <AdminPageHeader title={`Delivery list · ${formatDeliveryDay(filters.date)}`}>
         <button type="button" className="button button-compact button-outline" onClick={() => window.print()}><Icon name="layers" /> Print</button>
       </AdminPageHeader>
-      <BoardFilters orders={orders} filters={filters} setFilter={setFilter} showSearch={false} />
+      <BoardFilters filters={filters} setFilter={setFilter} zoneOptions={zoneOptionsOf(orders)} timeOptions={timeOptionsOf(orders)} showSearch={false}>
+        <DayField filters={filters} setFilter={setFilter} />
+      </BoardFilters>
       <LoadingOrError loading={loading && !data} error={data ? null : error} onRetry={reload} />
       {data && onTheList.length === 0 && <p className="hint">No confirmed orders to deliver for this day and slot yet.</p>}
       {groupForDelivery(onTheList).map((group) => <ZoneGroup key={group.zoneName} group={group} riders={riders} onChanged={reload} />)}

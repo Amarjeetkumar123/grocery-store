@@ -476,6 +476,8 @@ button, input, select { font: inherit; color: inherit; }
 .admin-navigation-group + .admin-navigation-group { margin-top: 12px; }
 .admin-navigation-title { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #8fb6a0; padding: 4px 12px; }
 .board-filters { gap: 10px; }
+.upcoming-days { margin: -4px 0 12px; }
+.page-buttons { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 16px 0; }
 .filter-field { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 4px 6px 4px 12px; }
 .filter-field .input { border: 0; height: 34px; width: auto; }
 .order-board { display: grid; grid-template-columns: repeat(5, minmax(220px, 1fr)); gap: 14px; overflow-x: auto; padding-bottom: 8px; align-items: start; }
@@ -500,7 +502,7 @@ button, input, select { font: inherit; color: inherit; }
 .print-only { display: none; }
 
 @media print {
-  .admin-sidebar, .board-filters, .admin-page-actions, .rider-picker, .icon-button { display: none !important; }
+  .admin-sidebar, .board-filters, .upcoming-days, .page-buttons, .admin-page-actions, .rider-picker, .icon-button { display: none !important; }
   .admin-main { padding: 0; }
   .print-only { display: table-cell; }
   .card, .table-box { border: 0; }

@@ -8,6 +8,8 @@ export function createAdminOrderRouter({ adminOrderService, deliveryService }) {
 
   // ?date=2026-10-04, or ?customerId=12 for one customer's orders
   router.get('/orders', async (request, response) => response.json(await adminOrderService.listOrders(request.query)));
+  // ?from=&to=&zone=&time=07:00-09:00&search=&page=
+  router.get('/orders/board', async (request, response) => response.json(await adminOrderService.listBoardOrders(request.query)));
   router.post('/orders/assign-rider', ownerOnly, async (request, response) => {
     response.json(await adminOrderService.assignRider(request.body ?? {}));
   });

@@ -8,6 +8,20 @@ export function buildAdminOrderFilter({ deliveryDate, customerId }) {
     .build();
 }
 
+// Order board: delivery dates fromDate..toDate (either may be missing), zone,
+// slot time window and search. Cancelled orders only when asked for.
+export function buildBoardOrderFilter({ fromDate, toDate, zoneId, startTime, endTime, searchText }, { includeCancelled = false } = {}) {
+  const builder = createFilterBuilder()
+    .whereCompared('placed.delivery_date', '>=', fromDate)
+    .whereCompared('placed.delivery_date', '<=', toDate)
+    .whereEquals('placed.zone_id', zoneId)
+    .whereEquals("to_char(slot.start_time, 'HH24:MI')", startTime)
+    .whereEquals("to_char(slot.end_time, 'HH24:MI')", endTime)
+    .whereAnyContains(['placed.order_number::text', 'placed.customer_name', 'placed.customer_phone'], searchText);
+  if (!includeCancelled) builder.where("placed.status <> 'cancelled'");
+  return builder.build();
+}
+
 // One rider's deliveries for a day, cancelled ones left out.
 export function buildRiderOrderFilter({ riderId, deliveryDate }) {
   return createFilterBuilder()

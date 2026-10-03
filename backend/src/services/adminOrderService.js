@@ -1,10 +1,14 @@
 import { withTransaction } from '../dbHelper/databaseConnection.js';
-import { assignRiderToOrders, findAdminOrders, updateOrderStatus } from '../dbHelper/adminOrderDbHelper.js';
+import {
+  assignRiderToOrders, findAdminOrders, findBoardFilterOptions, findOrderStatusCounts, findUpcomingOrderDays, updateOrderStatus,
+} from '../dbHelper/adminOrderDbHelper.js';
 import { lockOrder } from '../dbHelper/orderDbHelper.js';
 import { isActiveRider } from '../dbHelper/staffDbHelper.js';
-import { buildAdminOrderFilter } from '../filters/orderFilters.js';
+import { buildAdminOrderFilter, buildBoardOrderFilter } from '../filters/orderFilters.js';
 import { readPositiveInteger, readRequiredText } from '../validators/commonValidation.js';
 import { readOptionalDate } from '../validators/productValidation.js';
+import { readBoardQuery } from '../validators/orderValidation.js';
+import { todayInIndia } from '../utils/indianDate.js';
 import { cancelLockedOrder } from './orderCancellation.js';
 import { ServiceError } from './serviceError.js';
 
@@ -16,13 +20,34 @@ const statusSteps = {
   out_for_delivery: { from: 'packed', roles: ['owner'], needsRider: true },
 };
 const maximumOrdersPerAssignment = 200;
+const boardPageSize = 30;
 
-// query: { date: "2026-10-04" } for the board, or { customerId } for one customer's history.
+// query: { date: "2026-10-04" } for the picking and delivery lists, or { customerId } for one customer's history.
 async function listOrders({ database }, query) {
   const deliveryDate = readOptionalDate(query.date).date ?? null;
   const customerId = readPositiveInteger(query.customerId);
   if (!deliveryDate && !customerId) throw ServiceError.badRequest('Choose a delivery date.');
   return { orders: await findAdminOrders(database, buildAdminOrderFilter({ deliveryDate, customerId })) };
+}
+
+// The order board: one page of orders for a date range (none = all orders), the
+// count in each column over every page, the dropdown choices, and the coming
+// days that have orders, so an order booked for a later day is never missed.
+async function listBoardOrders({ database }, query) {
+  const { boardQuery, errorMessage } = readBoardQuery(query);
+  if (errorMessage) throw ServiceError.badRequest(errorMessage);
+  const [statusCounts, filterOptions, upcomingDays] = await Promise.all([
+    findOrderStatusCounts(database, buildBoardOrderFilter(boardQuery, { includeCancelled: true })),
+    findBoardFilterOptions(database, buildBoardOrderFilter({ fromDate: boardQuery.fromDate, toDate: boardQuery.toDate })),
+    findUpcomingOrderDays(database, todayInIndia()),
+  ]);
+  const shownCount = Object.entries(statusCounts).reduce((sum, [status, orders]) => (status === 'cancelled' ? sum : sum + orders), 0);
+  const pageCount = Math.max(1, Math.ceil(shownCount / boardPageSize));
+  const page = Math.min(boardQuery.page, pageCount);
+  // With no start date the newest orders come first; otherwise the nearest delivery day.
+  const orders = await findAdminOrders(database, buildBoardOrderFilter(boardQuery),
+    { limit: boardPageSize, offset: (page - 1) * boardPageSize, newestFirst: !boardQuery.fromDate });
+  return { orders, page, pageCount, statusCounts, filterOptions, upcomingDays };
 }
 
 function checkStatusStep(step, order, staffMember) {
@@ -83,6 +108,7 @@ async function assignRider({ database, notificationService }, body) {
 export function createAdminOrderService(dependencies) {
   return {
     listOrders: (query) => listOrders(dependencies, query),
+    listBoardOrders: (query) => listBoardOrders(dependencies, query),
     moveOrderForward: (staffMember, orderNumberInput, body) => moveOrderForward(dependencies, staffMember, orderNumberInput, body),
     cancelOrder: (orderNumberInput, body) => cancelOrder(dependencies, orderNumberInput, body),
     assignRider: (body) => assignRider(dependencies, body),

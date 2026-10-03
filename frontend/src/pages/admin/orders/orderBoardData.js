@@ -2,38 +2,78 @@ import { useEffect } from 'react';
 import { useSearchParams } from 'react-router';
 import { useApiData } from '../../../useApiData.js';
 import { useAuthentication } from '../../../AuthenticationContext.jsx';
-import { formatTimeRange, todayInIndia } from '../../../formatting.js';
+import { formatDeliveryDay, formatTimeRange, todayInIndia } from '../../../formatting.js';
 
 const refreshEverySeconds = 20;
 
-// Board filters live in the page address, so Picking list and Delivery
-// list open with the same day, zone and time window.
+// Filters live in the page address. The board uses a delivery date range
+// (from today on by default; both cleared = all orders); Picking list and
+// Delivery list use one day. Zone and time window are shared by all three.
 export function useBoardFilters() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const today = todayInIndia();
   const filters = {
-    date: searchParams.get('date') ?? todayInIndia(),
+    date: searchParams.get('date') ?? today,
+    from: searchParams.get('from') ?? today,
+    to: searchParams.get('to') ?? '',
     zoneId: searchParams.get('zone') ?? '',
     time: searchParams.get('time') ?? '',
     search: searchParams.get('search') ?? '',
+    page: Number(searchParams.get('page')) || 1,
   };
-  const setFilter = (name, value) => setSearchParams((previous) => {
+  // changes: { from: "2026-10-04", to: "" }. Any change but the page goes back to page 1.
+  const setFilters = (changes) => setSearchParams((previous) => {
     const next = new URLSearchParams(previous);
-    if (value) next.set(name, value);
-    else next.delete(name);
+    if (!('page' in changes)) next.delete('page');
+    for (const [name, value] of Object.entries(changes)) {
+      // An empty "from" is kept, so it means "no start date" rather than "today".
+      if (value || name === 'from') next.set(name, value ?? '');
+      else next.delete(name);
+    }
     return next;
   }, { replace: true });
-  return { filters, setFilter, queryString: searchParams.toString() };
+  const setFilter = (name, value) => setFilters({ [name]: value });
+  return { filters, setFilter, setFilters };
 }
 
-// All orders for the day, fetched again every 20 seconds.
-export function useDayOrders(date) {
-  const request = useApiData(`/api/admin/orders?date=${encodeURIComponent(date)}`);
+function useRefreshed(path) {
+  const request = useApiData(path);
   const { reload } = request;
   useEffect(() => {
     const timer = setInterval(reload, refreshEverySeconds * 1000);
     return () => clearInterval(timer);
   }, [reload]);
+  return request;
+}
+
+// All orders for one day, fetched again every 20 seconds.
+export function useDayOrders(date) {
+  const request = useRefreshed(`/api/admin/orders?date=${encodeURIComponent(date)}`);
   return { ...request, orders: request.data?.orders ?? [] };
+}
+
+// One page of the board, filtered on the server, fetched again every 20 seconds.
+export function useBoardOrders(filters) {
+  const query = new URLSearchParams({ from: filters.from, to: filters.to, zone: filters.zoneId, time: filters.time, search: filters.search, page: filters.page });
+  const request = useRefreshed(`/api/admin/orders/board?${query}`);
+  return { ...request, orders: request.data?.orders ?? [] };
+}
+
+// Picking list and Delivery list open on the board's day (if one day is shown) and zone/time.
+export function listQueryOf(filters) {
+  const query = new URLSearchParams();
+  if (filters.from && filters.from === filters.to) query.set('date', filters.from);
+  if (filters.zoneId) query.set('zone', filters.zoneId);
+  if (filters.time) query.set('time', filters.time);
+  return query.toString();
+}
+
+export function dateRangeLabel({ from, to }) {
+  if (!from && !to) return 'All dates';
+  if (from === to) return formatDeliveryDay(from);
+  if (!to) return `${formatDeliveryDay(from)} onwards`;
+  if (!from) return `Up to ${formatDeliveryDay(to)}`;
+  return `${formatDeliveryDay(from)} – ${formatDeliveryDay(to)}`;
 }
 
 // Active riders for the owner's rider pickers (packers don't assign riders).
