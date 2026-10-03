@@ -1,7 +1,7 @@
 import { withTransaction } from '../dbHelper/databaseConnection.js';
 import { findCustomerWithProfileByUserId } from '../dbHelper/customerDbHelper.js';
-import { findCustomerOrder, findCustomerOrders, lockCustomerOrder, markOrderCancelled } from '../dbHelper/orderDbHelper.js';
-import { adjustPackSizeStock } from '../dbHelper/packSizeDbHelper.js';
+import { findCustomerOrder, findCustomerOrders, lockOrder } from '../dbHelper/orderDbHelper.js';
+import { cancelLockedOrder } from './orderCancellation.js';
 import { readPositiveInteger } from '../validators/commonValidation.js';
 import { ServiceError } from './serviceError.js';
 
@@ -34,7 +34,6 @@ function checkCanCancel(order) {
   }
 }
 
-// Stock goes back on the shelf in the same transaction.
 async function cancelMyOrder(dependencies, user, orderNumberInput) {
   const { database } = dependencies;
   const orderNumber = readPositiveInteger(orderNumberInput);
@@ -42,10 +41,9 @@ async function cancelMyOrder(dependencies, user, orderNumberInput) {
   if (!orderNumber || !customerId) throw ServiceError.notFound('Order not found.');
 
   await withTransaction(database, async (client) => {
-    const order = await lockCustomerOrder(client, customerId, orderNumber);
+    const order = await lockOrder(client, { orderNumber, customerId });
     checkCanCancel(order);
-    for (const item of order.items) await adjustPackSizeStock(client, item.packSizeId, item.quantity);
-    await markOrderCancelled(client, order.id, 'Cancelled by customer');
+    await cancelLockedOrder(client, order, 'Cancelled by customer');
   });
   return getMyOrder(dependencies, user, orderNumber);
 }

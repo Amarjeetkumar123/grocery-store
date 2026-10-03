@@ -84,3 +84,12 @@ export function formatCutoff(cutoffAt) {
 export function formatShortDate(isoTimestamp) {
   return new Date(isoTimestamp).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', timeZone: 'Asia/Kolkata' });
 }
+
+// "just now", "9 min ago", "3 h ago", or the date for older times.
+export function formatTimeAgo(isoTimestamp) {
+  const minutes = Math.floor((Date.now() - new Date(isoTimestamp).getTime()) / 60000);
+  if (minutes < 1) return 'just now';
+  if (minutes < 60) return `${minutes} min ago`;
+  if (minutes < 24 * 60) return `${Math.floor(minutes / 60)} h ago`;
+  return formatShortDate(isoTimestamp);
+}

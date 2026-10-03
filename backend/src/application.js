@@ -13,11 +13,15 @@ import { createStockService } from './services/stockService.js';
 import { createCheckoutService } from './services/checkoutService.js';
 import { createCustomerOrderService } from './services/customerOrderService.js';
 import { createZoneService } from './services/zoneService.js';
+import { createAdminOrderService } from './services/adminOrderService.js';
+import { createPeopleService } from './services/peopleService.js';
 import { createPublicRouter } from './routes/publicRoutes.js';
 import { createAccountRouter } from './routes/accountRoutes.js';
 import { createAdminProductRouter } from './routes/adminProductRoutes.js';
 import { createAdminStockRouter } from './routes/adminStockRoutes.js';
 import { createAdminZoneRouter } from './routes/adminZoneRoutes.js';
+import { createAdminOrderRouter } from './routes/adminOrderRoutes.js';
+import { createAdminPeopleRouter } from './routes/adminPeopleRoutes.js';
 import { createCheckoutRouter } from './routes/checkoutRoutes.js';
 import { createCustomerOrderRouter } from './routes/customerOrderRoutes.js';
 
@@ -32,6 +36,8 @@ function createServices(dependencies) {
     checkoutService: createCheckoutService(dependencies),
     customerOrderService: createCustomerOrderService(dependencies),
     zoneService: createZoneService(dependencies),
+    adminOrderService: createAdminOrderService(dependencies),
+    peopleService: createPeopleService(dependencies),
   };
 }
 
@@ -78,7 +84,8 @@ export function createApplication({ database, verifyAccessToken, productImageSto
   application.use('/api/checkout', signedIn, createCheckoutRouter(services));
   application.use('/api/orders', signedIn, createCustomerOrderRouter(services));
   application.use('/api/admin', signedIn, requireRole('owner', 'packer'),
-    createAdminStockRouter(services), createAdminProductRouter(services), createAdminZoneRouter(services));
+    createAdminStockRouter(services), createAdminProductRouter(services), createAdminZoneRouter(services),
+    createAdminOrderRouter(services), createAdminPeopleRouter(services));
 
   applyErrorHandling(application);
   return application;

@@ -11,17 +11,20 @@ const insertOrderItemsQuery = `
   from unnest($2::bigint[], $3::text[], $4::text[], $5::int[], $6::numeric[])
     as item(pack_size_id, product_name, pack_label, quantity, unit_price)`;
 
+// The items of order "placed" as a JSON list (used inside a select).
+export const orderItemsJson = `
+  (select json_agg(json_build_object(
+            'packSizeId', item.pack_size_id, 'productName', item.product_name, 'packLabel', item.pack_label,
+            'quantity', item.quantity, 'unitPrice', item.unit_price) order by item.id)
+   from order_items item where item.order_id = placed.id)`;
+
 const customerOrdersQuery = `
   select placed.id, placed.order_number, placed.status, placed.delivery_date, slot.name as slot_name,
          to_char(slot.start_time, 'HH24:MI') as start_time, to_char(slot.end_time, 'HH24:MI') as end_time,
          placed.customer_name, placed.customer_phone, zone.name as zone_name, placed.zone_type,
          placed.tower_name, placed.flat_number, placed.house_number, placed.street, placed.landmark, placed.floor,
          placed.items_total, placed.delivery_charge, placed.total, placed.payment_method, placed.payment_status,
-         placed.cancel_reason, placed.created_at,
-         (select json_agg(json_build_object(
-                   'packSizeId', item.pack_size_id, 'productName', item.product_name, 'packLabel', item.pack_label,
-                   'quantity', item.quantity, 'unitPrice', item.unit_price) order by item.id)
-          from order_items item where item.order_id = placed.id) as items
+         placed.cancel_reason, placed.created_at, ${orderItemsJson} as items
   from orders placed
   join slots slot on slot.id = placed.slot_id
   join zones zone on zone.id = placed.zone_id
@@ -29,7 +32,7 @@ const customerOrdersQuery = `
   order by placed.created_at desc
   limit 50`;
 
-function toCustomerOrder(row) {
+export function toCustomerOrder(row) {
   return {
     orderNumber: row.order_number,
     status: row.status,
@@ -87,11 +90,12 @@ export async function findCustomerOrder(executor, customerId, orderNumber) {
   return result.rows[0] ? toCustomerOrder(result.rows[0]) : null;
 }
 
-// Call inside a transaction. Returns { id, status, items: [{ packSizeId, quantity }] } or null.
-export async function lockCustomerOrder(executor, customerId, orderNumber) {
+// Call inside a transaction. With customerId, only that customer's order.
+// Returns { id, status, riderId, items: [{ packSizeId, quantity }] } or null.
+export async function lockOrder(executor, { orderNumber, customerId = null }) {
   const result = await executor.query(
-    'select id, status from orders where customer_id = $1 and order_number = $2 for update',
-    [customerId, orderNumber],
+    'select id, status, rider_id from orders where order_number = $1 and ($2::bigint is null or customer_id = $2) for update',
+    [orderNumber, customerId],
   );
   const order = result.rows[0];
   if (!order) return null;
@@ -99,6 +103,7 @@ export async function lockCustomerOrder(executor, customerId, orderNumber) {
   return {
     id: order.id,
     status: order.status,
+    riderId: order.rider_id,
     items: items.rows.map((item) => ({ packSizeId: item.pack_size_id, quantity: item.quantity })),
   };
 }

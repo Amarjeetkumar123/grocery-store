@@ -19,6 +19,11 @@ import { AdminBulkImportPage } from './pages/admin/AdminBulkImportPage.jsx';
 import { AdminStockPage } from './pages/admin/AdminStockPage.jsx';
 import { AdminZonesPage } from './pages/admin/AdminZonesPage.jsx';
 import { AdminStoreSettingsPage } from './pages/admin/AdminStoreSettingsPage.jsx';
+import { AdminOrdersPage } from './pages/admin/AdminOrdersPage.jsx';
+import { AdminPickingListPage } from './pages/admin/AdminPickingListPage.jsx';
+import { AdminDeliveryListPage } from './pages/admin/AdminDeliveryListPage.jsx';
+import { AdminStaffPage } from './pages/admin/AdminStaffPage.jsx';
+import { AdminCustomersPage } from './pages/admin/AdminCustomersPage.jsx';
 
 const ownerOnly = (page) => <RequireRole allowedRoles={['owner']}>{page}</RequireRole>;
 
@@ -26,6 +31,9 @@ function adminRoutes() {
   return (
     <Route path="/admin" element={<RequireRole allowedRoles={['owner', 'packer']}><AdminLayout /></RequireRole>}>
       <Route index element={<AdminHomeRedirect />} />
+      <Route path="orders" element={<AdminOrdersPage />} />
+      <Route path="picking-list" element={<AdminPickingListPage />} />
+      <Route path="delivery-list" element={<AdminDeliveryListPage />} />
       <Route path="products" element={ownerOnly(<AdminProductsPage />)} />
       <Route path="products/new" element={ownerOnly(<AdminProductFormPage key="new" />)} />
       <Route path="products/import" element={ownerOnly(<AdminBulkImportPage />)} />
@@ -33,6 +41,8 @@ function adminRoutes() {
       <Route path="stock" element={<AdminStockPage />} />
       <Route path="zones" element={ownerOnly(<AdminZonesPage />)} />
       <Route path="store-settings" element={ownerOnly(<AdminStoreSettingsPage />)} />
+      <Route path="staff" element={ownerOnly(<AdminStaffPage />)} />
+      <Route path="customers" element={ownerOnly(<AdminCustomersPage />)} />
     </Route>
   );
 }

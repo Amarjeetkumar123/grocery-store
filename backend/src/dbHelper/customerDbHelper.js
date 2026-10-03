@@ -76,3 +76,50 @@ export async function upsertCustomerProfile(executor, user, zone, profile) {
   ]);
   return result.rowCount > 0;
 }
+
+// customerFilter comes from filters/orderFilters.js (buildCustomerFilter).
+const adminCustomersQuery = (whereClause) => `
+  select customer.id, customer.name, customer.phone, customer.email, customer.phone_confirmed, customer.blocked,
+         zone.name as zone_name, customer.zone_type, tower.name as tower_name, customer.flat_number,
+         customer.house_number, customer.street, customer.landmark, customer.created_at,
+         count(placed.id) filter (where placed.status <> 'cancelled') as order_count,
+         max(placed.created_at) as last_order_at
+  from customers customer
+  join zones zone on zone.id = customer.zone_id
+  left join towers tower on tower.id = customer.tower_id
+  left join orders placed on placed.customer_id = customer.id
+  ${whereClause}
+  group by customer.id, zone.name, tower.name
+  order by max(placed.created_at) desc nulls last, customer.created_at desc
+  limit 300`;
+
+export async function findCustomersForAdmin(executor, customerFilter) {
+  const result = await executor.query(adminCustomersQuery(customerFilter.whereClause), customerFilter.values);
+  return result.rows.map((row) => ({
+    id: row.id,
+    name: row.name,
+    phone: row.phone,
+    email: row.email,
+    phoneConfirmed: row.phone_confirmed,
+    blocked: row.blocked,
+    zoneName: row.zone_name,
+    zoneType: row.zone_type,
+    towerName: row.tower_name,
+    flatNumber: row.flat_number,
+    houseNumber: row.house_number,
+    street: row.street,
+    landmark: row.landmark,
+    orderCount: row.order_count,
+    lastOrderAt: row.last_order_at?.toISOString() ?? null,
+  }));
+}
+
+// flags: { phoneConfirmed, blocked }; a null flag is left as it is.
+export async function updateCustomerFlags(executor, customerId, flags) {
+  const result = await executor.query(
+    `update customers set phone_confirmed = coalesce($2, phone_confirmed), blocked = coalesce($3, blocked), updated_at = now()
+     where id = $1`,
+    [customerId, flags.phoneConfirmed, flags.blocked],
+  );
+  return result.rowCount > 0;
+}

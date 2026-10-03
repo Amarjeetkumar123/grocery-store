@@ -470,3 +470,41 @@ button, input, select { font: inherit; color: inherit; }
 .detail-row strong { text-align: right; }
 .inline-form .input { width: auto; flex: 0 1 220px; }
 .slot-section .admin-table td { white-space: nowrap; }
+
+/* ── Admin: order board, lists, staff and customers (Week 4) ── */
+.admin-navigation-group { display: flex; flex-direction: column; gap: 2px; }
+.admin-navigation-group + .admin-navigation-group { margin-top: 12px; }
+.admin-navigation-title { font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #8fb6a0; padding: 4px 12px; }
+.board-filters { gap: 10px; }
+.filter-field { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 4px 6px 4px 12px; }
+.filter-field .input { border: 0; height: 34px; width: auto; }
+.order-board { display: grid; grid-template-columns: repeat(5, minmax(220px, 1fr)); gap: 14px; overflow-x: auto; padding-bottom: 8px; align-items: start; }
+.board-column { background: #efede6; border-radius: 16px; padding: 12px; display: flex; flex-direction: column; gap: 10px; min-height: 240px; }
+.board-column h2 { font-size: 16px; display: flex; justify-content: space-between; align-items: center; padding: 2px 4px; }
+.board-count { min-width: 26px; height: 26px; border-radius: 999px; background: var(--card); font-size: 13px; display: inline-flex; align-items: center; justify-content: center; }
+.board-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+.board-card-attention { border: 2px solid #c98a1b; }
+.board-card-place { font-weight: 700; font-size: 14px; }
+.board-card-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 4px; }
+.icon-button-outline { width: 40px; height: 40px; border: 1.5px solid var(--green); color: var(--green); border-radius: 10px; }
+.icon-button-outline:focus-visible, .board-card-details summary:focus-visible { outline: 3px solid var(--yellow); outline-offset: 2px; }
+.board-card-details { font-size: 13px; }
+.board-card-details summary { cursor: pointer; color: var(--text-secondary); padding: 4px 0; }
+.board-card-details ul { margin: 4px 0 6px; padding-left: 18px; }
+.rider-picker { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; }
+.rider-picker .input { width: auto; min-width: 130px; }
+.delivery-group { gap: 12px; }
+.row-inactive td { color: var(--text-secondary); background: #faf9f6; }
+.order-history { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+.picking-table .stock-count { font-size: 18px; }
+.print-only { display: none; }
+
+@media print {
+  .admin-sidebar, .board-filters, .admin-page-actions, .rider-picker, .icon-button { display: none !important; }
+  .admin-main { padding: 0; }
+  .print-only { display: table-cell; }
+  .card, .table-box { border: 0; }
+  .admin-table th, .admin-table td { padding: 6px 8px; }
+}
+.filter-field { flex: none; }
+.admin-table a:not(.icon-button), .board-card-details a { color: var(--green-text); font-weight: 600; }

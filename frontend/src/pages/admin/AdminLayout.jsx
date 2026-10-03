@@ -4,12 +4,23 @@ import { useStoreDetails } from '../../useStoreDetails.js';
 import { Icon } from '../../Icon.jsx';
 import logoImage from '../../assets/logo.png';
 
-// The order board, staff and reports join this menu in Weeks 4 and 5.
-const navigationItems = [
-  { path: '/admin/products', label: 'Products', icon: 'tag', roles: ['owner'] },
-  { path: '/admin/stock', label: 'Stock', icon: 'layers', roles: ['owner', 'packer'] },
-  { path: '/admin/zones', label: 'Zones & slots', icon: 'pin', roles: ['owner'] },
-  { path: '/admin/store-settings', label: 'Store settings', icon: 'settings', roles: ['owner'] },
+// Cash check and reports join this menu in Week 5.
+const navigationGroups = [
+  { title: 'Daily', items: [
+    { path: '/admin/orders', label: 'Orders', icon: 'box', roles: ['owner', 'packer'] },
+    { path: '/admin/picking-list', label: 'Picking list', icon: 'layers', roles: ['owner', 'packer'] },
+    { path: '/admin/delivery-list', label: 'Delivery list', icon: 'truck', roles: ['owner', 'packer'] },
+  ] },
+  { title: 'Catalogue', items: [
+    { path: '/admin/products', label: 'Products', icon: 'tag', roles: ['owner'] },
+    { path: '/admin/stock', label: 'Stock', icon: 'layers', roles: ['owner', 'packer'] },
+  ] },
+  { title: 'Setup', items: [
+    { path: '/admin/zones', label: 'Zones & slots', icon: 'pin', roles: ['owner'] },
+    { path: '/admin/customers', label: 'Customers', icon: 'user', roles: ['owner'] },
+    { path: '/admin/staff', label: 'Staff', icon: 'building', roles: ['owner'] },
+    { path: '/admin/store-settings', label: 'Store settings', icon: 'settings', roles: ['owner'] },
+  ] },
 ];
 
 const roleLabels = { owner: 'Owner', packer: 'Packer' };
@@ -17,16 +28,23 @@ const roleLabels = { owner: 'Owner', packer: 'Packer' };
 export function AdminLayout() {
   const { account, signOut } = useAuthentication();
   const store = useStoreDetails();
-  const visibleItems = navigationItems.filter((item) => item.roles.includes(account.role));
+  const visibleGroups = navigationGroups
+    .map((group) => ({ ...group, items: group.items.filter((item) => item.roles.includes(account.role)) }))
+    .filter((group) => group.items.length > 0);
   return (
     <div className="admin-shell">
       <aside className="admin-sidebar">
         <div className="brand"><img className="store-logo" src={logoImage} alt="" /> {store.name}</div>
         <nav aria-label="Admin">
-          {visibleItems.map((item) => (
-            <NavLink key={item.path} to={item.path} className="admin-navigation-link">
-              <Icon name={item.icon} /> {item.label}
-            </NavLink>
+          {visibleGroups.map((group) => (
+            <div key={group.title} className="admin-navigation-group">
+              <p className="admin-navigation-title">{group.title}</p>
+              {group.items.map((item) => (
+                <NavLink key={item.path} to={item.path} className="admin-navigation-link">
+                  <Icon name={item.icon} /> {item.label}
+                </NavLink>
+              ))}
+            </div>
           ))}
         </nav>
         <div className="admin-user">
@@ -39,10 +57,9 @@ export function AdminLayout() {
   );
 }
 
-// /admin opens the first page this role can use.
+// /admin opens the order board for owner and packer.
 export function AdminHomeRedirect() {
-  const { account } = useAuthentication();
-  return <Navigate to={account.role === 'owner' ? '/admin/products' : '/admin/stock'} replace />;
+  return <Navigate to="/admin/orders" replace />;
 }
 
 export function AdminPageHeader({ title, children }) {
