@@ -34,7 +34,7 @@ const application = createApplication({
   verifyAccessToken: createSupabaseTokenVerifier(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY),
   productImageStorage,
   pushSender,
-  allowedOrigins: process.env.ALLOWED_ORIGINS.split(',').map((origin) => origin.trim()),
+  allowedOrigins: process.env.ALLOWED_ORIGINS.split(',').map((origin) => origin.trim().replace(/\/+$/, '')),
   trustProxy: process.env.TRUST_PROXY,
 });
 

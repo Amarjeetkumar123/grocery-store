@@ -158,7 +158,9 @@ Deploy Backend → Run workflow.
    DATABASE_CA_CERTIFICATE_PATH=./supabase-ca.crt
    ```
 
-   Keep the **same** `VAPID_*` keys as on your computer.
+   Keep the **same** `VAPID_*` keys as on your computer. After changing this
+   file, run the deploy again (GitHub → Actions → Deploy Backend → Run
+   workflow): `docker restart` keeps the old values.
 4. nginx and HTTPS on the VPS. nginx runs as the `nginx` container and reads
    one file, `/root/nginx.conf`. It reaches the API over its own Docker
    network, `grocery-store-network`, which every deploy joins.
