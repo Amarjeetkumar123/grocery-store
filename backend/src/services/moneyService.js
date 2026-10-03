@@ -1,8 +1,11 @@
 import { findDailyCollections, findUnpaidOrders, insertCashHandover } from '../dbHelper/paymentDbHelper.js';
 import { findSalesReport } from '../dbHelper/reportDbHelper.js';
+import { findSlotLoadForDay } from '../dbHelper/slotDbHelper.js';
+import { findStockItems } from '../dbHelper/packSizeDbHelper.js';
+import { buildStockFilter } from '../filters/stockFilters.js';
 import { readPositiveInteger } from '../validators/commonValidation.js';
 import { readMoney, readOptionalDate } from '../validators/productValidation.js';
-import { todayInIndia } from '../utils/indianDate.js';
+import { addDays, todayInIndia } from '../utils/indianDate.js';
 import { ServiceError } from './serviceError.js';
 
 const longestReportDays = 366;
@@ -40,11 +43,40 @@ async function getSalesReport({ database }, query) {
   return { fromDate, toDate, report: await findSalesReport(database, fromDate, toDate) };
 }
 
-// The owner's Cash & UPI check and Reports screens.
+const shownStockAlerts = 6;
+
+// The owner's first screen: tomorrow's slots, sales for the last 7 days
+// (today included), cash riders still hold, and stock that needs action.
+async function getDashboard({ database }) {
+  const today = todayInIndia();
+  const tomorrow = addDays(today, 1);
+  const [slots, salesWeek, collections, stockItems] = await Promise.all([
+    findSlotLoadForDay(database, tomorrow),
+    findSalesReport(database, addDays(today, -6), today),
+    findDailyCollections(database, today),
+    findStockItems(database, buildStockFilter({})),
+  ]);
+  const needsAction = stockItems.filter((item) => item.outOfStock || item.lowStock || item.expiringSoon);
+  return {
+    today,
+    tomorrow,
+    slots,
+    salesWeek,
+    cashWithRiders: collections.reduce((sum, person) => sum + person.cashInHand, 0),
+    stock: {
+      outOfStock: stockItems.filter((item) => item.outOfStock).length,
+      lowStock: stockItems.filter((item) => item.lowStock).length,
+      alerts: needsAction.slice(0, shownStockAlerts),
+    },
+  };
+}
+
+// The owner's Dashboard, Cash & UPI check and Reports screens.
 export function createMoneyService(dependencies) {
   return {
     getCashCheck: (query) => getCashCheck(dependencies, query),
     recordHandover: (owner, body) => recordHandover(dependencies, owner, body),
     getSalesReport: (query) => getSalesReport(dependencies, query),
+    getDashboard: () => getDashboard(dependencies),
   };
 }

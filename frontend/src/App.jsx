@@ -28,6 +28,7 @@ import { AdminStaffPage } from './pages/admin/AdminStaffPage.jsx';
 import { AdminCustomersPage } from './pages/admin/AdminCustomersPage.jsx';
 import { AdminCashCheckPage } from './pages/admin/AdminCashCheckPage.jsx';
 import { AdminReportsPage } from './pages/admin/AdminReportsPage.jsx';
+import { AdminDashboardPage } from './pages/admin/AdminDashboardPage.jsx';
 
 const ownerOnly = (page) => <RequireRole allowedRoles={['owner']}>{page}</RequireRole>;
 const riderOnly = (page) => <RequireRole allowedRoles={['rider']}>{page}</RequireRole>;
@@ -36,6 +37,7 @@ function adminRoutes() {
   return (
     <Route path="/admin" element={<RequireRole allowedRoles={['owner', 'packer']}><AdminLayout /></RequireRole>}>
       <Route index element={<AdminHomeRedirect />} />
+      <Route path="dashboard" element={ownerOnly(<AdminDashboardPage />)} />
       <Route path="orders" element={<AdminOrdersPage />} />
       <Route path="picking-list" element={<AdminPickingListPage />} />
       <Route path="delivery-list" element={<AdminDeliveryListPage />} />

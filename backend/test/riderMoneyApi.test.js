@@ -121,3 +121,13 @@ test('reports add up delivered sales, split by cash and UPI', { skip }, async ()
   assert.equal(report.byZone.length, 1);
   assert.equal((await asOwner(`/reports?from=${tomorrow}&to=${today}`)).status, 400);
 });
+
+test('the dashboard shows how full tomorrow\'s slots are, for the owner only', { skip }, async () => {
+  assert.equal((await callApi('/api/admin/dashboard', { token: 'packer-token' })).status, 403);
+  const { body } = await asOwner('/dashboard');
+  const busy = body.slots.filter((slot) => slot.ordersTaken > 0);
+  assert.deepEqual(busy.map((slot) => [slot.startTime, slot.ordersTaken, slot.ordersWaiting, slot.maximumOrders]), [['07:00', 4, 1, 20]]);
+  assert.equal(body.tomorrow, tomorrow);
+  assert.deepEqual([body.stock.outOfStock, body.stock.alerts], [0, []]);
+  assert.equal(body.salesWeek.sales, 0, 'tomorrow\'s deliveries are not in the last 7 days');
+});

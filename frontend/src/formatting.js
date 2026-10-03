@@ -36,7 +36,7 @@ export function todayInIndia() {
   return indianDateFormatter.format(new Date());
 }
 
-function addDays(isoDate, days) {
+export function addDays(isoDate, days) {
   const date = new Date(`${isoDate}T00:00:00Z`);
   date.setUTCDate(date.getUTCDate() + days);
   return date.toISOString().slice(0, 10);

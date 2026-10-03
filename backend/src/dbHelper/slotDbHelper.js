@@ -116,3 +116,34 @@ export async function updateSlot(executor, slotId, slot) {
   );
   return result.rowCount > 0;
 }
+
+// Every active zone with its slots running on deliveryDate and how full each
+// is; a zone with no slot that day comes back once with slotId null.
+const slotLoadQuery = `
+  select zone.id as zone_id, zone.name as zone_name, zone.type as zone_type,
+         slot.id as slot_id, to_char(slot.start_time, 'HH24:MI') as start_time,
+         to_char(slot.end_time, 'HH24:MI') as end_time, slot.max_orders,
+         count(taken.id) filter (where taken.status <> 'cancelled')::int as orders_taken,
+         count(taken.id) filter (where taken.status = 'new')::int as orders_waiting
+  from zones zone
+  left join slots slot on slot.zone_id = zone.id and slot.active
+    and extract(dow from $1::date)::smallint = any(slot.days)
+  left join orders taken on taken.slot_id = slot.id and taken.delivery_date = $1::date
+  where zone.active
+  group by zone.id, slot.id
+  order by zone.name, slot.start_time`;
+
+export async function findSlotLoadForDay(executor, deliveryDate) {
+  const result = await executor.query(slotLoadQuery, [deliveryDate]);
+  return result.rows.map((row) => ({
+    zoneId: row.zone_id,
+    zoneName: row.zone_name,
+    zoneType: row.zone_type,
+    slotId: row.slot_id,
+    startTime: row.start_time,
+    endTime: row.end_time,
+    maximumOrders: row.max_orders,
+    ordersTaken: row.orders_taken,
+    ordersWaiting: row.orders_waiting,
+  }));
+}

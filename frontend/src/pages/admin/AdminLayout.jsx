@@ -7,6 +7,7 @@ import logoImage from '../../assets/logo.png';
 
 const navigationGroups = [
   { title: 'Daily', items: [
+    { path: '/admin/dashboard', label: 'Dashboard', icon: 'home', roles: ['owner'] },
     { path: '/admin/orders', label: 'Orders', icon: 'box', roles: ['owner', 'packer'] },
     { path: '/admin/picking-list', label: 'Picking list', icon: 'layers', roles: ['owner', 'packer'] },
     { path: '/admin/delivery-list', label: 'Delivery list', icon: 'truck', roles: ['owner', 'packer'] },
@@ -62,9 +63,10 @@ export function AdminLayout() {
   );
 }
 
-// /admin opens the order board for owner and packer.
+// /admin opens the dashboard for the owner, the order board for the packer.
 export function AdminHomeRedirect() {
-  return <Navigate to="/admin/orders" replace />;
+  const { account } = useAuthentication();
+  return <Navigate to={account.role === 'owner' ? '/admin/dashboard' : '/admin/orders'} replace />;
 }
 
 export function AdminPageHeader({ title, children }) {
