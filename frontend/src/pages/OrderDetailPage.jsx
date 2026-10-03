@@ -8,6 +8,7 @@ import { deliveryAddressLine, formatRupees } from '../formatting.js';
 import { Icon } from '../Icon.jsx';
 import { PageBar } from '../components/PageBar.jsx';
 import { LoadingOrError } from '../components/LoadingOrError.jsx';
+import { AlertsToggle } from '../components/AlertsToggle.jsx';
 import { OrderProgress, ReorderButton, StatusPill, cancellableStatuses, deliveryWindowOf } from './orders/OrderParts.jsx';
 
 function OrderPlacedHeader({ orderNumber }) {
@@ -105,6 +106,7 @@ export function OrderDetailPage() {
             {order.status !== 'cancelled' && <OrderProgress status={order.status} />}
             <OrderFacts order={order} />
             {justPlaced && <ConfirmOnWhatsApp order={order} />}
+            {justPlaced && <AlertsToggle label="alerts for this order" />}
             <OrderItems order={order} />
             <div className="button-pair">
               {!justPlaced && <ReorderButton order={order} className="button button-outline" />}

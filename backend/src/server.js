@@ -2,6 +2,7 @@ import { createApplication } from './application.js';
 import { createDatabasePool } from './dbHelper/databaseConnection.js';
 import { createSupabaseTokenVerifier } from './authentication.js';
 import { createProductImageStorage } from './storage/productImageStorage.js';
+import { createPushSender } from './push/pushSender.js';
 
 const requiredVariables = ['DATABASE_URL', 'SUPABASE_URL', 'SUPABASE_PUBLISHABLE_KEY', 'ALLOWED_ORIGINS'];
 const missingVariables = requiredVariables.filter((variableName) => !process.env[variableName]);
@@ -21,10 +22,18 @@ if (!productImageStorage.isConfigured) {
 }
 productImageStorage.ensureBucketExists().catch((error) => console.error(error.message));
 
+const pushSender = createPushSender({
+  publicKey: process.env.VAPID_PUBLIC_KEY,
+  privateKey: process.env.VAPID_PRIVATE_KEY,
+  subject: process.env.VAPID_SUBJECT,
+});
+if (!pushSender.isConfigured) console.warn('VAPID keys are not set: order alerts (web push) are switched off.');
+
 const application = createApplication({
   database,
   verifyAccessToken: createSupabaseTokenVerifier(process.env.SUPABASE_URL, process.env.SUPABASE_PUBLISHABLE_KEY),
   productImageStorage,
+  pushSender,
   allowedOrigins: process.env.ALLOWED_ORIGINS.split(',').map((origin) => origin.trim()),
   trustProxy: process.env.TRUST_PROXY,
 });

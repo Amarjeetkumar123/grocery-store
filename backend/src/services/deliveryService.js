@@ -28,44 +28,51 @@ function checkMayHandle(order, staffMember) {
 }
 
 // Locks the order, checks it, runs change(client, order) in one transaction.
+// Returns { orderNumber, total }.
 async function changeLockedOrder(database, staffMember, orderNumberInput, change) {
   const orderNumber = readPositiveInteger(orderNumberInput);
-  await withTransaction(database, async (client) => {
+  const total = await withTransaction(database, async (client) => {
     const order = orderNumber ? await lockOrder(client, { orderNumber }) : null;
     checkMayHandle(order, staffMember);
     await change(client, order);
+    return order.total;
   });
-  return { orderNumber };
+  return { orderNumber, total };
 }
 
-async function startDelivery({ database }, staffMember, orderNumberInput) {
-  return changeLockedOrder(database, staffMember, orderNumberInput, async (client, order) => {
+async function startDelivery({ database, notificationService }, staffMember, orderNumberInput) {
+  const { orderNumber, total } = await changeLockedOrder(database, staffMember, orderNumberInput, async (client, order) => {
     if (order.status !== 'packed') throw ServiceError.conflict('Only a packed order can go out for delivery.');
     await updateOrderStatus(client, order.id, 'out_for_delivery');
   });
+  notificationService.orderStatusChanged(orderNumber, 'out_for_delivery', { total });
+  return { orderNumber };
 }
 
 // body: { method: "cash" | "upi" }. The amount is always the order total.
 async function recordPayment({ database }, staffMember, orderNumberInput, body) {
   if (!paymentMethods.includes(body.method)) throw ServiceError.badRequest('Choose cash or UPI.');
   try {
-    return await changeLockedOrder(database, staffMember, orderNumberInput, async (client, order) => {
+    const { orderNumber } = await changeLockedOrder(database, staffMember, orderNumberInput, async (client, order) => {
       if (order.paymentStatus === 'paid') throw ServiceError.conflict('This order is already marked as paid.');
       if (order.status !== 'out_for_delivery') throw ServiceError.conflict('Start the delivery before taking payment.');
       await insertPayment(client, { orderId: order.id, method: body.method, amount: order.total, collectedBy: staffMember.id });
     });
+    return { orderNumber };
   } catch (error) {
     if (error.code === uniqueViolationErrorCode) throw ServiceError.conflict('This order is already marked as paid.');
     throw error;
   }
 }
 
-async function markDelivered({ database }, staffMember, orderNumberInput) {
-  return changeLockedOrder(database, staffMember, orderNumberInput, async (client, order) => {
+async function markDelivered({ database, notificationService }, staffMember, orderNumberInput) {
+  const { orderNumber } = await changeLockedOrder(database, staffMember, orderNumberInput, async (client, order) => {
     if (order.status !== 'out_for_delivery') throw ServiceError.conflict('This order is not out for delivery.');
     if (order.paymentStatus !== 'paid') throw ServiceError.badRequest('Mark the payment first.');
     await updateOrderStatus(client, order.id, 'delivered');
   });
+  notificationService.orderStatusChanged(orderNumber, 'delivered');
+  return { orderNumber };
 }
 
 export function createDeliveryService(dependencies) {

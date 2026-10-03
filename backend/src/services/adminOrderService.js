@@ -34,19 +34,22 @@ function checkStatusStep(step, order, staffMember) {
 }
 
 // body: { status: "confirmed" | "packed" | "out_for_delivery" }
-async function moveOrderForward({ database }, staffMember, orderNumberInput, body) {
+async function moveOrderForward({ database, notificationService }, staffMember, orderNumberInput, body) {
   const orderNumber = readPositiveInteger(orderNumberInput);
   const step = statusSteps[body.status];
-  await withTransaction(database, async (client) => {
-    const order = orderNumber ? await lockOrder(client, { orderNumber }) : null;
-    checkStatusStep(step, order, staffMember);
-    await updateOrderStatus(client, order.id, body.status);
+  const order = await withTransaction(database, async (client) => {
+    const locked = orderNumber ? await lockOrder(client, { orderNumber }) : null;
+    checkStatusStep(step, locked, staffMember);
+    await updateOrderStatus(client, locked.id, body.status);
+    return locked;
   });
+  // "Packed" is for the shop; the customer hears about confirmed and on the way.
+  if (body.status !== 'packed') notificationService.orderStatusChanged(orderNumber, body.status, { total: order.total });
   return { orderNumber, status: body.status };
 }
 
 // body: { reason }. The customer sees the reason in My Orders.
-async function cancelOrder({ database }, orderNumberInput, body) {
+async function cancelOrder({ database, notificationService }, orderNumberInput, body) {
   const orderNumber = readPositiveInteger(orderNumberInput);
   const fieldErrors = {};
   const reason = readRequiredText(body, 'reason', 'A reason', 200, fieldErrors);
@@ -58,11 +61,12 @@ async function cancelOrder({ database }, orderNumberInput, body) {
     if (order.paymentStatus === 'paid') throw ServiceError.conflict('This order is already paid. Return the money before cancelling.');
     await cancelLockedOrder(client, order, reason);
   });
+  notificationService.orderStatusChanged(orderNumber, 'cancelled', { reason });
   return { orderNumber, status: 'cancelled' };
 }
 
 // body: { orderNumbers: [1001, 1002], riderId } (riderId null takes the rider off).
-async function assignRider({ database }, body) {
+async function assignRider({ database, notificationService }, body) {
   const orderNumbers = Array.isArray(body.orderNumbers) ? body.orderNumbers.map(readPositiveInteger) : [];
   if (orderNumbers.length === 0 || orderNumbers.length > maximumOrdersPerAssignment || orderNumbers.includes(null)) {
     throw ServiceError.badRequest('Choose the orders to assign.');
@@ -71,7 +75,9 @@ async function assignRider({ database }, body) {
   if (body.riderId !== null && !(riderId && (await isActiveRider(database, riderId)))) {
     throw ServiceError.badRequest('Choose an active rider.');
   }
-  return { assignedOrderNumbers: await assignRiderToOrders(database, orderNumbers, riderId) };
+  const assignedOrderNumbers = await assignRiderToOrders(database, orderNumbers, riderId);
+  if (riderId && assignedOrderNumbers.length > 0) notificationService.ridersAssigned(riderId, assignedOrderNumbers.length);
+  return { assignedOrderNumbers };
 }
 
 export function createAdminOrderService(dependencies) {

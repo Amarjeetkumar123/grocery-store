@@ -16,6 +16,18 @@ export const fakeProductImageStorage = {
   },
 };
 
+// Records alerts instead of sending them. Endpoints containing "gone" act
+// like a browser that has dropped its subscription.
+export const fakePushSender = {
+  isConfigured: true,
+  publicKey: 'test-public-key',
+  sentMessages: [],
+  async send(subscription, message) {
+    this.sentMessages.push({ endpoint: subscription.endpoint, ...message });
+    return subscription.endpoint.includes('gone') ? 'gone' : 'sent';
+  },
+};
+
 async function resetDatabase(database, extraSql) {
   await database.query('drop schema public cascade; create schema public;');
   await database.query(readFileSync(new URL('../database/001_schema.sql', import.meta.url), 'utf8'));
@@ -35,6 +47,7 @@ export async function startTestServer({ usersByToken, extraSql }) {
     database,
     verifyAccessToken: async (accessToken) => usersByToken[accessToken] ?? null,
     productImageStorage: fakeProductImageStorage,
+    pushSender: fakePushSender,
     allowedOrigins: ['http://localhost:5173'],
   });
   const server = await new Promise((resolve) => {

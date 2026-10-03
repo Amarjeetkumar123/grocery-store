@@ -81,6 +81,14 @@ Project Settings → API Keys → Secret keys). On start-up the server creates
 the public `product-images` bucket by itself. Without the key everything
 else works; photo upload just says it is not set up.
 
+**Order alerts** (web push, free) need `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`
+and `VAPID_SUBJECT` in `backend/.env`. Make the keys once with
+`npx web-push generate-vapid-keys` and keep the same keys forever: new keys
+silently break every alert people have already turned on. Staff turn alerts
+on from the admin sidebar, riders from My deliveries, customers from Profile
+or the order-placed page. On iPhone, alerts work only after Share → Add to
+Home Screen (iOS 16.4 or newer).
+
 ## Run it
 
 ```bash
@@ -107,7 +115,72 @@ cd backend && npm test
 
 - Only the Express server reads and writes the tables. Row level security
   is on with no policies, so Supabase's public Data API exposes nothing.
-- Staff are matched to their Google login by **confirmed** email the first
-  time they sign in, then by login id only.
+- Staff are matched to their **Google-only** login by email the first time
+  they sign in, then by login id only. Password logins never get staff access.
+- The server sends push alerts only to the browsers' own push services
+  (Google, Mozilla, Apple, Microsoft), never to an address a user typed.
 - Behind nginx or another reverse proxy, set `TRUST_PROXY=1` in
   `backend/.env` so request limits see each visitor's real IP.
+
+## Deploy
+
+### 1. API on your VPS with Docker (e.g. Hostinger)
+
+`backend/` has a `Dockerfile` and a `compose.yaml` that runs the API with
+Caddy in front for HTTPS (free certificates, renewed by themselves).
+
+1. Hostinger hPanel → VPS → OS & Panel: pick **Ubuntu with Docker**
+   (or install Docker on plain Ubuntu: `curl -fsSL https://get.docker.com | sh`).
+2. Your domain's DNS: an **A record** `api` → the VPS IP address. Wait until
+   `ping api.yourdomain.com` shows that IP.
+3. If the Hostinger firewall is on, allow ports 80 and 443.
+4. On the VPS:
+
+   ```bash
+   git clone <your repository> grocery-store && cd grocery-store/backend
+   cp .env.example .env && nano .env     # fill it in, see below
+   docker compose up -d --build
+   docker compose logs -f api            # should say "listening on port 3000"
+   ```
+
+5. Open `https://api.yourdomain.com/api/health`; it should say `{"status":"ok"}`.
+
+Production values in `backend/.env`:
+
+- `API_DOMAIN=api.yourdomain.com`
+- `ALLOWED_ORIGINS=https://your-site.netlify.app` (add your own domain too,
+  comma-separated, once you have one)
+- the **same** `VAPID_*` keys as on your computer, and the Supabase values
+- `TRUST_PROXY` and `PORT` are set by `compose.yaml`; leave them as they are
+- if a value contains `$` (e.g. in the database password), write it as `$$`
+
+To update after a `git push`: `git pull && docker compose up -d --build`.
+
+### 2. App on Netlify
+
+Netlify → Add new site → Import from Git → this repository. `netlify.toml`
+already sets the folder, build command and Node version. Add environment
+variables (Site configuration → Environment variables):
+
+- `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` (same as local)
+- `VITE_API_URL=https://api.yourdomain.com` (no slash at the end)
+
+Deploy, then put the site's address in the API's `ALLOWED_ORIGINS`.
+
+### 3. Supabase for the live site
+
+Authentication → URL Configuration: set **Site URL** to the live address and
+add `https://your-site.netlify.app/**` to Redirect URLs (keep the localhost
+ones for development).
+
+### Before real customers
+
+- Admin → Store settings: your real UPI ID (every QR code uses it), WhatsApp
+  number and the shop's location (stand in the shop, tap "Use my current location").
+- Admin → Zones & slots: your real societies, towers, areas and slots.
+- Admin → Staff: packer and riders by Google email.
+- Delete the test logins (`test@test.com`, `rider@test.com`) in Supabase →
+  Authentication → Users, and switch "Test Rider" off in Staff.
+- On an Android phone and an iPhone: open the site, Add to Home Screen, turn
+  on alerts, place a test order and follow it to Delivered.
+

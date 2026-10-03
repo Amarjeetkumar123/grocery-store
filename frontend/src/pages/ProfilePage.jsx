@@ -3,6 +3,7 @@ import { useAuthentication } from '../AuthenticationContext.jsx';
 import { Icon } from '../Icon.jsx';
 import { TabBar } from '../components/TabBar.jsx';
 import { deliveryAddressLine } from '../formatting.js';
+import { AlertsToggle } from '../components/AlertsToggle.jsx';
 
 export function ProfilePage() {
   const { account, signOut } = useAuthentication();
@@ -24,6 +25,7 @@ export function ProfilePage() {
           </section>
         )}
         <Link to="/address" className="button button-outline"><Icon name="pin" /> Change address</Link>
+        <AlertsToggle />
         <button type="button" className="text-button" onClick={signOut}><Icon name="logout" /> Sign out</button>
       </div>
       <TabBar />

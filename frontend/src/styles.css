@@ -549,3 +549,5 @@ button, input, select { font: inherit; color: inherit; }
   font-size: 12px; padding: 4px 8px; border-radius: 6px;
 }
 .bar-slot:hover .bar-tooltip, .bar-slot:focus-visible .bar-tooltip { display: block; }
+.alerts-note { display: flex; align-items: flex-start; gap: 6px; }
+.admin-user .alerts-note { color: #cfe3d7; font-size: 12px; }

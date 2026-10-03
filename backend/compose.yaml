@@ -1,0 +1,32 @@
+# The API plus Caddy in front of it for HTTPS (free certificates, renewed automatically).
+# Start:   docker compose up -d --build
+# Update:  git pull && docker compose up -d --build
+# Needs API_DOMAIN in .env, e.g. API_DOMAIN=api.yourdomain.com
+services:
+  api:
+    build: .
+    env_file: .env
+    environment:
+      PORT: "3000"
+      TRUST_PROXY: "1"
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      API_DOMAIN: ${API_DOMAIN:?Add API_DOMAIN=api.yourdomain.com to .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - api
+    restart: unless-stopped
+
+volumes:
+  caddy_data:
+  caddy_config:

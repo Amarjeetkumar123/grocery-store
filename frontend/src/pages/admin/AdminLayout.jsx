@@ -2,6 +2,7 @@ import { Navigate, NavLink, Outlet } from 'react-router';
 import { useAuthentication } from '../../AuthenticationContext.jsx';
 import { useStoreDetails } from '../../useStoreDetails.js';
 import { Icon } from '../../Icon.jsx';
+import { AlertsToggle } from '../../components/AlertsToggle.jsx';
 import logoImage from '../../assets/logo.png';
 
 const navigationGroups = [
@@ -52,6 +53,7 @@ export function AdminLayout() {
         </nav>
         <div className="admin-user">
           <p>{account.staffName} <span>· {roleLabels[account.role]}</span></p>
+          <AlertsToggle label="new order alerts" className="admin-navigation-link" />
           <button type="button" className="admin-navigation-link" onClick={signOut}><Icon name="logout" /> Sign out</button>
         </div>
       </aside>

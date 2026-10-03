@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { supabase } from './supabaseClient.js';
 import { callApi } from './apiClient.js';
+import { turnOffAlerts } from './push/pushNotifications.js';
 
 const AuthenticationContext = createContext(null);
 
@@ -36,7 +37,11 @@ export function AuthenticationProvider({ children }) {
     if (userId) refreshAccount();
   }, [userId, refreshAccount]);
 
-  const signOut = useCallback(() => supabase.auth.signOut(), []);
+  // Alerts belong to the person, so a shared phone stops getting them at sign-out.
+  const signOut = useCallback(async () => {
+    await turnOffAlerts().catch(() => {});
+    await supabase.auth.signOut();
+  }, []);
   const value = useMemo(
     () => ({ session, account, accountError, refreshAccount, signOut }),
     [session, account, accountError, refreshAccount, signOut],

@@ -51,6 +51,7 @@ async function checkSlotIsBookable(client, zoneId, order) {
   });
   if (!slot?.open) throw ServiceError.conflict('That delivery slot has closed. Please choose another.', { slotChanged: true });
   if (slot.full) throw ServiceError.conflict('That delivery slot just filled up. Please choose another.', { slotChanged: true });
+  return slot;
 }
 
 async function priceLockedCart(client, items, zone) {
@@ -82,7 +83,7 @@ async function saveOrder(client, { customerId, profile }, zone, order, cart) {
 
 // One transaction: zone, distance, slot, stock, prices, then save. Any
 // failure saves nothing and the customer sees why.
-async function placeOrder({ database }, user, body) {
+async function placeOrder({ database, notificationService }, user, body) {
   const { order, errorMessage } = readPlaceOrderRequest(body);
   if (errorMessage) throw ServiceError.badRequest(errorMessage);
   const saved = await withTransaction(database, async (client) => {
@@ -92,10 +93,11 @@ async function placeOrder({ database }, user, body) {
       const distanceError = await checkDeliveryDistance(client, customer.profile.latitude, customer.profile.longitude);
       if (distanceError) throw ServiceError.badRequest(`${distanceError} Please update your address.`);
     }
-    await checkSlotIsBookable(client, zone.id, order);
+    const slot = await checkSlotIsBookable(client, zone.id, order);
     const cart = await priceLockedCart(client, order.items, zone);
-    return saveOrder(client, customer, zone, order, cart);
+    return { ...(await saveOrder(client, customer, zone, order, cart)), total: cart.total, startTime: slot.startTime };
   });
+  notificationService.newOrder({ ...saved, deliveryDate: order.deliveryDate });
   return { orderNumber: saved.orderNumber };
 }
 

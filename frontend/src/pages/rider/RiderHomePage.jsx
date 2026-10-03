@@ -3,6 +3,7 @@ import { useAuthentication } from '../../AuthenticationContext.jsx';
 import { formatDeliveryDay, formatRupees, todayInIndia } from '../../formatting.js';
 import { Icon } from '../../Icon.jsx';
 import { LoadingOrError } from '../../components/LoadingOrError.jsx';
+import { AlertsToggle } from '../../components/AlertsToggle.jsx';
 import { mapLinkFor } from '../admin/orders/customerContactLinks.js';
 import { groupByZoneAndBlock, useRiderDay } from './riderData.js';
 
@@ -72,6 +73,7 @@ export function RiderHomePage() {
           </section>
         ))}
         <button type="button" className="text-button" onClick={reload}>Refresh</button>
+        <AlertsToggle label="delivery alerts" />
       </div>
     </main>
   );

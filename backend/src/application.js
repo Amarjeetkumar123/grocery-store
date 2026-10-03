@@ -17,6 +17,8 @@ import { createAdminOrderService } from './services/adminOrderService.js';
 import { createPeopleService } from './services/peopleService.js';
 import { createDeliveryService } from './services/deliveryService.js';
 import { createMoneyService } from './services/moneyService.js';
+import { createNotificationService } from './services/notificationService.js';
+import { createPushSubscriptionService } from './services/pushSubscriptionService.js';
 import { createPublicRouter } from './routes/publicRoutes.js';
 import { createAccountRouter } from './routes/accountRoutes.js';
 import { createAdminProductRouter } from './routes/adminProductRoutes.js';
@@ -26,6 +28,7 @@ import { createAdminOrderRouter } from './routes/adminOrderRoutes.js';
 import { createAdminPeopleRouter } from './routes/adminPeopleRoutes.js';
 import { createAdminMoneyRouter } from './routes/adminMoneyRoutes.js';
 import { createRiderRouter } from './routes/riderRoutes.js';
+import { createPushRouter } from './routes/pushRoutes.js';
 import { createCheckoutRouter } from './routes/checkoutRoutes.js';
 import { createCustomerOrderRouter } from './routes/customerOrderRoutes.js';
 
@@ -44,6 +47,7 @@ function createServices(dependencies) {
     peopleService: createPeopleService(dependencies),
     deliveryService: createDeliveryService(dependencies),
     moneyService: createMoneyService(dependencies),
+    pushSubscriptionService: createPushSubscriptionService(dependencies),
   };
 }
 
@@ -78,13 +82,15 @@ function applyErrorHandling(application) {
   });
 }
 
-export function createApplication({ database, verifyAccessToken, productImageStorage, allowedOrigins, trustProxy }) {
+export function createApplication({ database, verifyAccessToken, productImageStorage, pushSender, allowedOrigins, trustProxy }) {
   const application = express();
   applySecurityMiddleware(application, { allowedOrigins, trustProxy });
-  const services = createServices({ database, productImageStorage });
+  const notificationService = createNotificationService({ database, pushSender });
+  const services = createServices({ database, productImageStorage, pushSender, notificationService });
   const signedIn = requireSignedIn(verifyAccessToken, database);
 
   application.get('/api/health', (request, response) => response.json({ status: 'ok' }));
+  application.get('/api/push/public-key', (request, response) => response.json(services.pushSubscriptionService.publicKey()));
   application.use('/api', createPublicRouter(services));
   application.use('/api/account', signedIn, createAccountRouter(services));
   application.use('/api/checkout', signedIn, createCheckoutRouter(services));
@@ -93,6 +99,7 @@ export function createApplication({ database, verifyAccessToken, productImageSto
     createAdminStockRouter(services), createAdminProductRouter(services), createAdminZoneRouter(services),
     createAdminOrderRouter(services), createAdminPeopleRouter(services), createAdminMoneyRouter(services));
   application.use('/api/rider', signedIn, requireRole('rider'), createRiderRouter(services));
+  application.use('/api/push', signedIn, createPushRouter(services));
 
   applyErrorHandling(application);
   return application;

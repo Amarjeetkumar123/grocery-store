@@ -45,6 +45,7 @@ async function cancelMyOrder(dependencies, user, orderNumberInput) {
     checkCanCancel(order);
     await cancelLockedOrder(client, order, 'Cancelled by customer');
   });
+  dependencies.notificationService.customerCancelled(orderNumber);
   return getMyOrder(dependencies, user, orderNumber);
 }
 
