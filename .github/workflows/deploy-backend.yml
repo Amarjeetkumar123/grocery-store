@@ -1,0 +1,126 @@
+name: Deploy Backend
+
+# Same flow as car-loans-and-sales: build the image, push it to GitHub's
+# registry, then replace the container on the VPS over SSH. Tests run first,
+# so a broken push never reaches the VPS.
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'backend/**'
+      - '.github/workflows/deploy-backend.yml'
+  workflow_dispatch:
+
+# Two quick pushes deploy one after the other, never at the same time.
+concurrency:
+  group: deploy-backend
+  cancel-in-progress: false
+
+env:
+  IMAGE_NAME: amarjeetkumar123/grocery-store-backend
+  CONTAINER_NAME: grocery-store-backend
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: grocery_store_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready --health-interval 5s --health-timeout 5s --health-retries 10
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install packages
+        run: npm ci
+
+      - name: Run the API tests
+        run: npm test
+        env:
+          TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/grocery_store_test
+
+  build-and-deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: true
+          tags: |
+            ghcr.io/${{ env.IMAGE_NAME }}:latest
+            ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      # The API listens on 127.0.0.1:3000 only; nginx on the VPS forwards to it
+      # (deploy/nginx-grocery-store-api.conf). The job fails if the new
+      # container does not report healthy within a minute.
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            set -e
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            docker pull ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+            docker stop ${{ env.CONTAINER_NAME }} || true
+            docker rm ${{ env.CONTAINER_NAME }} || true
+
+            docker run -d \
+              --name ${{ env.CONTAINER_NAME }} \
+              --env-file /root/envs/grocerystore.backend.prod.env \
+              --restart unless-stopped \
+              -p 127.0.0.1:3000:3000 \
+              ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+            status=starting
+            for attempt in $(seq 1 20); do
+              status=$(docker inspect --format '{{.State.Health.Status}}' ${{ env.CONTAINER_NAME }})
+              [ "$status" = "healthy" ] && break
+              sleep 3
+            done
+            if [ "$status" != "healthy" ]; then
+              echo "The new API did not start. Last log lines:"
+              docker logs --tail 50 ${{ env.CONTAINER_NAME }}
+              exit 1
+            fi
+            echo "API is healthy."
+
+            docker logout ghcr.io
+            docker image prune -f

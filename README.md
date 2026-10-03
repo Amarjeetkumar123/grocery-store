@@ -124,37 +124,57 @@ cd backend && npm test
 
 ## Deploy
 
-### 1. API on your VPS with Docker (e.g. Hostinger)
+### 1. API on your VPS (Docker + GitHub Actions + nginx)
 
-`backend/` has a `Dockerfile` and a `compose.yaml` that runs the API with
-Caddy in front for HTTPS (free certificates, renewed by themselves).
+Every push to `master` that changes `backend/` runs
+`.github/workflows/deploy-backend.yml`: tests → Docker image to
+`ghcr.io/amarjeetkumar123/grocery-store-backend` → SSH to the VPS → the
+container is replaced and must report healthy, or the run fails. Same setup
+as car-loans-and-sales. You can also start it by hand: GitHub → Actions →
+Deploy Backend → Run workflow.
 
-1. Hostinger hPanel → VPS → OS & Panel: pick **Ubuntu with Docker**
-   (or install Docker on plain Ubuntu: `curl -fsSL https://get.docker.com | sh`).
-2. Your domain's DNS: an **A record** `api` → the VPS IP address. Wait until
-   `ping api.yourdomain.com` shows that IP.
-3. If the Hostinger firewall is on, allow ports 80 and 443.
-4. On the VPS:
+**One-time setup**
+
+1. GitHub → this repository → Settings → Secrets and variables → Actions:
+   add `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`, `VPS_PORT` (the same values
+   as car-loans-and-sales).
+2. A free name for the API, needed for HTTPS (the Netlify site is HTTPS and
+   browsers block calls from it to a plain `http://IP`): sign in at
+   [duckdns.org](https://www.duckdns.org), create e.g. `grocerystore`, and
+   set its IP to the VPS IP. You get `grocerystore.duckdns.org`.
+3. On the VPS, the settings file the container reads:
 
    ```bash
-   git clone <your repository> grocery-store && cd grocery-store/backend
-   cp .env.example .env && nano .env     # fill it in, see below
-   docker compose up -d --build
-   docker compose logs -f api            # should say "listening on port 3000"
+   mkdir -p /root/envs && nano /root/envs/grocerystore.backend.prod.env
    ```
 
-5. Open `https://api.yourdomain.com/api/health`; it should say `{"status":"ok"}`.
+   Same lines as `backend/.env`, with these production values (no quotes
+   around values in this file):
 
-Production values in `backend/.env`:
+   ```
+   ALLOWED_ORIGINS=https://your-site.netlify.app
+   TRUST_PROXY=1
+   PORT=3000
+   DATABASE_CA_CERTIFICATE_PATH=./supabase-ca.crt
+   ```
 
-- `API_DOMAIN=api.yourdomain.com`
-- `ALLOWED_ORIGINS=https://your-site.netlify.app` (add your own domain too,
-  comma-separated, once you have one)
-- the **same** `VAPID_*` keys as on your computer, and the Supabase values
-- `TRUST_PROXY` and `PORT` are set by `compose.yaml`; leave them as they are
-- if a value contains `$` (e.g. in the database password), write it as `$$`
+   Keep the **same** `VAPID_*` keys as on your computer.
+4. nginx and HTTPS on the VPS (put your DuckDNS name in the file first):
 
-To update after a `git push`: `git pull && docker compose up -d --build`.
+   ```bash
+   sudo cp deploy/nginx-grocery-store-api.conf /etc/nginx/sites-available/grocery-store-api
+   sudo ln -s /etc/nginx/sites-available/grocery-store-api /etc/nginx/sites-enabled/
+   sudo nginx -t && sudo systemctl reload nginx
+   sudo certbot --nginx -d grocerystore.duckdns.org
+   ```
+
+   (Copy the file from the repository, or paste it with `nano`.)
+5. Push to `master` (or run the workflow), then open
+   `https://grocerystore.duckdns.org/api/health`: `{"status":"ok"}`.
+
+On the VPS: `docker logs -f grocery-store-backend` shows the API's log. To go
+back to an earlier version, run the same `docker run` line from the workflow
+with an older image tag (each run's commit id is a tag).
 
 ### 2. App on Netlify
 
@@ -163,9 +183,11 @@ already sets the folder, build command and Node version. Add environment
 variables (Site configuration → Environment variables):
 
 - `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` (same as local)
-- `VITE_API_URL=https://api.yourdomain.com` (no slash at the end)
+- `VITE_API_URL=https://grocerystore.duckdns.org` (your API name, no slash at the end)
 
-Deploy, then put the site's address in the API's `ALLOWED_ORIGINS`.
+Netlify then deploys the app by itself on every push. Put the site's
+address in the API's `ALLOWED_ORIGINS` (in `/root/envs/grocerystore.backend.prod.env`)
+and run the backend workflow once more so the container reads it.
 
 ### 3. Supabase for the live site
 
