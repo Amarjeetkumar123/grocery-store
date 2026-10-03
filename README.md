@@ -159,16 +159,22 @@ Deploy Backend → Run workflow.
    ```
 
    Keep the **same** `VAPID_*` keys as on your computer.
-4. nginx and HTTPS on the VPS (put your DuckDNS name in the file first):
+4. nginx and HTTPS on the VPS. nginx runs as the `nginx` container and reads
+   one file, `/root/nginx.conf`. It reaches the API over its own Docker
+   network, `grocery-store-network`, which every deploy joins.
 
    ```bash
-   sudo cp deploy/nginx-grocery-store-api.conf /etc/nginx/sites-available/grocery-store-api
-   sudo ln -s /etc/nginx/sites-available/grocery-store-api /etc/nginx/sites-enabled/
-   sudo nginx -t && sudo systemctl reload nginx
-   sudo certbot --nginx -d grocerystorewebapp.duckdns.org
+   # The network, and nginx on it (again only if the nginx container is ever recreated)
+   docker network create grocery-store-network
+   docker network connect grocery-store-network nginx
+   # Certificate (nginx is stopped for ~20 seconds; renewals do the same by themselves)
+   certbot certonly --standalone -d grocerystorewebapp.duckdns.org \
+     --pre-hook "docker stop nginx" --post-hook "docker start nginx"
+   # Add the site: paste deploy/nginx-grocery-store-api.conf at the end
+   cp /root/nginx.conf /root/nginx.conf.backup
+   nano /root/nginx.conf
+   docker exec nginx nginx -t && docker exec nginx nginx -s reload
    ```
-
-   (Copy the file from the repository, or paste it with `nano`.)
 5. Push to `master` (or run the workflow), then open
    `https://grocerystorewebapp.duckdns.org/api/health`: `{"status":"ok"}`.
 

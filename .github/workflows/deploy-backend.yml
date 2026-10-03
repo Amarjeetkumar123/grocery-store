@@ -83,9 +83,10 @@ jobs:
             ghcr.io/${{ env.IMAGE_NAME }}:latest
             ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
-      # The API listens on 127.0.0.1:3001 only (3000 is taken on the VPS); nginx on the VPS forwards to it
-      # (deploy/nginx-grocery-store-api.conf). The job fails if the new
-      # container does not report healthy within a minute.
+      # The nginx container on the VPS reaches the API by name over grocery-store-network
+      # (deploy/nginx-grocery-store-api.conf). 127.0.0.1:3001 is
+      # only for checks on the VPS (3000 is taken there). The job fails if the
+      # new container does not report healthy within a minute.
       - name: Deploy to VPS
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -106,6 +107,7 @@ jobs:
               --name ${{ env.CONTAINER_NAME }} \
               --env-file /root/envs/grocerystore.backend.prod.env \
               --restart unless-stopped \
+              --network grocery-store-network \
               -p 127.0.0.1:3001:3000 \
               ghcr.io/${{ env.IMAGE_NAME }}:${{ github.sha }}
 
