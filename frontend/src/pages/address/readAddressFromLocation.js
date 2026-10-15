@@ -36,12 +36,17 @@ export function matchZone(zones, placeNames) {
 }
 
 // Fills only the boxes the customer has left empty, so typed text is never replaced.
+// The values the location suggests for each box.
+export function suggestedValuesOf(parts, zone) {
+  return { zoneId: zone ? String(zone.id) : '', houseNumber: parts.houseNumber, street: parts.street, landmark: parts.landmark };
+}
+
 export function fillEmptyFields(formValues, parts, zone) {
-  return {
-    ...formValues,
-    zoneId: formValues.zoneId || (zone ? String(zone.id) : ''),
-    houseNumber: formValues.houseNumber || parts.houseNumber,
-    street: formValues.street || parts.street,
-    landmark: formValues.landmark || parts.landmark,
-  };
+  const suggested = Object.entries(suggestedValuesOf(parts, zone));
+  return { ...formValues, ...Object.fromEntries(suggested.map(([fieldName, value]) => [fieldName, formValues[fieldName] || value])) };
+}
+
+// Boxes still holding what the location filled in; a box drops out once the customer changes it.
+export function fieldsFromLocation(formValues, suggestedValues) {
+  return new Set(Object.keys(suggestedValues).filter((fieldName) => suggestedValues[fieldName] && formValues[fieldName] === suggestedValues[fieldName]));
 }

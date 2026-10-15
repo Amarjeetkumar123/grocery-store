@@ -45,8 +45,8 @@ export function LocationCapture({ status, addressLookup, onCapture, errorMessage
   const shownStatus = status === 'saved' && addressLookup ? addressLookup : status;
   const message = errorMessage ?? locationMessages[shownStatus];
   return (
-    <div className="field">
-      <button type="button" className="button button-outline" onClick={onCapture} disabled={status === 'finding'}>
+    <div className="field location-capture">
+      <button type="button" className="button button-soft" onClick={onCapture} disabled={status === 'finding'}>
         <Icon name="pin" /> {status === 'saved' ? 'Update my location' : 'Use my current location'}
       </button>
       {message && (

@@ -29,9 +29,9 @@ export function TextField({ fieldId, label, value, onChange, errorMessage, class
   );
 }
 
-export function SelectField({ fieldId, label, value, onChange, errorMessage, placeholder, options }) {
+export function SelectField({ fieldId, label, value, onChange, errorMessage, placeholder, options, className, hint }) {
   return (
-    <div className="field">
+    <div className={className ? `field ${className}` : 'field'}>
       <label htmlFor={fieldId}>{label}</label>
       <select
         id={fieldId}
@@ -44,6 +44,7 @@ export function SelectField({ fieldId, label, value, onChange, errorMessage, pla
         <option value="" disabled>{placeholder}</option>
         {options.map((option) => <option key={option.id} value={option.id}>{option.name}</option>)}
       </select>
+      {hint && !errorMessage && <p className="field-hint">{hint}</p>}
       <FieldError fieldId={fieldId} message={errorMessage} />
     </div>
   );

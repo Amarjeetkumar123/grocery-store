@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { addressPartsOf, fillEmptyFields, matchZone } from './readAddressFromLocation.js';
+import { addressPartsOf, fieldsFromLocation, fillEmptyFields, matchZone } from './readAddressFromLocation.js';
 
 const mapAddress = { house_number: '112', road: 'Main Road', amenity: 'Shiv Mandir', suburb: 'Sector 73', city: 'Noida' };
 const zones = [{ id: 1, name: 'Mahagun Moderne, Sector 78' }, { id: 3, name: 'Sector 73 Market Area' }];
@@ -27,4 +27,10 @@ test('fills only empty boxes and keeps what the customer typed', () => {
   const typed = { zoneId: '', houseNumber: 'Shop 4', street: '', landmark: '', floor: '' };
   const filled = fillEmptyFields(typed, addressPartsOf(mapAddress), zones[1]);
   assert.deepEqual(filled, { zoneId: '3', houseNumber: 'Shop 4', street: 'Main Road', landmark: 'Near Shiv Mandir', floor: '' });
+});
+
+test('marks the boxes the location filled until the customer changes them', () => {
+  const suggested = { zoneId: '7', houseNumber: '', street: 'Main Road', landmark: 'Near Shiv Mandir' };
+  const values = { zoneId: '7', houseNumber: '12', street: 'Main Road', landmark: 'Near the temple' };
+  assert.deepEqual([...fieldsFromLocation(values, suggested)], ['zoneId', 'street']);
 });

@@ -8,7 +8,7 @@ import { CategoryPage } from './pages/CategoryPage.jsx';
 import { ProductPage } from './pages/ProductPage.jsx';
 import { SearchPage } from './pages/SearchPage.jsx';
 import { ProfilePage } from './pages/ProfilePage.jsx';
-import { CartPage } from './pages/CartPage.jsx';
+import { OpenCartRoute, ShopLayout } from './pages/ShopLayout.jsx';
 import { OrdersPage } from './pages/OrdersPage.jsx';
 import { OrderDetailPage } from './pages/OrderDetailPage.jsx';
 import { RiderHomePage } from './pages/rider/RiderHomePage.jsx';
@@ -64,15 +64,17 @@ export function App() {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
       <Route element={<RequireSignedIn />}>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/address" element={<AddressPage />} />
-        <Route path="/category/:categoryId" element={<CategoryPage />} />
-        <Route path="/product/:productId" element={<ProductPage />} />
-        <Route path="/search" element={<SearchPage />} />
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/cart" element={<CartPage />} />
-        <Route path="/orders" element={<OrdersPage />} />
-        <Route path="/orders/:orderNumber" element={<OrderDetailPage />} />
+        <Route element={<ShopLayout />}>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/address" element={<AddressPage />} />
+          <Route path="/category/:categoryId" element={<CategoryPage />} />
+          <Route path="/product/:productId" element={<ProductPage />} />
+          <Route path="/search" element={<SearchPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/cart" element={<OpenCartRoute />} />
+          <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/orders/:orderNumber" element={<OrderDetailPage />} />
+        </Route>
         {adminRoutes()}
         <Route path="/rider" element={riderOnly(<RiderHomePage />)} />
         <Route path="/rider/orders/:orderNumber" element={riderOnly(<RiderOrderPage />)} />

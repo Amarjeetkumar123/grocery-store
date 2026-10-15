@@ -101,19 +101,23 @@ export function OrderDetailPage() {
       <div className="page-body">
         <LoadingOrError loading={loading && !order} error={error} onRetry={reload} />
         {order && (
-          <>
-            {justPlaced ? <OrderPlacedHeader orderNumber={order.orderNumber} /> : <StatusPill status={order.status} />}
-            {order.status !== 'cancelled' && <OrderProgress status={order.status} />}
-            <OrderFacts order={order} />
-            {justPlaced && <ConfirmOnWhatsApp order={order} />}
-            {justPlaced && <AlertsToggle label="alerts for this order" />}
-            <OrderItems order={order} />
-            <div className="button-pair">
-              {!justPlaced && <ReorderButton order={order} className="button button-outline" />}
-              <Link to="/" className="button button-quiet">Keep shopping</Link>
+          <div className="two-column-layout">
+            <div className="column-stack">
+              {justPlaced ? <OrderPlacedHeader orderNumber={order.orderNumber} /> : <StatusPill status={order.status} />}
+              {order.status !== 'cancelled' && <section className="card"><OrderProgress status={order.status} /></section>}
+              <OrderItems order={order} />
             </div>
-            <CancelOrderButton order={order} onCancelled={reload} />
-          </>
+            <div className="column-stack column-side">
+              <OrderFacts order={order} />
+              {justPlaced && <ConfirmOnWhatsApp order={order} />}
+              {justPlaced && <AlertsToggle label="alerts for this order" />}
+              <div className="button-pair">
+                {!justPlaced && <ReorderButton order={order} className="button button-outline" />}
+                <Link to="/" className="button button-quiet">Keep shopping</Link>
+              </div>
+              <CancelOrderButton order={order} onCancelled={reload} />
+            </div>
+          </div>
         )}
       </div>
     </main>

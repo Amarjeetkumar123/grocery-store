@@ -10,6 +10,7 @@ export function createPublicRouter({ storeService, catalogueService }) {
   router.get('/products', async (request, response) => {
     response.json(await catalogueService.listProducts(request.query));
   });
+  router.get('/products/popular', async (request, response) => response.json(await catalogueService.listPopularProducts()));
   router.get('/products/:productId', async (request, response) => {
     response.json(await catalogueService.getProduct(request.params.productId));
   });

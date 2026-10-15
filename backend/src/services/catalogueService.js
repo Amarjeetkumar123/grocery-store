@@ -37,6 +37,15 @@ async function listProducts({ database, productImageStorage }, query) {
   return { products: products.map((product) => toCustomerProduct(product, productImageStorage)) };
 }
 
+const popularProductCount = 12;
+
+// The best sellers of the last 7 days, for the home page.
+async function listPopularProducts({ database, productImageStorage }) {
+  const page = { limit: popularProductCount, offset: 0 };
+  const products = await findProducts(database, buildProductFilter({}), page, 'popular');
+  return { products: products.map((product) => toCustomerProduct(product, productImageStorage)) };
+}
+
 async function getProduct({ database, productImageStorage }, productIdInput) {
   const productId = readPositiveInteger(productIdInput);
   const [product] = productId ? await findProducts(database, buildProductFilter({ productId })) : [];
@@ -48,6 +57,7 @@ export function createCatalogueService(dependencies) {
   return {
     listCategories: () => listCategories(dependencies),
     listProducts: (query) => listProducts(dependencies, query),
+    listPopularProducts: () => listPopularProducts(dependencies),
     getProduct: (productIdInput) => getProduct(dependencies, productIdInput),
   };
 }

@@ -4,7 +4,10 @@ import { useStoreDetails } from '../useStoreDetails.js';
 import { Icon } from '../Icon.jsx';
 import { deliveryAddressLine } from '../formatting.js';
 import { TabBar } from '../components/TabBar.jsx';
+import { CartBar } from '../components/CartBar.jsx';
 import { CategoryGrid } from './home/CategoryGrid.jsx';
+import { HomeBanners } from './home/HomeBanners.jsx';
+import { NextSlotsCard, PopularProducts } from './home/HomeSections.jsx';
 import { AlertsBell } from '../components/AlertsToggle.jsx';
 import logoImage from '../assets/logo.png';
 
@@ -42,13 +45,17 @@ export function HomePage() {
     <main className="app-shell">
       <StoreHeader profile={account.profile} />
       <div className="page-body">
-        <div className="offer-banner">
-          <span className="offer-icon"><Icon name="cash" /></span>
-          <p><strong>Pay at your door</strong>Cash or UPI when your order arrives</p>
+        <div className="home-hero">
+          <HomeBanners />
+          <NextSlotsCard />
         </div>
-        <h2 className="section-title">Shop by category</h2>
-        <CategoryGrid />
+        <section className="home-section">
+          <h2 className="section-title">Shop by category</h2>
+          <CategoryGrid />
+        </section>
+        <PopularProducts />
       </div>
+      <CartBar aboveTabBar />
       <TabBar />
     </main>
   );

@@ -124,6 +124,12 @@ test('a full slot takes no more orders', { skip }, async () => {
   assert.deepEqual([third.status, third.body.slotChanged], [409, true]);
 });
 
+test('popular products: most sold this week first, hidden products left out', { skip }, async () => {
+  const { status, body } = await callApi('/api/products/popular', { token: 'riya-token' });
+  assert.equal(status, 200);
+  assert.deepEqual(body.products.map((product) => product.name), ['Sunflower Oil', 'Toor Dal']);
+});
+
 test('customers see only their own orders, newest first', { skip }, async () => {
   const { body } = await callApi('/api/orders', { token: 'riya-token' });
   assert.deepEqual(body.orders.map((order) => order.orderNumber), [1002, 1001]);

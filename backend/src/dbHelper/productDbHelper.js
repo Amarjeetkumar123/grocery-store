@@ -1,7 +1,18 @@
 // productFilter comes from filters/productFilters.js. The two fragments
 // below are fixed text chosen by includeHidden, never user input.
 // page: { limit, offset } for one page, or null for up to 500 products.
-function productsWithPackSizesQuery({ whereClause, includeHidden, values }, page) {
+// sortOrder: a key of productSortOrders, never user input.
+const productSortOrders = {
+  name: 'product.name',
+  // Most packs sold in the last 7 days first (cancelled orders do not count), then by name.
+  popular: `(select coalesce(sum(item.quantity), 0) from order_items item
+              join pack_sizes sold on sold.id = item.pack_size_id
+              join orders placed on placed.id = item.order_id
+              where sold.product_id = product.id and placed.status <> 'cancelled'
+                and placed.created_at > now() - interval '7 days') desc, product.name`,
+};
+
+function productsWithPackSizesQuery({ whereClause, includeHidden, values }, page, sortOrder) {
   const pageClause = page ? `limit $${values.length + 1} offset $${values.length + 2}` : 'limit 500';
   const packSizeCondition = includeHidden ? '' : 'and pack.active';
   const onlyWithPackSizes = includeHidden ? '' : 'having count(pack.id) > 0';
@@ -22,7 +33,7 @@ function productsWithPackSizesQuery({ whereClause, includeHidden, values }, page
     ${whereClause}
     group by product.id, category.name
     ${onlyWithPackSizes}
-    order by product.name
+    order by ${productSortOrders[sortOrder]}
     ${pageClause}`;
 }
 
@@ -42,9 +53,10 @@ function toProduct(row) {
   };
 }
 
-export async function findProducts(executor, productFilter, page = null) {
+export async function findProducts(executor, productFilter, page = null, sortOrder = 'name') {
   const pageValues = page ? [page.limit, page.offset] : [];
-  const result = await executor.query(productsWithPackSizesQuery(productFilter, page), [...productFilter.values, ...pageValues]);
+  const query = productsWithPackSizesQuery(productFilter, page, sortOrder);
+  const result = await executor.query(query, [...productFilter.values, ...pageValues]);
   return result.rows.map(toProduct);
 }
 

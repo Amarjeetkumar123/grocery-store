@@ -1,4 +1,3 @@
-import { useNavigate } from 'react-router';
 import { useCart } from '../../cart/CartContext.jsx';
 import { formatDeliveryDay, formatTimeRange } from '../../formatting.js';
 
@@ -53,11 +52,10 @@ export function itemCountOf(order) {
 
 // Puts the same items in the cart again; the cart shows today's prices.
 export function ReorderButton({ order, className = 'button button-compact' }) {
-  const { addItems } = useCart();
-  const navigate = useNavigate();
+  const { addItems, openCart } = useCart();
   function reorder() {
     addItems(order.items.map(({ packSizeId, quantity }) => ({ packSizeId, quantity })));
-    navigate('/cart');
+    openCart();
   }
   return <button type="button" className={className} onClick={reorder}>Reorder</button>;
 }

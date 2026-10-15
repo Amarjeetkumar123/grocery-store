@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import { useApiData } from '../useApiData.js';
 import { formatMonthYear, formatRupees } from '../formatting.js';
 import { PageBar } from '../components/PageBar.jsx';
 import { LoadingOrError } from '../components/LoadingOrError.jsx';
-import { PriceLine, ProductImage, StockStatus } from '../components/ProductCard.jsx';
+import { PriceLine, ProductCard, ProductImage, StockStatus } from '../components/ProductCard.jsx';
 import { QuantityStepper } from '../components/QuantityStepper.jsx';
 import { useCartSummary } from '../components/CartBar.jsx';
 import { useCart } from '../cart/CartContext.jsx';
@@ -42,28 +42,29 @@ function PackDetails({ product, packSize }) {
 // Photo with back and cart buttons floating over it, instead of a top bar.
 function ProductHero({ product }) {
   const navigate = useNavigate();
-  const { itemCount } = useCart();
+  const { itemCount, openCart } = useCart();
   return (
     <div className="product-hero">
       <ProductImage product={product} className="product-hero-image" />
       <button type="button" className="hero-button hero-button-back" onClick={() => navigate(-1)} aria-label="Go back">
         <Icon name="back" />
       </button>
-      <Link to="/cart" className="hero-button hero-button-cart" aria-label={`Cart, ${itemCount} ${itemCount === 1 ? 'item' : 'items'}`}>
+      <button type="button" className="hero-button hero-button-cart" onClick={openCart} aria-label={`Cart, ${itemCount} ${itemCount === 1 ? 'item' : 'items'}`}>
         <Icon name="cart" />
         {itemCount > 0 && <span className="tab-badge">{itemCount}</span>}
-      </Link>
+      </button>
     </div>
   );
 }
 
 function GoToCartButton() {
   const { itemsLabel, total } = useCartSummary();
+  const { openCart } = useCart();
   return (
-    <Link to="/cart" className="button button-large go-to-cart">
+    <button type="button" className="button button-large go-to-cart" onClick={openCart}>
       <span><strong>Go to cart</strong><small>{itemsLabel}{total ? ` · ${formatRupees(total)}` : ''}</small></span>
       <Icon name="right" />
-    </Link>
+    </button>
   );
 }
 
@@ -84,6 +85,41 @@ function BuyBar({ product, packSize }) {
   return <div className="bottom-action buy-bar">{content}</div>;
 }
 
+// Other products from the same category, under the details.
+function SimilarProducts({ product }) {
+  const { data } = useApiData(`/api/products?categoryId=${product.categoryId}`);
+  const others = (data?.products ?? []).filter((candidate) => candidate.id !== product.id).slice(0, 6);
+  if (others.length === 0) return null;
+  return (
+    <section className="similar-products">
+      <h2 className="section-title">You may also like</h2>
+      <div className="product-row">{others.map((other) => <ProductCard key={other.id} product={other} />)}</div>
+    </section>
+  );
+}
+
+// Phones: picture on top, Add to cart fixed at the bottom. Computers: picture on the left, details on the right.
+function ProductDetails({ product, packSize, onChoosePackSize }) {
+  return (
+    <div className="product-layout">
+      <ProductHero product={product} />
+      <div className="product-details">
+        <div>
+          {product.brand && <p className="brand-name">{product.brand}</p>}
+          <h1 className="product-title">{product.name}</h1>
+        </div>
+        <PackSizeChoices packSizes={product.packSizes} chosenPackSize={packSize} onChoose={onChoosePackSize} />
+        <PriceLine packSize={packSize} />
+        <StockStatus packSize={packSize} />
+        <BuyBar product={product} packSize={packSize} />
+        {product.description && <p className="hint">{product.description}</p>}
+        <PackDetails product={product} packSize={packSize} />
+        <SimilarProducts product={product} />
+      </div>
+    </div>
+  );
+}
+
 export function ProductPage() {
   const { productId } = useParams();
   const { data, error, loading, reload } = useApiData(`/api/products/${encodeURIComponent(productId)}`);
@@ -96,22 +132,8 @@ export function ProductPage() {
       {!product && <PageBar title="Product" />}
       <div className="page-body">
         <LoadingOrError loading={loading} error={error} onRetry={reload} />
-        {product && (
-          <>
-            <ProductHero product={product} />
-            <div>
-              {product.brand && <p className="brand-name">{product.brand}</p>}
-              <h1 className="product-title">{product.name}</h1>
-            </div>
-            <PackSizeChoices packSizes={product.packSizes} chosenPackSize={packSize} onChoose={setChosenPackSizeId} />
-            <PriceLine packSize={packSize} />
-            <StockStatus packSize={packSize} />
-            {product.description && <p className="hint">{product.description}</p>}
-            <PackDetails product={product} packSize={packSize} />
-          </>
-        )}
+        {product && <ProductDetails key={product.id} product={product} packSize={packSize} onChoosePackSize={setChosenPackSizeId} />}
       </div>
-      {packSize && <BuyBar product={product} packSize={packSize} />}
     </main>
   );
 }

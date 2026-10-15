@@ -62,6 +62,10 @@ export function CartProvider({ children }) {
   const setQuantity = useCallback((packSizeId, quantity) => updateItems((current) => withQuantity(current, packSizeId, quantity)), [updateItems]);
   const addItems = useCallback((newItems) => updateItems((current) => withAddedItems(current, newItems)), [updateItems]);
   const clearCart = useCallback(() => updateItems(() => []), [updateItems]);
+  // The cart opens as a panel that slides in from the right, over any shop page.
+  const [cartOpen, setCartOpen] = useState(false);
+  const openCart = useCallback(() => setCartOpen(true), []);
+  const closeCart = useCallback(() => setCartOpen(false), []);
 
   const value = useMemo(() => ({
     items,
@@ -70,7 +74,10 @@ export function CartProvider({ children }) {
     setQuantity,
     addItems,
     clearCart,
-  }), [items, setQuantity, addItems, clearCart]);
+    cartOpen,
+    openCart,
+    closeCart,
+  }), [items, setQuantity, addItems, clearCart, cartOpen, openCart, closeCart]);
   return <CartContext value={value}>{children}</CartContext>;
 }
 

@@ -1,4 +1,3 @@
-import { Link } from 'react-router';
 import { useCart } from '../cart/CartContext.jsx';
 import { useCartQuote } from '../cart/useCartQuote.js';
 import { useDebouncedValue } from '../useDebouncedValue.js';
@@ -21,10 +20,11 @@ export function useCartSummary() {
 // Floating "View cart" bar. aboveTabBar: the page also shows the tab bar.
 export function CartBar({ aboveTabBar = false }) {
   const { itemCount, itemsLabel, total, lines } = useCartSummary();
+  const { openCart } = useCart();
   if (itemCount === 0) return null;
   return (
     <div className={aboveTabBar ? 'cart-bar cart-bar-above-tabs' : 'cart-bar'}>
-      <Link to="/cart" className="cart-bar-link">
+      <button type="button" className="cart-bar-link" onClick={openCart}>
         <span className="cart-bar-photos" aria-hidden="true">
           {lines.slice(0, 2).map((line) => <ProductImage key={line.packSizeId} product={line} className="cart-bar-photo" />)}
         </span>
@@ -33,7 +33,7 @@ export function CartBar({ aboveTabBar = false }) {
           {total && <small>{itemsLabel}</small>}
         </span>
         <span className="cart-bar-button">View cart <Icon name="right" size={16} /></span>
-      </Link>
+      </button>
     </div>
   );
 }
