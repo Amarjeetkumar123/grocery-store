@@ -26,6 +26,17 @@
 
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--background); }
+/* Thin scrollbars in the theme's soft green; lighter on the dark green sidebar.
+   Chrome and Safari get a 6px bar; Firefox only allows "thin" (it ignores the -webkit rules). */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track, ::-webkit-scrollbar-corner { background: transparent; }
+::-webkit-scrollbar-thumb { background: #bccdc2; border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: #98b3a2; }
+.admin-sidebar::-webkit-scrollbar-thumb, .admin-sidebar ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.22); }
+@supports (-moz-appearance: none) {
+  * { scrollbar-width: thin; scrollbar-color: #bccdc2 transparent; }
+  .admin-sidebar, .admin-sidebar * { scrollbar-color: rgba(255, 255, 255, 0.22) transparent; }
+}
 h1, h2, p { margin: 0; }
 button, input, select { font: inherit; color: inherit; }
 h1, h2, h3, strong, b, th, dt { font-weight: 600; }

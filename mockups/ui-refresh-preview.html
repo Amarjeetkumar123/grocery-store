@@ -18,12 +18,13 @@
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--page-bg); color: var(--page-fg); font-family: var(--font); padding-inline: 16px; padding-block: 32px 64px; -webkit-font-smoothing: antialiased; }
 h1, h2, h3, p { margin: 0; }
+b, strong, th { font-weight: 600; }
 .sheet { max-width: 1320px; margin: 0 auto; display: flex; flex-direction: column; gap: 48px; }
 .sheet-head { display: flex; flex-direction: column; gap: 8px; max-width: 70ch; }
-.sheet-head h1 { font-size: 24px; font-weight: 600; }
+.sheet-head h1 { font-size: 20px; font-weight: 600; }
 .sheet-head p, .row-head p { color: var(--page-muted); font-size: 14px; line-height: 1.55; }
 .row-head { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; max-width: 80ch; }
-.row-head h2 { font-size: 17px; font-weight: 600; }
+.row-head h2 { font-size: 15px; font-weight: 600; }
 figure { margin: 0; display: flex; flex-direction: column; gap: 12px; }
 figcaption { font-size: 13px; color: var(--page-muted); }
 figcaption b { color: var(--page-fg); font-weight: 600; margin-right: 6px; }
@@ -124,7 +125,7 @@ tbody tr:hover td { background: #fbfaf7; }
 .num { text-align: right; }
 .product { display: flex; align-items: center; gap: 10px; min-width: 220px; }
 .product img { width: 36px; height: 36px; border-radius: 8px; object-fit: contain; padding: 4px; background: #f7f2e3; border: 1px solid #f0e9d4; }
-.product b { display: block; font-weight: 600; font-size: 13px; }
+.product b { display: block; font-weight: 500; font-size: 13px; }
 .product small { color: var(--muted); font-size: 12px; }
 .cat { font-size: 12px; color: var(--muted); white-space: nowrap; }
 .stack { display: flex; flex-direction: column; gap: 6px; }
@@ -148,115 +149,236 @@ tbody tr:hover td { background: #fbfaf7; }
 .pages span { min-width: 28px; height: 28px; padding: 0 6px; border-radius: 7px; display: inline-flex; align-items: center; justify-content: center; color: var(--text); font-weight: 500; }
 .pages span.on { background: var(--green); color: #fff; }
 .pages span.off { color: #c4c7c0; }
+
+/* ── Zones & slots ── */
+.zones { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 16px; align-items: start; }
+.panel { background: var(--card); border: 1px solid var(--line); border-radius: 12px; box-shadow: var(--shadow-xs); }
+.panel-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--line-soft); }
+.panel-head h4 { margin: 0; font-size: 14px; font-weight: 600; }
+.panel-head h4 span { color: var(--muted); font-weight: 500; margin-left: 4px; }
+.panel-body { padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+.segmented { display: flex; gap: 2px; background: #f2f1ec; border-radius: 8px; padding: 2px; margin: 12px 12px 4px; }
+.segmented span { flex: 1; text-align: center; height: 28px; line-height: 28px; border-radius: 6px; font-size: 12.5px; font-weight: 500; color: var(--muted); }
+.segmented span.on { background: var(--card); color: var(--text); box-shadow: var(--shadow-xs); }
+.zone-list { list-style: none; margin: 0; padding: 4px 8px 8px; display: flex; flex-direction: column; gap: 2px; }
+.zone-item { display: flex; align-items: center; gap: 10px; padding: 9px 8px; border-radius: 8px; }
+.zone-item:hover { background: #f7f6f2; }
+.zone-item.on { background: var(--green-light); }
+.zone-icon { width: 32px; height: 32px; flex: none; border-radius: 8px; background: #e9f0f9; color: var(--blue-text); display: inline-flex; align-items: center; justify-content: center; }
+.zone-icon.local { background: #f4efe2; color: var(--amber-text); }
+.zone-text { flex: 1; min-width: 0; }
+.zone-text b { display: block; font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.zone-text small { display: block; font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.live-dot { width: 7px; height: 7px; border-radius: 50%; background: #2fa36b; flex: none; }
+.zone-title { display: flex; align-items: center; gap: 8px; }
+.zone-title h4 { margin: 0; font-size: 14px; font-weight: 600; }
+.chip-tag { font-size: 11px; font-weight: 500; border-radius: 999px; padding: 0 8px; line-height: 20px; background: #e9f0f9; color: var(--blue-text); }
+.chip-live { background: var(--green-light); color: var(--green-text); }
+.section-label { font-size: 12px; font-weight: 600; color: var(--text); margin: 0 0 8px; }
+.section-note { font-size: 12px; color: var(--muted); margin-top: -4px; margin-bottom: 10px; }
+.form-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; max-width: 760px; }
+.form-grid .wide { grid-column: 1 / -1; }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label { font-size: 12px; font-weight: 500; color: var(--muted); }
+.input { height: 34px; display: flex; align-items: center; gap: 6px; padding: 0 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); box-shadow: var(--shadow-xs); font-size: 13px; color: var(--text); }
+.input .prefix { color: var(--faint); }
+.input.placeholder { color: var(--faint); }
+.divider { height: 1px; background: var(--line-soft); margin: 0 -16px; }
+.switch-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; max-width: 760px; }
+.switch-row b { display: block; font-size: 13px; font-weight: 500; }
+.switch-row small { color: var(--muted); font-size: 12px; }
+.toggle { width: 34px; height: 20px; border-radius: 999px; background: var(--green); position: relative; flex: none; }
+.toggle::after { content: ''; position: absolute; top: 3px; right: 3px; width: 14px; height: 14px; border-radius: 50%; background: #fff; }
+.towers { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.tower { height: 28px; display: inline-flex; align-items: center; gap: 4px; padding: 0 4px 0 10px; border: 1px solid var(--line); border-radius: 999px; font-size: 12.5px; font-weight: 500; background: var(--card); }
+.tower .i { width: 13px; height: 13px; color: var(--faint); }
+.tower-add { display: inline-flex; gap: 6px; }
+.tower-add .input { width: 150px; height: 28px; border-radius: 999px; }
+.tower-add .btn { height: 28px; border-radius: 999px; }
+.days { display: inline-flex; gap: 3px; }
+.days span { width: 20px; height: 20px; border-radius: 50%; font-size: 10.5px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; background: var(--green-light); color: var(--green-text); }
+.days span.off { background: #f0efe9; color: #b6bab3; }
+.tip { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); padding: 10px 16px; border-top: 1px solid var(--line-soft); }
+.tip .i { color: #b8740f; }
+.save-bar { display: flex; justify-content: flex-end; gap: 8px; }
+/* Many zones: the zone list and the editor each scroll on their own,
+   so the list never pushes the editor down and the page height stays the screen height. */
+.zone-column { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.zone-panel { display: flex; flex-direction: column; }
+.zone-panel .search { flex: none; min-width: 0; margin: 12px 12px 0; }
+.fit-screen .zones { flex: 1; min-height: 0; align-items: stretch; }
+.fit-screen .zone-panel { min-height: 0; }
+.fit-screen .zone-list { flex: 1; min-height: 0; overflow-y: auto; }
+.fit-screen .zone-column { min-height: 0; overflow-y: auto; overflow-x: hidden; padding-right: 4px; }
+.live-dot.off { background: #c9ccc5; }
+.status.off { color: var(--muted); }
+.status.off::before { background: #c9ccc5; }
+.slot-table th, .slot-table td { padding-left: 12px; padding-right: 12px; }
+.slot-table td { white-space: nowrap; }
+.slot-table td:last-child { width: 1%; }
+.slot-table td small { display: block; white-space: normal; font-size: 12px; color: var(--muted); }
+/* ── Scrollbars: thin, soft green; lighter on the dark sidebar.
+   Chrome and Safari get a 6px bar; Firefox only allows "thin" (it ignores the -webkit rules). */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track, ::-webkit-scrollbar-corner { background: transparent; }
+::-webkit-scrollbar-thumb { background: #bccdc2; border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: #98b3a2; }
+.side::-webkit-scrollbar-thumb, .side ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.22); }
+@supports (-moz-appearance: none) {
+  * { scrollbar-width: thin; scrollbar-color: #bccdc2 transparent; }
+  .side, .side * { scrollbar-color: rgba(255, 255, 255, 0.22) transparent; }
+}
+/* ── Customers ── */
+.filter-tabs { margin: 0; flex: none; }
+.filter-tabs span { flex: none; padding: 0 12px; }
+.person { display: flex; align-items: center; gap: 10px; min-width: 200px; }
+.avatar { width: 30px; height: 30px; flex: none; border-radius: 50%; background: var(--green-light); color: var(--green-text); font-size: 11.5px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; }
+.two-line b { display: block; font-weight: 500; }
+.two-line small { display: block; font-size: 12px; color: var(--muted); }
+.phone { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+.phone .square { width: 26px; height: 26px; border-radius: 7px; }
+.phone .square .i { width: 14px; height: 14px; }
+.pill-green { background: var(--green-light); color: var(--green-text); }
+.orders-link { color: var(--green-text); font-weight: 500; display: inline-flex; align-items: center; gap: 2px; }
+.row-actions { display: flex; align-items: center; justify-content: flex-end; gap: 6px; }
+tr.row-blocked td { background: #fcfbf9; }
+tr.row-blocked .two-line b, tr.row-blocked .avatar { opacity: .55; }
+tr.row-open td { background: #f8faf7; border-bottom: 0; }
+tr.history-row td { background: #f8faf7; padding-top: 0; }
+.history { margin-left: 40px; display: flex; flex-direction: column; border-left: 2px solid var(--line); padding-left: 14px; gap: 6px; }
+.history span { display: flex; gap: 12px; align-items: center; font-size: 12.5px; }
+.history em { font-style: normal; color: var(--muted); min-width: 52px; }
+.list-foot { font-size: 12px; color: var(--muted); padding: 9px 16px; border-top: 1px solid var(--line-soft); }
 </style></head>
 <body>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5M5 9v11h14V9M10 20v-6h4v6"/></symbol><symbol id="box" viewBox="0 0 24 24"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9zM4 7.5l8 4.5 8-4.5M12 12v9"/></symbol><symbol id="layers" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5zM3 13l9 5 9-5"/></symbol><symbol id="truck" viewBox="0 0 24 24"><path d="M2 6h12v10H2zM14 9h4l3 3.5V16h-7"/><circle cx="6" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></symbol><symbol id="tag" viewBox="0 0 24 24"><path d="M3 12V3h9l9 9-9 9z"/><circle cx="7.5" cy="7.5" r="1.5"/></symbol><symbol id="grid" viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></symbol><symbol id="pin" viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></symbol><symbol id="user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4.5 4.5-7 8-7s7 2.5 8 7"/></symbol><symbol id="building" viewBox="0 0 24 24"><path d="M4 21V4h10v17M14 9h6v12M2 21h20M7 8h1M10 8h1M7 12h1M10 12h1M7 16h1M10 16h1"/></symbol><symbol id="settings" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8M14 4v6M8 14v6"/></symbol><symbol id="cash" viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></symbol><symbol id="bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4"/></symbol><symbol id="search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol><symbol id="down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol><symbol id="back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol><symbol id="right" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol><symbol id="check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol><symbol id="chat" viewBox="0 0 24 24"><path d="M4 20l1.4-4A8 8 0 1 1 8.5 19z"/></symbol><symbol id="clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol><symbol id="calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol><symbol id="edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"/></symbol><symbol id="upload" viewBox="0 0 24 24"><path d="M12 15V4M7 9l5-5 5 5M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></symbol><symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol></svg>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol><symbol id="info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></symbol><symbol id="close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol><symbol id="home" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5M5 9v11h14V9M10 20v-6h4v6"/></symbol><symbol id="box" viewBox="0 0 24 24"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9zM4 7.5l8 4.5 8-4.5M12 12v9"/></symbol><symbol id="layers" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5zM3 13l9 5 9-5"/></symbol><symbol id="truck" viewBox="0 0 24 24"><path d="M2 6h12v10H2zM14 9h4l3 3.5V16h-7"/><circle cx="6" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></symbol><symbol id="tag" viewBox="0 0 24 24"><path d="M3 12V3h9l9 9-9 9z"/><circle cx="7.5" cy="7.5" r="1.5"/></symbol><symbol id="grid" viewBox="0 0 24 24"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></symbol><symbol id="pin" viewBox="0 0 24 24"><path d="M12 21s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/></symbol><symbol id="user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-4.5 4.5-7 8-7s7 2.5 8 7"/></symbol><symbol id="building" viewBox="0 0 24 24"><path d="M4 21V4h10v17M14 9h6v12M2 21h20M7 8h1M10 8h1M7 12h1M10 12h1M7 16h1M10 16h1"/></symbol><symbol id="settings" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8M14 4v6M8 14v6"/></symbol><symbol id="cash" viewBox="0 0 24 24"><rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></symbol><symbol id="bell" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4"/></symbol><symbol id="search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol><symbol id="down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol><symbol id="back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol><symbol id="right" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol><symbol id="check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol><symbol id="chat" viewBox="0 0 24 24"><path d="M4 20l1.4-4A8 8 0 1 1 8.5 19z"/></symbol><symbol id="clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol><symbol id="calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol><symbol id="edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16zM13.5 6.5l4 4"/></symbol><symbol id="upload" viewBox="0 0 24 24"><path d="M12 15V4M7 9l5-5 5 5M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></symbol><symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol><symbol id="phone" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></symbol><symbol id="more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></symbol></svg>
 <main class="sheet">
   <header class="sheet-head">
     <h1>Grocery Store, refreshed</h1>
-    <p>Admin screens that are designed but not built yet. Calmer type: 13px text, 20px page titles, medium and semibold weights only. Thin borders with light shadows, and smaller 30–34px controls.</p>
+    <p>Admin screens that are designed but not built yet. Screens already in the app have been removed from this page.</p>
   </header>
   <section>
-    <div class="row-head"><h2>Orders board</h2>
-      <p>Filters sit in one row with search first. Each status is a light grey lane, and empty lanes show one short line. Cards are compact: the order number and time, the address, the slot, then items and total, then the actions.</p></div>
-    <figure style="margin-bottom:24px"><img class="now-shot" src="orders-board-now.png" alt="The current orders board"><figcaption><b><span class="tag tag-now">Now</span>Orders board</b>Your screenshot of the live app</figcaption></figure>
-    <figure><div class="frame-wrap"><div class="frame"><div class="frame-bar"><i></i><i></i><i></i><span>grocerystorewebapp.duckdns.org/admin/orders</span></div>
-      <div class="app"><aside class="side"><div class="brand"><img src="../frontend/src/assets/logo.png" alt="">Grocery Store</div><div class="group"><p>Daily</p><span class="nav"><svg class="i"><use href="#home"/></svg>Dashboard</span><span class="nav on"><svg class="i"><use href="#box"/></svg>Orders<span class="n">2</span></span><span class="nav"><svg class="i"><use href="#layers"/></svg>Picking list</span><span class="nav"><svg class="i"><use href="#truck"/></svg>Delivery list</span></div><div class="group"><p>Catalogue</p><span class="nav"><svg class="i"><use href="#tag"/></svg>Products</span><span class="nav"><svg class="i"><use href="#grid"/></svg>Categories</span><span class="nav"><svg class="i"><use href="#layers"/></svg>Stock</span></div><div class="group"><p>Setup</p><span class="nav"><svg class="i"><use href="#pin"/></svg>Zones &amp; slots</span><span class="nav"><svg class="i"><use href="#user"/></svg>Customers</span><span class="nav"><svg class="i"><use href="#building"/></svg>Staff</span><span class="nav"><svg class="i"><use href="#settings"/></svg>Store settings</span></div><div class="group"><p>Money</p><span class="nav"><svg class="i"><use href="#cash"/></svg>Cash &amp; UPI check</span><span class="nav"><svg class="i"><use href="#tag"/></svg>Reports</span></div><div class="side-foot"><div class="alerts"><svg class="i i-sm"><use href="#bell"/></svg>New order alerts<span class="switch" aria-label="On"></span></div>
-      <div class="who"><span class="av">A</span><span><b>Amarjeet</b><small>Owner · Sign out</small></span></div></div></aside><div class="main"><div class="page-head"><div><h3>Orders</h3><p>All dates · <b>2 new</b> waiting to confirm</p></div>
-        <div class="actions"><span class="btn btn-secondary"><svg class="i i-sm"><use href="#layers"/></svg>Picking list</span><span class="btn btn-secondary"><svg class="i i-sm"><use href="#truck"/></svg>Delivery list</span></div></div>
-      <div class="toolbar">
-        <span class="search"><svg class="i i-sm"><use href="#search"/></svg>Order no., name or phone</span>
-        <span class="control"><svg class="i i-sm"><use href="#calendar"/></svg><b>Any date</b><svg class="i chev"><use href="#down"/></svg></span>
-        <span class="control"><svg class="i i-sm"><use href="#pin"/></svg><b>All zones</b><svg class="i chev"><use href="#down"/></svg></span>
-        <span class="control"><svg class="i i-sm"><use href="#clock"/></svg><b>All slots</b><svg class="i chev"><use href="#down"/></svg></span>
-      </div>
-      <div class="board"><section class="lane new"><div class="lane-head"><i style="background:#e2a63a"></i>New<span>2</span></div><article class="order">
-      <div class="order-top"><strong>#1004</strong><small>12 days ago</small></div>
-      <div class="place"><small>Mahagun Moderne, Sector 78</small><b>Tower 2 · Flat 5</b></div>
-      <div class="meta"><span><svg class="i i-sm"><use href="#clock"/></svg>Mon 5 Oct · 7–9 AM</span></div>
-      <div class="meta"><span>3 items</span><b>₹234</b></div>
-      <div class="order-actions"><span class="btn btn-primary btn-small"><svg class="i i-sm"><use href="#check"/></svg>Confirm</span><span class="square" aria-label="WhatsApp"><svg class="i"><use href="#chat"/></svg></span><span class="square" aria-label="Map"><svg class="i"><use href="#pin"/></svg></span></div>
-      <div class="details">Items and contact<svg class="i i-sm"><use href="#down"/></svg></div>
-    </article><article class="order">
-      <div class="order-top"><strong>#1003</strong><small>12 days ago</small></div>
-      <div class="place"><small>Mahagun Moderne, Sector 78</small><b>Tower 2 · Flat 5</b></div>
-      <div class="meta"><span><svg class="i i-sm"><use href="#clock"/></svg>Sun 4 Oct · 6–8 PM</span></div>
-      <div class="meta"><span>1 item</span><b>₹235</b></div>
-      <div class="order-actions"><span class="btn btn-primary btn-small"><svg class="i i-sm"><use href="#check"/></svg>Confirm</span><span class="square" aria-label="WhatsApp"><svg class="i"><use href="#chat"/></svg></span><span class="square" aria-label="Map"><svg class="i"><use href="#pin"/></svg></span></div>
-      <div class="details">Items and contact<svg class="i i-sm"><use href="#down"/></svg></div>
-    </article></section><section class="lane"><div class="lane-head"><i style="background:#4a86c5"></i>Confirmed<span>0</span></div><div class="lane-empty">No orders to pack</div></section><section class="lane"><div class="lane-head"><i style="background:#8b6cc9"></i>Packed<span>0</span></div><div class="lane-empty">Nothing waiting for a rider</div></section><section class="lane"><div class="lane-head"><i style="background:#c2410c"></i>Out for delivery<span>0</span></div><div class="lane-empty">Nothing on the road</div></section><section class="lane"><div class="lane-head"><i style="background:#2fa36b"></i>Delivered<span>2</span></div><article class="order done">
-      <div class="order-top"><strong>#1005</strong><span class="paid">UPI ✓</span></div>
-      <div class="place"><small>Mahagun Moderne, Sector 78</small><b>Tower 1 · Flat 33</b></div>
-      <div class="meta"><span><svg class="i i-sm"><use href="#clock"/></svg>Sun 4 Oct · 6–8 PM</span></div>
-      <div class="meta"><span>3 items</span><b>₹1,263</b></div>
-      <div class="order-actions"><span class="square" aria-label="WhatsApp"><svg class="i"><use href="#chat"/></svg></span><span class="square" aria-label="Map"><svg class="i"><use href="#pin"/></svg></span></div>
-      <div class="details">Items and contact<svg class="i i-sm"><use href="#down"/></svg></div>
-    </article><article class="order done">
-      <div class="order-top"><strong>#1001</strong><span class="paid">UPI ✓</span></div>
-      <div class="place"><small>Supertech Capetown, Sector 74</small><b>Tower B · Flat 4</b></div>
-      <div class="meta"><span><svg class="i i-sm"><use href="#clock"/></svg>Sat 3 Oct · 6–8 PM</span></div>
-      <div class="meta"><span>2 items</span><b>₹954</b></div>
-      <div class="order-actions"><span class="square" aria-label="WhatsApp"><svg class="i"><use href="#chat"/></svg></span><span class="square" aria-label="Map"><svg class="i"><use href="#pin"/></svg></span></div>
-      <div class="details">Items and contact<svg class="i i-sm"><use href="#down"/></svg></div>
-    </article></section></div>
-      <p class="foot-note">1 cancelled order is hidden.<a>Show</a></p></div></div></div></div><figcaption><b><span class="tag tag-new">Refreshed</span>Orders board</b>On a phone, scroll the frame sideways</figcaption></figure>
+    <div class="row-head"><h2>Zones &amp; slots</h2>
+      <p>The zone list is one compact panel: each zone on one line with its details underneath, and a green dot for live. The zone editor puts Save at the top next to the zone name, so it no longer floats on its own. Details, the Live switch and towers are separate sections with dividers, and the money fields have a ₹ sign and stay a sensible width. Slots show the days as small letters, and the tip becomes a quiet line instead of a big yellow box.</p></div>
+    <figure style="margin-bottom:24px"><img class="now-shot" src="zones-now.png" alt="The current zones and slots page"><figcaption><b><span class="tag tag-now">Now</span>Zones &amp; slots</b>Your screenshot of the live app</figcaption></figure>
+    <figure style="margin-bottom:24px"><div class="frame-wrap"><div class="frame"><div class="frame-bar"><i></i><i></i><i></i><span>grocerystorewebapp.duckdns.org/admin/zones</span></div>
+      <div class="app fit-screen"><aside class="side"><div class="brand"><img src="../frontend/src/assets/logo.png" alt="">Grocery Store</div><div class="group"><p>Daily</p><span class="nav"><svg class="i"><use href="#home"/></svg>Dashboard</span><span class="nav"><svg class="i"><use href="#box"/></svg>Orders<span class="n">2</span></span><span class="nav"><svg class="i"><use href="#layers"/></svg>Picking list</span><span class="nav"><svg class="i"><use href="#truck"/></svg>Delivery list</span></div><div class="group"><p>Catalogue</p><span class="nav"><svg class="i"><use href="#tag"/></svg>Products</span><span class="nav"><svg class="i"><use href="#grid"/></svg>Categories</span><span class="nav"><svg class="i"><use href="#layers"/></svg>Stock</span></div><div class="group"><p>Setup</p><span class="nav on"><svg class="i"><use href="#pin"/></svg>Zones &amp; slots</span><span class="nav"><svg class="i"><use href="#user"/></svg>Customers</span><span class="nav"><svg class="i"><use href="#building"/></svg>Staff</span><span class="nav"><svg class="i"><use href="#settings"/></svg>Store settings</span></div><div class="group"><p>Money</p><span class="nav"><svg class="i"><use href="#cash"/></svg>Cash &amp; UPI check</span><span class="nav"><svg class="i"><use href="#tag"/></svg>Reports</span></div><div class="side-foot"><div class="alerts"><svg class="i i-sm"><use href="#bell"/></svg>New order alerts<span class="switch" aria-label="On"></span></div>
+      <div class="who"><span class="av">A</span><span><b>Amarjeet</b><small>Owner · Sign out</small></span></div></div></aside><div class="main"><div class="page-head"><div><h3>Zones &amp; slots</h3><p>4 delivery zones · 3 societies and 1 local areas</p></div></div>
+      <div class="zones"><div class="panel zone-panel"><div class="panel-head"><h4>Delivery zones<span>4</span></h4><span class="btn btn-primary btn-small"><svg class="i i-sm"><use href="#plus"/></svg>Add zone</span></div>
+      <span class="search"><svg class="i i-sm"><use href="#search"/></svg>Find a zone</span>
+      <div class="segmented"><span class="on">All</span><span>Societies 3</span><span>Local areas 1</span></div>
+      <ul class="zone-list"><li class="zone-item"><span class="zone-icon"><svg class="i i-sm"><use href="#building"/></svg></span>
+      <span class="zone-text"><b>great value sharnan</b><small>Society · 0 towers · 0 customers</small></span><span class="live-dot" title="Live"></span></li><li class="zone-item on"><span class="zone-icon"><svg class="i i-sm"><use href="#building"/></svg></span>
+      <span class="zone-text"><b>Mahagun Moderne, Sector 78</b><small>Society · 3 towers · 2 customers</small></span><span class="live-dot" title="Live"></span></li><li class="zone-item"><span class="zone-icon local"><svg class="i i-sm"><use href="#home"/></svg></span>
+      <span class="zone-text"><b>Sector 73 Market Area</b><small>Local area · 0 customers</small></span><span class="live-dot" title="Live"></span></li><li class="zone-item"><span class="zone-icon"><svg class="i i-sm"><use href="#building"/></svg></span>
+      <span class="zone-text"><b>Supertech Capetown, Sector 74</b><small>Society · 4 towers · 2 customers</small></span><span class="live-dot" title="Live"></span></li></ul></div><div class="zone-column"><div class="panel"><div class="panel-head"><div class="zone-title"><h4>Mahagun Moderne, Sector 78</h4><span class="chip-tag">Society</span><span class="chip-tag chip-live">Live</span></div>
+        <div class="save-bar"><span class="btn btn-secondary btn-small">Cancel</span><span class="btn btn-primary btn-small">Save changes</span></div></div>
+      <div class="panel-body">
+        <div><p class="section-label">Details</p><div class="form-grid">
+          <div class="field wide"><label>Society or area name</label><span class="input">Mahagun Moderne, Sector 78</span></div>
+          <div class="field"><label>Minimum order</label><span class="input"><span class="prefix">₹</span>199</span></div><div class="field"><label>Delivery charge</label><span class="input"><span class="prefix">₹</span>30</span></div><div class="field"><label>Free delivery above</label><span class="input"><span class="prefix">₹</span>499</span></div>
+        </div></div>
+        <div class="divider"></div>
+        <div class="switch-row"><span><b>Live</b><small>Customers can choose this zone and place orders</small></span><span class="toggle" aria-label="On"></span></div>
+        <div class="divider"></div>
+        <div><p class="section-label">Towers / blocks<span style="color:var(--muted);font-weight:500;margin-left:6px">3</span></p><p class="section-note">Customers pick one of these when they save their address.</p>
+          <div class="towers"><span class="tower">Tower 1<svg class="i"><use href="#close"/></svg></span><span class="tower">Tower 2<svg class="i"><use href="#close"/></svg></span><span class="tower">Tower 3<svg class="i"><use href="#close"/></svg></span><span class="tower-add"><span class="input placeholder">e.g. Tower S</span><span class="btn btn-secondary btn-small"><svg class="i i-sm"><use href="#plus"/></svg>Add</span></span></div></div>
+      </div></div><div class="panel"><div class="panel-head"><h4>Delivery slots<span>2</span></h4><span class="btn btn-secondary btn-small"><svg class="i i-sm"><use href="#plus"/></svg>Add slot</span></div>
+      <table class="slot-table"><thead><tr><th>Slot</th><th>Days</th><th>Time</th><th class="num">Max</th><th>Status</th><th></th></tr></thead>
+      <tbody><tr><td>Morning</td><td><span class="days"><span class="">M</span><span class="">T</span><span class="">W</span><span class="">T</span><span class="">F</span><span class="">S</span><span class="">S</span></span></td><td>7–9 AM<small>Order by 10 PM, day before</small></td><td class="num">25</td>
+      <td><span class="status">Live</span></td><td class="num"><span class="edit"><svg class="i i-sm"><use href="#edit"/></svg></span></td></tr><tr><td>Evening</td><td><span class="days"><span class="">M</span><span class="">T</span><span class="">W</span><span class="">T</span><span class="">F</span><span class="">S</span><span class="off">S</span></span></td><td>6–8 PM<small>Order by 2 PM, same day</small></td><td class="num">25</td>
+      <td><span class="status">Live</span></td><td class="num"><span class="edit"><svg class="i i-sm"><use href="#edit"/></svg></span></td></tr></tbody></table>
+      <p class="tip"><svg class="i i-sm"><use href="#info"/></svg>Give a nearby local area the same time window, so one rider covers both in one round.</p></div></div></div></div></div></div></div><figcaption><b><span class="tag tag-new">Refreshed</span>Zones &amp; slots, today</b>Your 4 zones and 2 slots</figcaption></figure>
+    <figure><div class="frame-wrap"><div class="frame"><div class="frame-bar"><i></i><i></i><i></i><span>grocerystorewebapp.duckdns.org/admin/zones</span></div>
+      <div class="app fit-screen"><aside class="side"><div class="brand"><img src="../frontend/src/assets/logo.png" alt="">Grocery Store</div><div class="group"><p>Daily</p><span class="nav"><svg class="i"><use href="#home"/></svg>Dashboard</span><span class="nav"><svg class="i"><use href="#box"/></svg>Orders<span class="n">2</span></span><span class="nav"><svg class="i"><use href="#layers"/></svg>Picking list</span><span class="nav"><svg class="i"><use href="#truck"/></svg>Delivery list</span></div><div class="group"><p>Catalogue</p><span class="nav"><svg class="i"><use href="#tag"/></svg>Products</span><span class="nav"><svg class="i"><use href="#grid"/></svg>Categories</span><span class="nav"><svg class="i"><use href="#layers"/></svg>Stock</span></div><div class="group"><p>Setup</p><span class="nav on"><svg class="i"><use href="#pin"/></svg>Zones &amp; slots</span><span class="nav"><svg class="i"><use href="#user"/></svg>Customers</span><span class="nav"><svg class="i"><use href="#building"/></svg>Staff</span><span class="nav"><svg class="i"><use href="#settings"/></svg>Store settings</span></div><div class="group"><p>Money</p><span class="nav"><svg class="i"><use href="#cash"/></svg>Cash &amp; UPI check</span><span class="nav"><svg class="i"><use href="#tag"/></svg>Reports</span></div><div class="side-foot"><div class="alerts"><svg class="i i-sm"><use href="#bell"/></svg>New order alerts<span class="switch" aria-label="On"></span></div>
+      <div class="who"><span class="av">A</span><span><b>Amarjeet</b><small>Owner · Sign out</small></span></div></div></aside><div class="main"><div class="page-head"><div><h3>Zones &amp; slots</h3><p>14 delivery zones · 11 societies and 3 local areas</p></div></div>
+      <div class="zones"><div class="panel zone-panel"><div class="panel-head"><h4>Delivery zones<span>14</span></h4><span class="btn btn-primary btn-small"><svg class="i i-sm"><use href="#plus"/></svg>Add zone</span></div>
+      <span class="search"><svg class="i i-sm"><use href="#search"/></svg>Find a zone</span>
+      <div class="segmented"><span class="on">All</span><span>Societies 11</span><span>Local areas 3</span></div>
+      <ul class="zone-list"><li class="zone-item"><span class="zone-icon"><svg class="i i-sm"><use href="#building"/></svg></span>
+      <span class="zone-text"><b>Mahagun Moderne, Sector 78</b><small>Society · 4 towers · 12 customers</small></span><span class="live-dot" title="Live"></span></li><li class="zone-item"><span class="zone-icon"><svg class="i i-sm"><use href="#building"/></svg></span>
+      <span class="zone-text"><b>Supertech Capetown, Sector 74</b><small>Society · 7 towers · 19 customers</small></span><span class="live-dot" title="Live"></span></li><li class="zone-item on"><span class="zone-icon"><svg class="i i-sm"><use href="#building"/></svg></span>
+      <span class="zone-text"><b>ATS Pristine, Sector 150</b><small>Society · 10 towers · 26 customers</small></span><span class="live-dot" title="Live"></span></li><li class="zone-item"><span class="zone-icon"><svg class="i i-sm"><use href="#building"/></svg></span>
+      <span class="zone-text"><b>Gaur City 2, 12th Avenue</b><small>Society · 13 towers · 33 customers</small></span><span class="live-dot" title="Live"></span></li><li class="zone-item"><span class="zone-icon"><svg class="i i-sm"><use href="#building"/></svg></span>
+      <span class="zone-text"><b>Prateek Wisteria, Sector 77</b><small>Society · 16 towers · 40 customers</small></span><span class="live-dot" title="Live"></span></li><li class="zone-item"><span class="zone-icon"><svg class="i i-sm"><use href="#building"/></svg></span>
+      <span class="zone-text"><b>Ajnara Homes, Sector 16B</b><small>Society · 5 towers · 47 customers</small></span><span class="live-dot" title="Live"></span></li><li class="zone-item"><span class="zone-icon"><svg class="i i-sm"><use href="#building"/></svg></span>
+      <span class="zone-text"><b>Paras Tierea, Sector 137</b><small>Society · 8 towers · 54 customers</small></span><span class="live-dot off" title="Not live"></span></li><li class="zone-item"><span class="zone-icon"><svg class="i i-sm"><use href="#building"/></svg></span>
+      <span class="zone-text"><b>Jaypee Aman, Sector 151</b><small>Society · 11 towers · 61 customers</small></span><span class="live-dot" title="Live"></span></li><li class="zone-item"><span class="zone-icon"><svg class="i i-sm"><use href="#building"/></svg></span>
+      <span class="zone-text"><b>Logix Blossom County, Sector 137</b><small>Society · 14 towers · 68 customers</small></span><span class="live-dot" title="Live"></span></li><li class="zone-item"><span class="zone-icon"><svg class="i i-sm"><use href="#building"/></svg></span>
+      <span class="zone-text"><b>Eldeco Utopia, Sector 93A</b><small>Society · 17 towers · 75 customers</small></span><span class="live-dot" title="Live"></span></li><li class="zone-item"><span class="zone-icon local"><svg class="i i-sm"><use href="#home"/></svg></span>
+      <span class="zone-text"><b>Sector 73 Market Area</b><small>Local area · 18 customers</small></span><span class="live-dot" title="Live"></span></li><li class="zone-item"><span class="zone-icon local"><svg class="i i-sm"><use href="#home"/></svg></span>
+      <span class="zone-text"><b>Sector 76 Shops</b><small>Local area · 9 customers</small></span><span class="live-dot" title="Live"></span></li><li class="zone-item"><span class="zone-icon local"><svg class="i i-sm"><use href="#home"/></svg></span>
+      <span class="zone-text"><b>Sector 52 Village</b><small>Local area · 4 customers</small></span><span class="live-dot" title="Live"></span></li><li class="zone-item"><span class="zone-icon"><svg class="i i-sm"><use href="#building"/></svg></span>
+      <span class="zone-text"><b>great value sharnan</b><small>Society · 0 towers · 0 customers</small></span><span class="live-dot off" title="Not live"></span></li></ul><p class="list-foot">2 not live · shown with a grey dot</p></div><div class="zone-column"><div class="panel"><div class="panel-head"><div class="zone-title"><h4>ATS Pristine, Sector 150</h4><span class="chip-tag">Society</span><span class="chip-tag chip-live">Live</span></div>
+        <div class="save-bar"><span class="btn btn-secondary btn-small">Cancel</span><span class="btn btn-primary btn-small">Save changes</span></div></div>
+      <div class="panel-body">
+        <div><p class="section-label">Details</p><div class="form-grid">
+          <div class="field wide"><label>Society or area name</label><span class="input">ATS Pristine, Sector 150</span></div>
+          <div class="field"><label>Minimum order</label><span class="input"><span class="prefix">₹</span>199</span></div><div class="field"><label>Delivery charge</label><span class="input"><span class="prefix">₹</span>30</span></div><div class="field"><label>Free delivery above</label><span class="input"><span class="prefix">₹</span>499</span></div>
+        </div></div>
+        <div class="divider"></div>
+        <div class="switch-row"><span><b>Live</b><small>Customers can choose this zone and place orders</small></span><span class="toggle" aria-label="On"></span></div>
+        <div class="divider"></div>
+        <div><p class="section-label">Towers / blocks<span style="color:var(--muted);font-weight:500;margin-left:6px">16</span></p><p class="section-note">Customers pick one of these when they save their address.</p>
+          <div class="towers"><span class="tower">Tower A<svg class="i"><use href="#close"/></svg></span><span class="tower">Tower B<svg class="i"><use href="#close"/></svg></span><span class="tower">Tower C<svg class="i"><use href="#close"/></svg></span><span class="tower">Tower D<svg class="i"><use href="#close"/></svg></span><span class="tower">Tower E<svg class="i"><use href="#close"/></svg></span><span class="tower">Tower F<svg class="i"><use href="#close"/></svg></span><span class="tower">Tower G<svg class="i"><use href="#close"/></svg></span><span class="tower">Tower H<svg class="i"><use href="#close"/></svg></span><span class="tower">Tower J<svg class="i"><use href="#close"/></svg></span><span class="tower">Tower K<svg class="i"><use href="#close"/></svg></span><span class="tower">Tower L<svg class="i"><use href="#close"/></svg></span><span class="tower">Tower M<svg class="i"><use href="#close"/></svg></span><span class="tower">Tower N<svg class="i"><use href="#close"/></svg></span><span class="tower">Tower P<svg class="i"><use href="#close"/></svg></span><span class="tower">Tower Q<svg class="i"><use href="#close"/></svg></span><span class="tower">Tower R<svg class="i"><use href="#close"/></svg></span><span class="tower-add"><span class="input placeholder">e.g. Tower S</span><span class="btn btn-secondary btn-small"><svg class="i i-sm"><use href="#plus"/></svg>Add</span></span></div></div>
+      </div></div><div class="panel"><div class="panel-head"><h4>Delivery slots<span>6</span></h4><span class="btn btn-secondary btn-small"><svg class="i i-sm"><use href="#plus"/></svg>Add slot</span></div>
+      <table class="slot-table"><thead><tr><th>Slot</th><th>Days</th><th>Time</th><th class="num">Max</th><th>Status</th><th></th></tr></thead>
+      <tbody><tr><td>Early morning</td><td><span class="days"><span class="">M</span><span class="">T</span><span class="">W</span><span class="">T</span><span class="">F</span><span class="">S</span><span class="">S</span></span></td><td>6–7 AM<small>Order by 9 PM, day before</small></td><td class="num">15</td>
+      <td><span class="status">Live</span></td><td class="num"><span class="edit"><svg class="i i-sm"><use href="#edit"/></svg></span></td></tr><tr><td>Morning</td><td><span class="days"><span class="">M</span><span class="">T</span><span class="">W</span><span class="">T</span><span class="">F</span><span class="">S</span><span class="">S</span></span></td><td>7–9 AM<small>Order by 10 PM, day before</small></td><td class="num">40</td>
+      <td><span class="status">Live</span></td><td class="num"><span class="edit"><svg class="i i-sm"><use href="#edit"/></svg></span></td></tr><tr><td>Late morning</td><td><span class="days"><span class="">M</span><span class="">T</span><span class="">W</span><span class="">T</span><span class="">F</span><span class="off">S</span><span class="off">S</span></span></td><td>10–12 AM<small>Order by 8 AM, same day</small></td><td class="num">30</td>
+      <td><span class="status">Live</span></td><td class="num"><span class="edit"><svg class="i i-sm"><use href="#edit"/></svg></span></td></tr><tr><td>Afternoon</td><td><span class="days"><span class="off">M</span><span class="off">T</span><span class="off">W</span><span class="off">T</span><span class="off">F</span><span class="">S</span><span class="">S</span></span></td><td>1–3 PM<small>Order by 11 AM, same day</small></td><td class="num">20</td>
+      <td><span class="status off">Paused</span></td><td class="num"><span class="edit"><svg class="i i-sm"><use href="#edit"/></svg></span></td></tr><tr><td>Evening</td><td><span class="days"><span class="">M</span><span class="">T</span><span class="">W</span><span class="">T</span><span class="">F</span><span class="">S</span><span class="off">S</span></span></td><td>6–8 PM<small>Order by 2 PM, same day</small></td><td class="num">40</td>
+      <td><span class="status">Live</span></td><td class="num"><span class="edit"><svg class="i i-sm"><use href="#edit"/></svg></span></td></tr><tr><td>Night</td><td><span class="days"><span class="">M</span><span class="">T</span><span class="">W</span><span class="">T</span><span class="">F</span><span class="">S</span><span class="">S</span></span></td><td>8–10 PM<small>Order by 5 PM, same day</small></td><td class="num">25</td>
+      <td><span class="status">Live</span></td><td class="num"><span class="edit"><svg class="i i-sm"><use href="#edit"/></svg></span></td></tr></tbody></table>
+      <p class="tip"><svg class="i i-sm"><use href="#info"/></svg>Give a nearby local area the same time window, so one rider covers both in one round.</p></div></div></div></div></div></div></div><figcaption><b><span class="tag tag-new">Refreshed</span>Zones &amp; slots, when the store grows</b>14 zones, 16 towers and 6 slots in the same screen. The zone list scrolls inside its panel with search on top; the editor on the right scrolls on its own, so Save stays next to the zone name.</figcaption></figure>
   </section>
   <section>
-    <div class="row-head"><h2>Products table</h2>
-      <p>The table fills the screen down to the bottom edge and scrolls inside, with the column names fixed at the top. Underneath: the count shown, rows per page and page buttons. Packs of one product line up row by row. Stock problems are small coloured pills.</p></div>
-    <figure><div class="frame-wrap"><div class="frame"><div class="frame-bar"><i></i><i></i><i></i><span>grocerystorewebapp.duckdns.org/admin/products</span></div>
-      <div class="app fit-screen"><aside class="side"><div class="brand"><img src="../frontend/src/assets/logo.png" alt="">Grocery Store</div><div class="group"><p>Daily</p><span class="nav"><svg class="i"><use href="#home"/></svg>Dashboard</span><span class="nav"><svg class="i"><use href="#box"/></svg>Orders<span class="n">2</span></span><span class="nav"><svg class="i"><use href="#layers"/></svg>Picking list</span><span class="nav"><svg class="i"><use href="#truck"/></svg>Delivery list</span></div><div class="group"><p>Catalogue</p><span class="nav on"><svg class="i"><use href="#tag"/></svg>Products</span><span class="nav"><svg class="i"><use href="#grid"/></svg>Categories</span><span class="nav"><svg class="i"><use href="#layers"/></svg>Stock</span></div><div class="group"><p>Setup</p><span class="nav"><svg class="i"><use href="#pin"/></svg>Zones &amp; slots</span><span class="nav"><svg class="i"><use href="#user"/></svg>Customers</span><span class="nav"><svg class="i"><use href="#building"/></svg>Staff</span><span class="nav"><svg class="i"><use href="#settings"/></svg>Store settings</span></div><div class="group"><p>Money</p><span class="nav"><svg class="i"><use href="#cash"/></svg>Cash &amp; UPI check</span><span class="nav"><svg class="i"><use href="#tag"/></svg>Reports</span></div><div class="side-foot"><div class="alerts"><svg class="i i-sm"><use href="#bell"/></svg>New order alerts<span class="switch" aria-label="On"></span></div>
-      <div class="who"><span class="av">A</span><span><b>Amarjeet</b><small>Owner · Sign out</small></span></div></div></aside><div class="main"><div class="page-head"><div><h3>Products</h3><p><b>24 products</b> · 1 low on stock · 1 out of stock</p></div>
-        <div class="actions"><span class="btn btn-secondary"><svg class="i i-sm"><use href="#upload"/></svg>Bulk upload</span><span class="btn btn-primary"><svg class="i i-sm"><use href="#plus"/></svg>Add product</span></div></div>
-      <div class="toolbar"><span class="search"><svg class="i i-sm"><use href="#search"/></svg>Search products or brands</span>
-        <span class="control"><svg class="i i-sm"><use href="#grid"/></svg><b>All categories</b><svg class="i chev"><use href="#down"/></svg></span></div>
+    <div class="row-head"><h2>Customers</h2>
+      <p>Scrollbars everywhere are now thin and soft green (lighter on the dark sidebar), as in the zone list and table below. The search box sits in a toolbar instead of stretching into a tall empty card. Each customer shows initials, name and email; the phone has a WhatsApp button next to it; the address shows tower and flat first with the society underneath. Status is one pill (Phone confirmed, Not confirmed or Blocked), and Block moves into a "more" menu so it is not one click away. Tap the order count to see their orders under the row. Filters and page numbers match Products and Stock, and the table scrolls inside the screen.</p></div>
+    <figure style="margin-bottom:24px"><img class="now-shot" src="customers-now.png" alt="The current customers page"><figcaption><b><span class="tag tag-now">Now</span>Customers</b>Your screenshot of the live app</figcaption></figure>
+    <figure><div class="frame-wrap"><div class="frame"><div class="frame-bar"><i></i><i></i><i></i><span>grocerystorewebapp.duckdns.org/admin/customers</span></div>
+      <div class="app fit-screen"><aside class="side"><div class="brand"><img src="../frontend/src/assets/logo.png" alt="">Grocery Store</div><div class="group"><p>Daily</p><span class="nav"><svg class="i"><use href="#home"/></svg>Dashboard</span><span class="nav"><svg class="i"><use href="#box"/></svg>Orders<span class="n">2</span></span><span class="nav"><svg class="i"><use href="#layers"/></svg>Picking list</span><span class="nav"><svg class="i"><use href="#truck"/></svg>Delivery list</span></div><div class="group"><p>Catalogue</p><span class="nav"><svg class="i"><use href="#tag"/></svg>Products</span><span class="nav"><svg class="i"><use href="#grid"/></svg>Categories</span><span class="nav"><svg class="i"><use href="#layers"/></svg>Stock</span></div><div class="group"><p>Setup</p><span class="nav"><svg class="i"><use href="#pin"/></svg>Zones &amp; slots</span><span class="nav on"><svg class="i"><use href="#user"/></svg>Customers</span><span class="nav"><svg class="i"><use href="#building"/></svg>Staff</span><span class="nav"><svg class="i"><use href="#settings"/></svg>Store settings</span></div><div class="group"><p>Money</p><span class="nav"><svg class="i"><use href="#cash"/></svg>Cash &amp; UPI check</span><span class="nav"><svg class="i"><use href="#tag"/></svg>Reports</span></div><div class="side-foot"><div class="alerts"><svg class="i i-sm"><use href="#bell"/></svg>New order alerts<span class="switch" aria-label="On"></span></div>
+      <div class="who"><span class="av">A</span><span><b>Amarjeet</b><small>Owner · Sign out</small></span></div></div></aside><div class="main"><div class="page-head"><div><h3>Customers</h3><p>48 customers · 9 phones not confirmed</p></div></div>
+      <div class="toolbar"><span class="search"><svg class="i i-sm"><use href="#search"/></svg>Name, phone, email, flat or street</span>
+        <div class="segmented filter-tabs"><span class="on">All 48</span><span>Not confirmed 9</span><span>Blocked 1</span></div>
+        <span class="control">Zone <b>All zones</b><svg class="i chev"><use href="#down"/></svg></span></div>
       <div class="table-card"><div class="table-scroll"><table>
-        <thead><tr><th>Product</th><th>Category</th><th>Pack</th><th class="num">MRP</th><th class="num">Price</th><th class="num">Stock</th><th>Best before</th><th>Status</th><th></th></tr></thead>
-        <tbody><tr><td><div class="product"><img src="../frontend/src/assets/categories/rice.png" alt=""><span><b>Classic Basmati Rice</b><small>India Gate</small></span></div></td>
-          <td class="cat">Rice</td><td><div class="stack"><span class="">1 kg</span><span class="">5 kg</span></div></td>
-          <td class="num"><div class="stack"><span class="mrp">₹210</span><span class="mrp">₹999</span></div></td><td class="num"><div class="stack"><span class="price">₹185</span><span class="price">₹875</span></div></td>
-          <td class="num"><div class="stack"><span class="">25</span><span class="">10</span></div></td><td><div class="stack"><span class="">Mar 2028</span><span class="">Mar 2028</span></div></td>
-          <td><span class="status">Active</span></td><td class="num"><span class="edit" aria-label="Edit Classic Basmati Rice"><svg class="i i-sm"><use href="#edit"/></svg></span></td></tr><tr><td><div class="product"><img src="../frontend/src/assets/categories/grains-millets.png" alt=""><span><b>Daliya</b><small>Rajdhani</small></span></div></td>
-          <td class="cat">Grains &amp; Millets</td><td><div class="stack"><span class="">500 g</span></div></td>
-          <td class="num"><div class="stack"><span class="mrp">₹45</span></div></td><td class="num"><div class="stack"><span class="price">₹40</span></div></td>
-          <td class="num"><div class="stack"><span class="">20</span></div></td><td><div class="stack"><span class="">Jan 2027</span></div></td>
-          <td><span class="status">Active</span></td><td class="num"><span class="edit" aria-label="Edit Daliya"><svg class="i i-sm"><use href="#edit"/></svg></span></td></tr><tr><td><div class="product"><img src="../frontend/src/assets/categories/oils-ghee.png" alt=""><span><b>Extra Virgin Olive Oil</b><small>Figaro</small></span></div></td>
-          <td class="cat">Oils &amp; Ghee</td><td><div class="stack"><span class="">500 ml</span></div></td>
-          <td class="num"><div class="stack"><span class="mrp">₹899</span></div></td><td class="num"><div class="stack"><span class="price">₹749</span></div></td>
-          <td class="num"><div class="stack"><span class="">4</span></div></td><td><div class="stack"><span class="">Aug 2027</span></div></td>
-          <td><span class="status">Active</span></td><td class="num"><span class="edit" aria-label="Edit Extra Virgin Olive Oil"><svg class="i i-sm"><use href="#edit"/></svg></span></td></tr><tr><td><div class="product"><img src="../frontend/src/assets/categories/oils-ghee.png" alt=""><span><b>Groundnut Oil</b><small>Dhara</small></span></div></td>
-          <td class="cat">Oils &amp; Ghee</td><td><div class="stack"><span class="">1 L</span></div></td>
-          <td class="num"><div class="stack"><span class="mrp">₹230</span></div></td><td class="num"><div class="stack"><span class="price">₹205</span></div></td>
-          <td class="num"><div class="stack"><span class=""><span class="pill pill-low">2 left</span></span></div></td><td><div class="stack"><span class="">Jan 2027</span></div></td>
-          <td><span class="status">Active</span></td><td class="num"><span class="edit" aria-label="Edit Groundnut Oil"><svg class="i i-sm"><use href="#edit"/></svg></span></td></tr><tr><td><div class="product"><img src="../frontend/src/assets/categories/dals-pulses.png" alt=""><span><b>Kabuli Chana</b><small>Rajdhani</small></span></div></td>
-          <td class="cat">Dals &amp; Pulses</td><td><div class="stack"><span class="">1 kg</span></div></td>
-          <td class="num"><div class="stack"><span class="mrp">₹160</span></div></td><td class="num"><div class="stack"><span class="price">₹145</span></div></td>
-          <td class="num"><div class="stack"><span class="">14</span></div></td><td><div class="stack"><span class="">Mar 2027</span></div></td>
-          <td><span class="status">Active</span></td><td class="num"><span class="edit" aria-label="Edit Kabuli Chana"><svg class="i i-sm"><use href="#edit"/></svg></span></td></tr><tr><td><div class="product"><img src="../frontend/src/assets/categories/oils-ghee.png" alt=""><span><b>Kachi Ghani Mustard Oil</b><small>Fortune</small></span></div></td>
-          <td class="cat">Oils &amp; Ghee</td><td><div class="stack"><span class="">1 L</span><span class="">5 L</span></div></td>
-          <td class="num"><div class="stack"><span class="mrp">₹210</span><span class="mrp">₹1,000</span></div></td><td class="num"><div class="stack"><span class="price">₹185</span><span class="price">₹899</span></div></td>
-          <td class="num"><div class="stack"><span class="">35</span><span class="">8</span></div></td><td><div class="stack"><span class="">Feb 2027</span><span class="">Feb 2027</span></div></td>
-          <td><span class="status">Active</span></td><td class="num"><span class="edit" aria-label="Edit Kachi Ghani Mustard Oil"><svg class="i i-sm"><use href="#edit"/></svg></span></td></tr><tr><td><div class="product"><img src="../frontend/src/assets/categories/atta-flours.png" alt=""><span><b>Maida</b><small>Rajdhani</small></span></div></td>
-          <td class="cat">Atta &amp; Flours</td><td><div class="stack"><span class="">1 kg</span></div></td>
-          <td class="num"><div class="stack"><span class="mrp">₹60</span></div></td><td class="num"><div class="stack"><span class="price">₹55</span></div></td>
-          <td class="num"><div class="stack"><span class=""><span class="pill pill-out">Out of stock</span></span></div></td><td><div class="stack"><span class="">Feb 2027</span></div></td>
-          <td><span class="status">Active</span></td><td class="num"><span class="edit" aria-label="Edit Maida"><svg class="i i-sm"><use href="#edit"/></svg></span></td></tr><tr><td><div class="product"><img src="../frontend/src/assets/categories/dals-pulses.png" alt=""><span><b>Masoor Dal</b><small>Rajdhani</small></span></div></td>
-          <td class="cat">Dals &amp; Pulses</td><td><div class="stack"><span class="">1 kg</span></div></td>
-          <td class="num"><div class="stack"><span class="mrp">₹130</span></div></td><td class="num"><div class="stack"><span class="price">₹115</span></div></td>
-          <td class="num"><div class="stack"><span class="">18</span></div></td><td><div class="stack"><span class="">Mar 2027</span></div></td>
-          <td><span class="status">Active</span></td><td class="num"><span class="edit" aria-label="Edit Masoor Dal"><svg class="i i-sm"><use href="#edit"/></svg></span></td></tr><tr><td><div class="product"><img src="../frontend/src/assets/categories/dals-pulses.png" alt=""><span><b>Moong Dal</b><small>Tata Sampann</small></span></div></td>
-          <td class="cat">Dals &amp; Pulses</td><td><div class="stack"><span class="">1 kg</span></div></td>
-          <td class="num"><div class="stack"><span class="mrp">₹170</span></div></td><td class="num"><div class="stack"><span class="price">₹152</span></div></td>
-          <td class="num"><div class="stack"><span class="">20</span></div></td><td><div class="stack"><span class="">Feb 2027</span></div></td>
-          <td><span class="status">Active</span></td><td class="num"><span class="edit" aria-label="Edit Moong Dal"><svg class="i i-sm"><use href="#edit"/></svg></span></td></tr><tr><td><div class="product"><img src="../frontend/src/assets/categories/grains-millets.png" alt=""><span><b>Organic Foxtail Millet</b><small>24 Mantra Organic</small></span></div></td>
-          <td class="cat">Grains &amp; Millets</td><td><div class="stack"><span class="">500 g</span></div></td>
-          <td class="num"><div class="stack"><span class="mrp">₹110</span></div></td><td class="num"><div class="stack"><span class="price">₹99</span></div></td>
-          <td class="num"><div class="stack"><span class="">8</span></div></td><td><div class="stack"><span class="">Mar 2027</span></div></td>
-          <td><span class="status">Active</span></td><td class="num"><span class="edit" aria-label="Edit Organic Foxtail Millet"><svg class="i i-sm"><use href="#edit"/></svg></span></td></tr></tbody></table></div>
-        <div class="pager"><span>Showing <b>1–10</b> of <b>24</b></span>
-          <div class="pager-right"><span class="per-page">Rows per page <span>10<svg class="i i-sm"><use href="#down"/></svg></span></span>
-          <div class="pages"><span class="off"><svg class="i i-sm"><use href="#back"/></svg></span><span class="on">1</span><span>2</span><span>3</span><span><svg class="i i-sm"><use href="#right"/></svg></span></div></div></div>
-      </div></div></div></div></div><figcaption><b><span class="tag tag-new">Refreshed</span>Products</b>Scroll inside the table; page buttons stay below it</figcaption></figure>
+        <thead><tr><th>Customer</th><th>Phone</th><th>Address</th><th>Orders</th><th>Status</th><th></th></tr></thead>
+        <tbody><tr class=""><td><div class="person"><span class="avatar">RS</span><span class="two-line"><b>Riya Sharma</b><small>riya.sharma@example.com</small></span></div></td>
+      <td><span class="phone">98100 42311<span class="square" title="WhatsApp"><svg class="i"><use href="#chat"/></svg></span></span></td>
+      <td><span class="two-line"><b>Tower A · Flat 34</b><small>Supertech Capetown, Sector 74</small></span></td>
+      <td><span class="two-line"><span class="orders-link">1 order<svg class="i i-sm"><use href="#down"/></svg></span><small>last 15 Oct</small></span></td>
+      <td><span class="pill pill-low">Not confirmed</span></td><td><div class="row-actions"><span class="btn btn-secondary btn-small"><svg class="i i-sm"><use href="#check"/></svg>Confirm phone</span><span class="edit" title="More: block, call"><svg class="i i-sm"><use href="#more"/></svg></span></div></td></tr><tr class=""><td><div class="person"><span class="avatar">AK</span><span class="two-line"><b>Ajay Kumar Gautam</b><small>ajay.gautam@example.com</small></span></div></td>
+      <td><span class="phone">81784 97269<span class="square" title="WhatsApp"><svg class="i"><use href="#chat"/></svg></span></span></td>
+      <td><span class="two-line"><b>Tower 1 · Flat 33</b><small>Mahagun Moderne, Sector 78</small></span></td>
+      <td><span class="two-line"><span class="orders-link">1 order<svg class="i i-sm"><use href="#down"/></svg></span><small>last 4 Oct</small></span></td>
+      <td><span class="pill pill-low">Not confirmed</span></td><td><div class="row-actions"><span class="btn btn-secondary btn-small"><svg class="i i-sm"><use href="#check"/></svg>Confirm phone</span><span class="edit" title="More: block, call"><svg class="i i-sm"><use href="#more"/></svg></span></div></td></tr><tr class="row-open"><td><div class="person"><span class="avatar">KM</span><span class="two-line"><b>Karan Mehta</b><small>karan.mehta@example.com</small></span></div></td>
+      <td><span class="phone">81788 92757<span class="square" title="WhatsApp"><svg class="i"><use href="#chat"/></svg></span></span></td>
+      <td><span class="two-line"><b>Tower 2 · Flat 5</b><small>Mahagun Moderne, Sector 78</small></span></td>
+      <td><span class="two-line"><span class="orders-link">2 orders<svg class="i i-sm"><use href="#down"/></svg></span><small>last 3 Oct</small></span></td>
+      <td><span class="pill pill-green">Phone confirmed</span></td><td><div class="row-actions"><span class="edit" title="More: block, call"><svg class="i i-sm"><use href="#more"/></svg></span></div></td></tr><tr class="history-row"><td colspan="6"><div class="history"><span><b>#1042</b><em>3 Oct</em>₹612<span class="status">Delivered</span></span><span><b>#1017</b><em>21 Sep</em>₹348<span class="status">Delivered</span></span></div></td></tr><tr class=""><td><div class="person"><span class="avatar">NV</span><span class="two-line"><b>Neha Verma</b><small>neha.verma@example.com</small></span></div></td>
+      <td><span class="phone">98345 67890<span class="square" title="WhatsApp"><svg class="i"><use href="#chat"/></svg></span></span></td>
+      <td><span class="two-line"><b>Tower B · Flat 4</b><small>Supertech Capetown, Sector 74</small></span></td>
+      <td><span class="two-line"><span class="orders-link">1 order<svg class="i i-sm"><use href="#down"/></svg></span><small>last 3 Oct</small></span></td>
+      <td><span class="pill pill-green">Phone confirmed</span></td><td><div class="row-actions"><span class="edit" title="More: block, call"><svg class="i i-sm"><use href="#more"/></svg></span></div></td></tr><tr class=""><td><div class="person"><span class="avatar">SG</span><span class="two-line"><b>Sanjay Gupta</b><small>sanjay.g@example.com</small></span></div></td>
+      <td><span class="phone">99580 11223<span class="square" title="WhatsApp"><svg class="i"><use href="#chat"/></svg></span></span></td>
+      <td><span class="two-line"><b>House 112, Main Road</b><small>Sector 73 Market Area</small></span></td>
+      <td><span class="two-line"><span class="orders-link">6 orders<svg class="i i-sm"><use href="#down"/></svg></span><small>last 2 Oct</small></span></td>
+      <td><span class="pill pill-green">Phone confirmed</span></td><td><div class="row-actions"><span class="edit" title="More: block, call"><svg class="i i-sm"><use href="#more"/></svg></span></div></td></tr><tr class=""><td><div class="person"><span class="avatar">PN</span><span class="two-line"><b>Pooja Nair</b><small>pooja.nair@example.com</small></span></div></td>
+      <td><span class="phone">98711 50432<span class="square" title="WhatsApp"><svg class="i"><use href="#chat"/></svg></span></span></td>
+      <td><span class="two-line"><b>Tower D · Flat 1203</b><small>ATS Pristine, Sector 150</small></span></td>
+      <td><span class="two-line"><span class="orders-link">3 orders<svg class="i i-sm"><use href="#down"/></svg></span><small>last 29 Sep</small></span></td>
+      <td><span class="pill pill-green">Phone confirmed</span></td><td><div class="row-actions"><span class="edit" title="More: block, call"><svg class="i i-sm"><use href="#more"/></svg></span></div></td></tr><tr class="row-blocked"><td><div class="person"><span class="avatar">VS</span><span class="two-line"><b>Vikram Singh</b><small>vikram.s@example.com</small></span></div></td>
+      <td><span class="phone">97170 88341<span class="square" title="WhatsApp"><svg class="i"><use href="#chat"/></svg></span></span></td>
+      <td><span class="two-line"><b>Tower 7 · Flat 806</b><small>Gaur City 2, 12th Avenue</small></span></td>
+      <td><span class="two-line"><b style="color:var(--muted)">No orders</b></span></td>
+      <td><span class="pill pill-out">Blocked</span></td><td><div class="row-actions"><span class="btn btn-secondary btn-small">Unblock</span><span class="edit" title="More: block, call"><svg class="i i-sm"><use href="#more"/></svg></span></div></td></tr><tr class=""><td><div class="person"><span class="avatar">AI</span><span class="two-line"><b>Ananya Iyer</b><small>ananya.iyer@example.com</small></span></div></td>
+      <td><span class="phone">88600 23109<span class="square" title="WhatsApp"><svg class="i"><use href="#chat"/></svg></span></span></td>
+      <td><span class="two-line"><b>Tower 3 · Flat 71</b><small>Mahagun Moderne, Sector 78</small></span></td>
+      <td><span class="two-line"><span class="orders-link">4 orders<svg class="i i-sm"><use href="#down"/></svg></span><small>last 27 Sep</small></span></td>
+      <td><span class="pill pill-green">Phone confirmed</span></td><td><div class="row-actions"><span class="edit" title="More: block, call"><svg class="i i-sm"><use href="#more"/></svg></span></div></td></tr></tbody></table></div>
+        <div class="pager"><span>Showing <b>1–25</b> of <b>48</b></span><div class="pager-right"><span class="per-page">Rows <span>25<svg class="i i-sm"><use href="#down"/></svg></span></span>
+          <div class="pages"><span class="off"><svg class="i i-sm"><use href="#back"/></svg></span><span class="on">1</span><span>2</span><span><svg class="i i-sm"><use href="#right"/></svg></span></div></div></div></div></div></div></div></div><figcaption><b><span class="tag tag-new">Refreshed</span>Customers</b>Example customers; Karan's orders are opened under his row</figcaption></figure>
   </section>
 </main>
 </body></html>

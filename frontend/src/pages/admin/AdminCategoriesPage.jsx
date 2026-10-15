@@ -8,21 +8,23 @@ import { AddCategoryForm } from './categories/AddCategoryForm.jsx';
 export function AdminCategoriesPage() {
   const { data, error, loading, reload } = useApiData('/api/admin/categories');
   return (
-    <div className="narrow-page">
+    <div className="narrow-page fit-screen-page">
       <AdminPageHeader title="Categories" />
       <p className="hint page-intro">Shown on the shop home page, smallest order number first. Tap a photo to change it.</p>
       <AddCategoryForm onAdded={reload} />
       <LoadingOrError loading={loading && !data} error={error} onRetry={reload} />
       {data && (
         <div className="table-box">
-          <table className="admin-table category-table">
-            <thead><tr><th>Category</th><th className="number">Products</th><th>Status</th><th>Order</th><th /></tr></thead>
-            <tbody>
-              {data.categories.map((category) => (
-                <CategoryRow key={`${category.id}-${category.name}-${category.sortOrder}-${category.comingSoon}`} category={category} onSaved={reload} />
-              ))}
-            </tbody>
-          </table>
+          <div className="table-scroll">
+            <table className="admin-table category-table">
+              <thead><tr><th>Category</th><th className="number">Products</th><th>Status</th><th>Order</th><th /></tr></thead>
+              <tbody>
+                {data.categories.map((category) => (
+                  <CategoryRow key={`${category.id}-${category.name}-${category.sortOrder}-${category.comingSoon}`} category={category} onSaved={reload} />
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>

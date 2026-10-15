@@ -6,6 +6,7 @@ import { useSaveRequest } from '../../useSaveRequest.js';
 import { deliveryAddressLine, formatRupees, formatShortDate } from '../../formatting.js';
 import { LoadingOrError } from '../../components/LoadingOrError.jsx';
 import { StatusPill } from '../orders/OrderParts.jsx';
+import { Icon } from '../../Icon.jsx';
 import { AdminPageHeader } from './AdminLayout.jsx';
 
 function OrderHistory({ customerId }) {
@@ -69,25 +70,32 @@ export function AdminCustomersPage() {
   const debouncedSearchText = useDebouncedValue(searchText.trim());
   const { data, error, loading, reload } = useApiData(`/api/admin/customers?search=${encodeURIComponent(debouncedSearchText)}`);
   return (
-    <>
-      <AdminPageHeader title="Customers" />
-      <input type="search" className="input admin-search" placeholder="Name, phone, email, flat or street" aria-label="Search customers"
-        value={searchText} onChange={(event) => setSearchText(event.target.value)} />
+    <div className="fit-screen-page">
+      <AdminPageHeader title="Customers" subtitle={data && `${data.customers.length} ${data.customers.length === 1 ? 'customer' : 'customers'}`} />
+      <div className="filter-row">
+        <label className="search-input admin-search">
+          <Icon name="search" size={16} />
+          <input type="search" value={searchText} onChange={(event) => setSearchText(event.target.value)}
+            placeholder="Name, phone, email, flat or street" aria-label="Search customers" />
+        </label>
+      </div>
       <LoadingOrError loading={loading && !data} error={error} onRetry={reload} />
       {data && data.customers.length === 0 && <p className="hint">No customers found.</p>}
       {data && data.customers.length > 0 && (
         <div className="table-box">
-          <table className="admin-table">
-            <thead><tr><th>Customer</th><th>Phone</th><th>Address</th><th>Orders</th><th>Checks</th></tr></thead>
-            <tbody>
-              {data.customers.map((customer) => (
-                <CustomerRow key={customer.id} customer={customer} expanded={expandedCustomerId === customer.id} onChanged={reload}
-                  onToggle={() => setExpandedCustomerId(expandedCustomerId === customer.id ? null : customer.id)} />
-              ))}
-            </tbody>
-          </table>
+          <div className="table-scroll">
+            <table className="admin-table">
+              <thead><tr><th>Customer</th><th>Phone</th><th>Address</th><th>Orders</th><th>Checks</th></tr></thead>
+              <tbody>
+                {data.customers.map((customer) => (
+                  <CustomerRow key={customer.id} customer={customer} expanded={expandedCustomerId === customer.id} onChanged={reload}
+                    onToggle={() => setExpandedCustomerId(expandedCustomerId === customer.id ? null : customer.id)} />
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
-    </>
+    </div>
   );
 }
