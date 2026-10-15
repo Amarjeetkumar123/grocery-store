@@ -59,8 +59,17 @@ export async function setCategoryImagePath(executor, categoryId, imagePath) {
   await executor.query('update categories set image_path = $2 where id = $1', [categoryId, imagePath]);
 }
 
-// Map of lower-case category name -> id, for matching spreadsheet rows.
+// "  Atta &  FLOURS " -> "atta & flours": how spreadsheet category names are matched.
+export const categoryMatchKey = (name) => name.trim().replace(/\s+/g, ' ').toLowerCase();
+
+// Map of category match key -> id, for matching spreadsheet rows.
 export async function findCategoryIdsByLowerCaseName(executor) {
   const result = await executor.query('select id, name from categories');
-  return new Map(result.rows.map((row) => [row.name.toLowerCase(), row.id]));
+  return new Map(result.rows.map((row) => [categoryMatchKey(row.name), row.id]));
+}
+
+// New categories from a spreadsheet go after the existing ones.
+export async function findNextCategorySortOrder(executor) {
+  const result = await executor.query('select coalesce(max(sort_order), 0) + 1 as next_sort_order from categories');
+  return Math.min(result.rows[0].next_sort_order, 999);
 }

@@ -9,7 +9,9 @@ function ImportResult({ summary, problems, errorMessage }) {
     return (
       <p className="notice notice-success" role="status">
         <Icon name="check" /> Saved: {summary.productsCreated} new products, {summary.packSizesCreated} new pack sizes,
-        {' '}{summary.packSizesUpdated} pack sizes updated. <Link to="/admin/products">See products</Link>
+        {' '}{summary.packSizesUpdated} pack sizes updated.
+        {summary.categoriesCreated?.length > 0 && ` New ${summary.categoriesCreated.length === 1 ? 'category' : 'categories'}: ${summary.categoriesCreated.join(', ')}.`}
+        {' '}<Link to="/admin/products">See products</Link>
       </p>
     );
   }

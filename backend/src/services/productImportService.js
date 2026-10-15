@@ -1,5 +1,7 @@
 import { withTransaction } from '../dbHelper/databaseConnection.js';
-import { findCategoryIdsByLowerCaseName } from '../dbHelper/categoryDbHelper.js';
+import {
+  categoryMatchKey, findCategoryIdsByLowerCaseName, findNextCategorySortOrder, insertCategory,
+} from '../dbHelper/categoryDbHelper.js';
 import {
   findProductIdByNameAndBrand, insertProduct, updateProductDetailsIfGiven,
 } from '../dbHelper/productDbHelper.js';
@@ -52,15 +54,16 @@ function readRecords(csvText) {
   return { records, problems: [] };
 }
 
-// One spreadsheet row -> one pack size of one product.
-function readImportRow(record, categoryIdsByName) {
+// One spreadsheet row -> one pack size of one product. The category is matched by name
+// ignoring case and extra spaces; a name that matches nothing becomes a new category.
+function readImportRow(record) {
   const fieldErrors = {};
   const { values } = record;
-  const categoryId = categoryIdsByName.get(values.categoryName.toLowerCase());
-  if (!categoryId) fieldErrors.category = `No category called "${values.categoryName}".`;
+  const categoryName = readRequiredText(values, 'categoryName', 'Category', 60, fieldErrors)?.replace(/\s+/g, ' ');
   const row = {
     rowNumber: record.rowNumber,
-    categoryId,
+    categoryName,
+    categoryKey: categoryName ? categoryMatchKey(categoryName) : '',
     productName: readRequiredText(values, 'productName', 'Product name', 120, fieldErrors),
     brand: readOptionalText(values, 'brand', 'Brand', 80, fieldErrors),
     manufacturer: readOptionalText(values, 'manufacturer', 'Manufacturer', 120, fieldErrors),
@@ -76,7 +79,7 @@ function groupRowsByProduct(rows) {
   const products = new Map();
   const problems = [];
   for (const row of rows) {
-    const productKey = [row.categoryId, row.productName.toLowerCase(), (row.brand ?? '').toLowerCase()].join('|');
+    const productKey = [row.categoryKey, row.productName.toLowerCase(), (row.brand ?? '').toLowerCase()].join('|');
     const product = products.get(productKey) ?? { ...row, packSizes: [] };
     if (product.packSizes.some((packSize) => packSize.label.toLowerCase() === row.packSize.label.toLowerCase())) {
       problems.push({ rowNumber: row.rowNumber, message: `Pack size "${row.packSize.label}" appears twice for this product.` });
@@ -89,7 +92,19 @@ function groupRowsByProduct(rows) {
   return { products: [...products.values()], problems };
 }
 
-async function saveImportedProduct(client, product, summary) {
+// The id of the row's category, adding the category first when no name matches.
+async function categoryIdFor(client, product, categoryIdsByKey, summary) {
+  const existingId = categoryIdsByKey.get(product.categoryKey);
+  if (existingId) return existingId;
+  const sortOrder = await findNextCategorySortOrder(client);
+  const categoryId = await insertCategory(client, { name: product.categoryName, sortOrder, comingSoon: false });
+  categoryIdsByKey.set(product.categoryKey, categoryId);
+  summary.categoriesCreated.push(product.categoryName);
+  return categoryId;
+}
+
+async function saveImportedProduct(client, product, categoryIdsByKey, summary) {
+  product.categoryId = await categoryIdFor(client, product, categoryIdsByKey, summary);
   let productId = await findProductIdByNameAndBrand(client, product.categoryId, product.productName, product.brand);
   if (productId) {
     await updateProductDetailsIfGiven(client, productId, product.manufacturer, product.description);
@@ -123,21 +138,21 @@ function readRecordsOrThrow(csvText) {
   }
 }
 
-// Returns { summary: { productsCreated, packSizesCreated, packSizesUpdated } }.
+// Returns { summary: { productsCreated, packSizesCreated, packSizesUpdated, categoriesCreated: [names] } }.
 async function importProductsFromCsv({ database }, csvText) {
   const reading = readRecordsOrThrow(csvText);
   throwIfProblems(reading.problems);
 
-  const categoryIdsByName = await findCategoryIdsByLowerCaseName(database);
-  const checkedRows = reading.records.map((record) => readImportRow(record, categoryIdsByName));
+  const checkedRows = reading.records.map((record) => readImportRow(record));
   throwIfProblems(checkedRows.flatMap((checkedRow) => checkedRow.problems));
 
   const grouping = groupRowsByProduct(checkedRows.map((checkedRow) => checkedRow.row));
   throwIfProblems(grouping.problems);
 
   const summary = await withTransaction(database, async (client) => {
-    const counts = { productsCreated: 0, packSizesCreated: 0, packSizesUpdated: 0 };
-    for (const product of grouping.products) await saveImportedProduct(client, product, counts);
+    const counts = { productsCreated: 0, packSizesCreated: 0, packSizesUpdated: 0, categoriesCreated: [] };
+    const categoryIdsByKey = await findCategoryIdsByLowerCaseName(client);
+    for (const product of grouping.products) await saveImportedProduct(client, product, categoryIdsByKey, counts);
     return counts;
   });
   return { summary };

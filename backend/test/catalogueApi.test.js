@@ -156,7 +156,7 @@ test('bulk import creates new products and updates existing pack sizes', { skip 
     token: 'owner-token', method: 'POST', rawBody: bulkImportCsv, contentType: 'text/csv',
   });
   assert.equal(status, 200, JSON.stringify(body));
-  assert.deepEqual(body.summary, { productsCreated: 1, packSizesCreated: 2, packSizesUpdated: 1 });
+  assert.deepEqual(body.summary, { productsCreated: 1, packSizesCreated: 2, packSizesUpdated: 1, categoriesCreated: [] });
   const oil = (await callApi(`/api/admin/products/${sunflowerOil.id}`, { token: 'owner-token' })).body.product;
   const packOne = oil.packSizes.find((packSize) => packSize.label === '1 L');
   assert.equal(packOne.price, 150);
@@ -168,7 +168,7 @@ test('bulk import with any bad row saves nothing and lists every problem', { ski
   const badCsv = [
     'Category,Product name,Brand,Pack size,MRP,Price,Stock',
     'Atta & Flours,Besan,Rajdhani,500 g,70,62,24',
-    'Snacks,Chips,Lays,50 g,20,20,10',
+    'Rice,,Lays,50 g,20,20,10',
     'Rice,Basmati Rice,India Gate,5 kg,850,900,4',
     'Rice,Basmati Rice,India Gate,1 kg,180,170,',
   ].join('\n');
@@ -178,6 +178,26 @@ test('bulk import with any bad row saves nothing and lists every problem', { ski
   assert.equal(status, 400);
   assert.deepEqual(body.problems.map((problem) => problem.rowNumber), [3, 4, 5]);
   assert.equal((await callApi('/api/products?search=besan')).body.products.length, 0, 'valid rows were not saved either');
+});
+
+test('bulk import matches categories ignoring case and spaces, and adds new ones once', { skip }, async () => {
+  const csv = [
+    'Category,Product name,Brand,Pack size,MRP,Price,Stock',
+    '  ATTA &  flours ,Bajra Atta,Rajdhani,1 kg,90,80,12',
+    'Snacks,Masala Chips,Lays,50 g,20,20,10',
+    'snacks,Salted Peanuts,Haldiram,200 g,60,55,8',
+  ].join('\n');
+  const { status, body } = await callApi('/api/admin/products/bulk-import', {
+    token: 'owner-token', method: 'POST', rawBody: csv, contentType: 'text/csv',
+  });
+  assert.equal(status, 200, JSON.stringify(body));
+  assert.deepEqual(body.summary.categoriesCreated, ['Snacks'], 'snacks and Snacks are one new category');
+  const categories = (await testServer.database.query("select name, sort_order, coming_soon from categories where lower(name) in ('snacks', 'atta & flours')")).rows;
+  assert.deepEqual(categories.map((category) => category.name).sort(), ['Atta & Flours', 'Snacks'], 'no second Atta & Flours');
+  const snacks = categories.find((category) => category.name === 'Snacks');
+  assert.equal(snacks.coming_soon, false);
+  const { rows: [{ highest }] } = await testServer.database.query("select max(sort_order) as highest from categories where name <> 'Snacks'");
+  assert.ok(snacks.sort_order > highest, 'new categories go after the existing ones');
 });
 
 test('the admin product list comes one page at a time', { skip }, async () => {
