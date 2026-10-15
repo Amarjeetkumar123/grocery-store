@@ -122,10 +122,15 @@ test('the owner finds customers, confirms phones and blocks', { skip }, async ()
   assert.equal(body.customers.length, 1);
   const [riya] = body.customers;
   assert.deepEqual([riya.name, riya.orderCount, riya.phoneConfirmed], ['Riya', 1, false]);
+  assert.deepEqual([body.counts, body.total, body.page, body.pageCount], [{ all: 1, unconfirmed: 1, blocked: 0 }, 1, 1, 1]);
+  assert.equal((await asOwner('/api/admin/customers?zoneId=999999')).body.counts.all, 0, 'another zone has no customers');
 
   await asOwner(`/api/admin/customers/${riya.id}`, { method: 'PUT', body: { phoneConfirmed: true } });
   assert.equal((await boardOrder(1001)).customer.phoneConfirmed, true);
   await asOwner(`/api/admin/customers/${riya.id}`, { method: 'PUT', body: { blocked: true } });
+  const blockedList = (await asOwner('/api/admin/customers?status=blocked')).body;
+  assert.deepEqual([blockedList.customers.map((customer) => customer.name), blockedList.counts], [['Riya'], { all: 1, unconfirmed: 0, blocked: 1 }]);
+  assert.equal((await asOwner('/api/admin/customers?status=unconfirmed')).body.customers.length, 0);
   const blockedOrder = await callApi('/api/checkout/slots', { token: 'riya-token' });
   assert.equal(blockedOrder.status, 403);
   const history = await asOwner(`/api/admin/orders?customerId=${riya.id}`);

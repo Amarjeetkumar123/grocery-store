@@ -27,11 +27,42 @@ function ZoneTypeChoice({ value, onChange }) {
   );
 }
 
-// zone: the zone to edit, or null to add a new one. onSaved(zoneId).
-export function ZoneForm({ zone, onSaved }) {
+function ZoneHeading({ zone, formId, saving, onCancel }) {
+  return (
+    <div className="card-heading zone-heading">
+      <div className="zone-title">
+        <h2>{zone ? zone.name : 'New zone'}</h2>
+        {zone && <span className="pill pill-blue">{zone.type === 'society' ? 'Society' : 'Local area'}</span>}
+        {zone && <span className={`pill ${zone.active ? 'pill-green' : 'pill-gray'}`}>{zone.active ? 'Live' : 'Not live'}</span>}
+      </div>
+      <div className="row-actions">
+        <button type="button" className="button button-compact button-outline" onClick={onCancel}>Cancel</button>
+        <button type="submit" form={formId} className="button button-compact" disabled={saving}>{saving ? 'Saving…' : zone ? 'Save changes' : 'Add zone'}</button>
+      </div>
+    </div>
+  );
+}
+
+function MoneyFields({ values, update, fieldErrors }) {
+  return (
+    <div className="field-row money-fields">
+      <TextField fieldId="minimumOrderValue" label="Minimum order" prefix="₹" inputMode="decimal" value={values.minimumOrderValue}
+        onChange={update('minimumOrderValue')} errorMessage={fieldErrors.minimumOrderValue} />
+      <TextField fieldId="deliveryCharge" label="Delivery charge" prefix="₹" inputMode="decimal" value={values.deliveryCharge}
+        onChange={update('deliveryCharge')} errorMessage={fieldErrors.deliveryCharge} />
+      <TextField fieldId="freeDeliveryAbove" label="Free delivery above" prefix="₹" inputMode="decimal" placeholder="Never" value={values.freeDeliveryAbove}
+        onChange={update('freeDeliveryAbove')} errorMessage={fieldErrors.freeDeliveryAbove} />
+    </div>
+  );
+}
+
+// zone: the zone to edit, or null to add one. Save sits in the heading, next to the name.
+// children (the tower editor) go under the form, outside it, because they have their own form.
+export function ZoneForm({ zone, onSaved, onCancel, children }) {
   const [values, setValues] = useState(() => toFormValues(zone));
   const { saving, error, fieldErrors, save } = useSaveRequest();
   const update = (fieldName) => (value) => setValues((previous) => ({ ...previous, [fieldName]: value }));
+  const formId = `zone-form-${zone?.id ?? 'new'}`;
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -43,25 +74,20 @@ export function ZoneForm({ zone, onSaved }) {
   }
 
   return (
-    <form className="zone-form" onSubmit={handleSubmit}>
-      <TextField fieldId="zoneName" label="Society or area name" value={values.name} onChange={update('name')} errorMessage={fieldErrors.name} maxLength={80} />
-      {!zone && <ZoneTypeChoice value={values.type} onChange={update('type')} />}
-      <div className="field-row">
-        <TextField fieldId="minimumOrderValue" label="Minimum order (₹)" inputMode="decimal" value={values.minimumOrderValue}
-          onChange={update('minimumOrderValue')} errorMessage={fieldErrors.minimumOrderValue} />
-        <TextField fieldId="deliveryCharge" label="Delivery charge (₹)" inputMode="decimal" value={values.deliveryCharge}
-          onChange={update('deliveryCharge')} errorMessage={fieldErrors.deliveryCharge} />
-        <TextField fieldId="freeDeliveryAbove" label="Free delivery above (₹)" inputMode="decimal" placeholder="Never" value={values.freeDeliveryAbove}
-          onChange={update('freeDeliveryAbove')} errorMessage={fieldErrors.freeDeliveryAbove} />
-      </div>
-      <label className="checkbox-label">
-        <input type="checkbox" checked={values.active} onChange={(event) => update('active')(event.target.checked)} />
-        Live: customers can choose this zone and order
-      </label>
-      {error && <p className="error-text" role="alert">{error}</p>}
-      <div className="form-actions">
-        <button type="submit" className="button button-compact" disabled={saving}>{saving ? 'Saving…' : zone ? 'Save zone' : 'Add zone'}</button>
-      </div>
-    </form>
+    <section className="card zone-card">
+      <ZoneHeading zone={zone} formId={formId} saving={saving} onCancel={onCancel} />
+      <form id={formId} className="zone-form" onSubmit={handleSubmit}>
+        <p className="section-label">Details</p>
+        <TextField fieldId="zoneName" label="Society or area name" value={values.name} onChange={update('name')} errorMessage={fieldErrors.name} maxLength={80} />
+        {!zone && <ZoneTypeChoice value={values.type} onChange={update('type')} />}
+        <MoneyFields values={values} update={update} fieldErrors={fieldErrors} />
+        {error && <p className="error-text" role="alert">{error}</p>}
+        <label className="switch-row">
+          <span><strong>Live</strong><small>Customers can choose this zone and place orders</small></span>
+          <input type="checkbox" className="switch" role="switch" checked={values.active} onChange={(event) => update('active')(event.target.checked)} />
+        </label>
+      </form>
+      {children}
+    </section>
   );
 }

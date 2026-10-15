@@ -1,8 +1,9 @@
 import { uniqueViolationErrorCode } from '../dbHelper/databaseConnection.js';
-import { findCustomersForAdmin, updateCustomerFlags } from '../dbHelper/customerDbHelper.js';
+import { countCustomersByStatus, findCustomersForAdmin, updateCustomerFlags } from '../dbHelper/customerDbHelper.js';
 import { findAllStaff, insertStaffMember, updateStaffMember } from '../dbHelper/staffDbHelper.js';
 import { buildCustomerFilter } from '../filters/orderFilters.js';
 import { readPositiveInteger } from '../validators/commonValidation.js';
+import { readPage } from '../validators/pagingValidation.js';
 import { validateStaffInput } from '../validators/staffValidation.js';
 import { ServiceError, throwIfFieldErrors } from './serviceError.js';
 
@@ -29,8 +30,16 @@ async function saveStaffMember({ database }, currentStaffMember, staffIdInput, b
   return { staffId };
 }
 
+const customerStatuses = ['all', 'unconfirmed', 'blocked'];
+
+// query: { search, zoneId, status, page, pageSize }. counts are per status, for the filter tabs.
 async function listCustomers({ database }, query) {
-  return { customers: await findCustomersForAdmin(database, buildCustomerFilter({ searchText: query.search })) };
+  const status = customerStatuses.includes(query.status) ? query.status : 'all';
+  const filterInput = { searchText: query.search, zoneId: readPositiveInteger(query.zoneId) };
+  const counts = await countCustomersByStatus(database, buildCustomerFilter(filterInput));
+  const page = readPage(query, counts[status]);
+  const customers = await findCustomersForAdmin(database, buildCustomerFilter({ ...filterInput, status }), page);
+  return { customers, counts, total: counts[status], page: page.page, pageSize: page.pageSize, pageCount: page.pageCount };
 }
 
 // body: { phoneConfirmed?: true/false, blocked?: true/false }

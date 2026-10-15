@@ -31,10 +31,17 @@ export function buildRiderOrderFilter({ riderId, deliveryDate }) {
     .build();
 }
 
-// Customers screen search: name, phone, email or address.
-export function buildCustomerFilter({ searchText }) {
-  return createFilterBuilder()
+const customerStatusConditions = {
+  unconfirmed: 'not customer.phone_confirmed and not customer.blocked',
+  blocked: 'customer.blocked',
+};
+
+// Customers screen: search (name, phone, email or address), zone, and status (all, unconfirmed or blocked).
+export function buildCustomerFilter({ searchText, zoneId, status }) {
+  const builder = createFilterBuilder()
+    .whereEquals('customer.zone_id', zoneId)
     .whereAnyContains(['customer.name', 'customer.phone', 'customer.email', 'customer.flat_number',
-      'customer.house_number', 'customer.street', 'zone.name'], searchText)
-    .build();
+      'customer.house_number', 'customer.street', 'zone.name'], searchText);
+  if (customerStatusConditions[status]) builder.where(customerStatusConditions[status]);
+  return builder.build();
 }

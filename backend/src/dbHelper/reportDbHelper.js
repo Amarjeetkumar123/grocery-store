@@ -34,6 +34,12 @@ const notifyMeQuery = `
   from notify_me request join categories category on category.id = request.category_id
   group by category.name order by requests desc`;
 
+// Delivered sales between two dates, both included; for "up 18% on the week before".
+export async function findSalesTotal(executor, fromDate, toDate) {
+  const result = await executor.query(summaryQuery, [fromDate, toDate]);
+  return result.rows[0].sales;
+}
+
 export async function findSalesReport(executor, fromDate, toDate) {
   const range = [fromDate, toDate];
   const [summary, byDay, byZone, topItems, notifyMe] = await Promise.all([

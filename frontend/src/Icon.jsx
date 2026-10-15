@@ -73,6 +73,8 @@ const iconShapes = {
   ),
   box: <path d="m12 3 8 4.5v9L12 21l-8-4.5v-9zM4 7.5l8 4.5 8-4.5M12 12v9" />,
   chat: <path d="M4 20l1.4-4A8 8 0 1 1 8.5 19z" />,
+  more: <path d="M5 12h.01M12 12h.01M19 12h.01" strokeWidth="3" />,
+  phone: <path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z" />,
   settings: <path d="M4 7h10M18 7h2M4 17h4M12 17h8M14 4v6M8 14v6" />,
   close: <path d="M6 6l12 12M18 6 6 18" />,
 };

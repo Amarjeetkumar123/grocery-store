@@ -14,11 +14,11 @@ function AddTowerForm({ zone, save, saving, onChanged }) {
     }
   }
   return (
-    <form className="inline-form" onSubmit={addTower}>
+    <form className="tower-add" onSubmit={addTower}>
       <input className="input input-small" value={newTowerName} onChange={(event) => setNewTowerName(event.target.value)}
         placeholder="e.g. Tower E" maxLength={40} aria-label="New tower name" />
       <button type="submit" className="button button-compact button-outline" disabled={saving || !newTowerName.trim()}>
-        <Icon name="plus" /> Add tower
+        <Icon name="plus" /> Add
       </button>
     </form>
   );
@@ -33,19 +33,19 @@ export function TowerEditor({ zone, onChanged }) {
   }
   return (
     <div className="tower-editor">
-      <p className="field-label">Towers / blocks</p>
-      <div className="chip-row">
+      <p className="section-label">Towers / blocks <span className="heading-count">{zone.towers.length}</span></p>
+      <p className="field-hint">{zone.towers.length === 0 ? 'No towers yet. Customers need one to save their address.' : 'Customers pick one of these when they save their address.'}</p>
+      <div className="tower-chips">
         {zone.towers.map((tower) => (
-          <span key={tower.id} className="chip tower-chip">
+          <span key={tower.id} className="tower-chip">
             {tower.name}
             <button type="button" className="tower-remove" onClick={() => removeTower(tower)} aria-label={`Remove ${tower.name}`}>
-              <Icon name="close" size={14} />
+              <Icon name="close" size={13} />
             </button>
           </span>
         ))}
-        {zone.towers.length === 0 && <span className="hint">No towers yet. Customers need one to save their address.</span>}
+        <AddTowerForm zone={zone} save={save} saving={saving} onChanged={onChanged} />
       </div>
-      <AddTowerForm zone={zone} save={save} saving={saving} onChanged={onChanged} />
       {error && <p className="field-error" role="alert">{error}</p>}
     </div>
   );

@@ -130,4 +130,6 @@ test('the dashboard shows how full tomorrow\'s slots are, for the owner only', {
   assert.equal(body.tomorrow, tomorrow);
   assert.deepEqual([body.stock.outOfStock, body.stock.alerts], [0, []]);
   assert.equal(body.salesWeek.sales, 0, 'tomorrow\'s deliveries are not in the last 7 days');
+  assert.equal(body.salesWeekBefore, 0);
+  assert.equal(body.ridersWithCash > 0, body.cashWithRiders > 0);
 });

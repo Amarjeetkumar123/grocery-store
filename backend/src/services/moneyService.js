@@ -1,5 +1,5 @@
 import { findDailyCollections, findUnpaidOrders, insertCashHandover } from '../dbHelper/paymentDbHelper.js';
-import { findSalesReport } from '../dbHelper/reportDbHelper.js';
+import { findSalesReport, findSalesTotal } from '../dbHelper/reportDbHelper.js';
 import { findSlotLoadForDay } from '../dbHelper/slotDbHelper.js';
 import { findStockItems } from '../dbHelper/packSizeDbHelper.js';
 import { buildStockFilter } from '../filters/stockFilters.js';
@@ -50,9 +50,10 @@ const shownStockAlerts = 6;
 async function getDashboard({ database }) {
   const today = todayInIndia();
   const tomorrow = addDays(today, 1);
-  const [slots, salesWeek, collections, stockItems] = await Promise.all([
+  const [slots, salesWeek, salesWeekBefore, collections, stockItems] = await Promise.all([
     findSlotLoadForDay(database, tomorrow),
     findSalesReport(database, addDays(today, -6), today),
+    findSalesTotal(database, addDays(today, -13), addDays(today, -7)),
     findDailyCollections(database, today),
     findStockItems(database, buildStockFilter({})),
   ]);
@@ -62,7 +63,9 @@ async function getDashboard({ database }) {
     tomorrow,
     slots,
     salesWeek,
+    salesWeekBefore,
     cashWithRiders: collections.reduce((sum, person) => sum + person.cashInHand, 0),
+    ridersWithCash: collections.filter((person) => person.cashInHand > 0).length,
     stock: {
       outOfStock: stockItems.filter((item) => item.outOfStock).length,
       lowStock: stockItems.filter((item) => item.lowStock).length,

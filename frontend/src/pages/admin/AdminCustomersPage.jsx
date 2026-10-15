@@ -1,101 +1,82 @@
-import { Fragment, useState } from 'react';
-import { callApi } from '../../apiClient.js';
+import { useState } from 'react';
 import { useApiData } from '../../useApiData.js';
 import { useDebouncedValue } from '../../useDebouncedValue.js';
-import { useSaveRequest } from '../../useSaveRequest.js';
-import { deliveryAddressLine, formatRupees, formatShortDate } from '../../formatting.js';
 import { LoadingOrError } from '../../components/LoadingOrError.jsx';
-import { StatusPill } from '../orders/OrderParts.jsx';
 import { Icon } from '../../Icon.jsx';
 import { AdminPageHeader } from './AdminLayout.jsx';
+import { TablePager } from './TablePager.jsx';
+import { CustomerRow } from './customers/CustomerRow.jsx';
 
-function OrderHistory({ customerId }) {
-  const { data, error, loading } = useApiData(`/api/admin/orders?customerId=${customerId}`);
-  if (!data) return <LoadingOrError loading={loading} error={error} />;
-  if (data.orders.length === 0) return <p className="hint">No orders yet.</p>;
+const statusFilters = [
+  { status: 'all', label: 'All' },
+  { status: 'unconfirmed', label: 'Not confirmed' },
+  { status: 'blocked', label: 'Blocked' },
+];
+
+function CustomerFilters({ filters, counts, onChange }) {
+  const zones = useApiData('/api/admin/zones');
   return (
-    <ul className="order-history">
-      {[...data.orders].reverse().map((order) => (
-        <li key={order.orderNumber}>
-          <strong>#{order.orderNumber}</strong> · {formatShortDate(order.createdAt)} · {formatRupees(order.total)} <StatusPill status={order.status} />
-          {order.cancelReason && <span className="hint"> · {order.cancelReason}</span>}
-        </li>
-      ))}
-    </ul>
+    <div className="filter-row">
+      <label className="search-input admin-search">
+        <Icon name="search" size={16} />
+        <input type="search" value={filters.search} onChange={(event) => onChange({ search: event.target.value })}
+          placeholder="Name, phone, email, flat or street" aria-label="Search customers" />
+      </label>
+      <div className="chip-row" role="group" aria-label="Show">
+        {statusFilters.map(({ status, label }) => (
+          <button key={status} type="button" className="chip" aria-pressed={filters.status === status} onClick={() => onChange({ status })}>
+            {label}{counts && <span className="chip-count">{counts[status]}</span>}
+          </button>
+        ))}
+      </div>
+      <select className="input admin-select" value={filters.zoneId} onChange={(event) => onChange({ zoneId: event.target.value })} aria-label="Zone">
+        <option value="">All zones</option>
+        {zones.data?.zones.map((zone) => <option key={zone.id} value={zone.id}>{zone.name}</option>)}
+      </select>
+    </div>
   );
 }
 
-// Phone confirmed after their WhatsApp message; blocked customers cannot order.
-function CustomerFlags({ customer, onChanged }) {
-  const { saving, error, save } = useSaveRequest();
-  async function setFlag(flags, question) {
-    if (question && !window.confirm(question)) return;
-    if (await save(() => callApi(`/api/admin/customers/${customer.id}`, { method: 'PUT', body: flags }))) onChanged();
-  }
-  return (
-    <>
-      {customer.phoneConfirmed
-        ? <span className="pill pill-green">Phone confirmed</span>
-        : <button type="button" className="button button-compact button-outline" disabled={saving} onClick={() => setFlag({ phoneConfirmed: true })}>Confirm phone</button>}
-      {customer.blocked
-        ? <button type="button" className="text-button small-text-button" disabled={saving} onClick={() => setFlag({ blocked: false })}>Unblock</button>
-        : <button type="button" className="text-button small-text-button danger-text" disabled={saving}
-          onClick={() => setFlag({ blocked: true }, `Block ${customer.name}? They will not be able to order.`)}>Block</button>}
-      {error && <p className="field-error" role="alert">{error}</p>}
-    </>
-  );
-}
-
-function CustomerRow({ customer, expanded, onToggle, onChanged }) {
-  return (
-    <Fragment>
-      <tr className={customer.blocked ? 'row-inactive' : ''}>
-        <td><strong>{customer.name}</strong>{customer.blocked && <span className="pill pill-red">Blocked</span>}<br /><span className="hint">{customer.email}</span></td>
-        <td><a href={`tel:+91${customer.phone}`}>{customer.phone}</a></td>
-        <td>{deliveryAddressLine(customer)}</td>
-        <td>
-          <button type="button" className="text-button small-text-button" onClick={onToggle} aria-expanded={expanded}>{customer.orderCount} {customer.orderCount === 1 ? 'order' : 'orders'}</button>
-          {customer.lastOrderAt && <span className="hint"> · last {formatShortDate(customer.lastOrderAt)}</span>}
-        </td>
-        <td><div className="badge-cell"><CustomerFlags customer={customer} onChanged={onChanged} /></div></td>
-      </tr>
-      {expanded && <tr><td colSpan={5}><OrderHistory customerId={customer.id} /></td></tr>}
-    </Fragment>
-  );
-}
-
-export function AdminCustomersPage() {
-  const [searchText, setSearchText] = useState('');
+function CustomerTable({ data, onChanged, onPageChange }) {
   const [expandedCustomerId, setExpandedCustomerId] = useState(null);
-  const debouncedSearchText = useDebouncedValue(searchText.trim());
-  const { data, error, loading, reload } = useApiData(`/api/admin/customers?search=${encodeURIComponent(debouncedSearchText)}`);
+  return (
+    <div className="table-box">
+      <div className="table-scroll">
+        <table className="admin-table customer-table">
+          <thead><tr><th>Customer</th><th>Phone</th><th>Address</th><th>Orders</th><th>Status</th><th /></tr></thead>
+          <tbody>
+            {data.customers.map((customer) => (
+              <CustomerRow key={customer.id} customer={customer} expanded={expandedCustomerId === customer.id} onChanged={onChanged}
+                onToggle={() => setExpandedCustomerId(expandedCustomerId === customer.id ? null : customer.id)} />
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <TablePager page={data.page} pageCount={data.pageCount} pageSize={data.pageSize} total={data.total} shownCount={data.customers.length} onChange={onPageChange} />
+    </div>
+  );
+}
+
+function subtitleFor(counts) {
+  if (!counts) return null;
+  const customers = `${counts.all} ${counts.all === 1 ? 'customer' : 'customers'}`;
+  return counts.unconfirmed > 0 ? `${customers} · ${counts.unconfirmed} ${counts.unconfirmed === 1 ? 'phone' : 'phones'} not confirmed` : customers;
+}
+
+// Search, status and zone run on the server; the table fills the window and pages like Products.
+export function AdminCustomersPage() {
+  const [filters, setFilters] = useState({ search: '', status: 'all', zoneId: '', page: 1, pageSize: 25 });
+  const changeFilters = (changes) => setFilters((previous) => ({ ...previous, page: 1, ...changes }));
+  const debouncedSearchText = useDebouncedValue(filters.search.trim());
+  const query = new URLSearchParams({ ...filters, search: debouncedSearchText }).toString();
+  const { data, error, loading, reload } = useApiData(`/api/admin/customers?${query}`);
   return (
     <div className="fit-screen-page">
-      <AdminPageHeader title="Customers" subtitle={data && `${data.customers.length} ${data.customers.length === 1 ? 'customer' : 'customers'}`} />
-      <div className="filter-row">
-        <label className="search-input admin-search">
-          <Icon name="search" size={16} />
-          <input type="search" value={searchText} onChange={(event) => setSearchText(event.target.value)}
-            placeholder="Name, phone, email, flat or street" aria-label="Search customers" />
-        </label>
-      </div>
+      <AdminPageHeader title="Customers" subtitle={subtitleFor(data?.counts)} />
+      <CustomerFilters filters={filters} counts={data?.counts} onChange={changeFilters} />
       <LoadingOrError loading={loading && !data} error={error} onRetry={reload} />
-      {data && data.customers.length === 0 && <p className="hint">No customers found.</p>}
-      {data && data.customers.length > 0 && (
-        <div className="table-box">
-          <div className="table-scroll">
-            <table className="admin-table">
-              <thead><tr><th>Customer</th><th>Phone</th><th>Address</th><th>Orders</th><th>Checks</th></tr></thead>
-              <tbody>
-                {data.customers.map((customer) => (
-                  <CustomerRow key={customer.id} customer={customer} expanded={expandedCustomerId === customer.id} onChanged={reload}
-                    onToggle={() => setExpandedCustomerId(expandedCustomerId === customer.id ? null : customer.id)} />
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
+      {data && data.total === 0 && <p className="hint centered">No customers found.</p>}
+      {data && data.total > 0 && <CustomerTable data={data} onChanged={reload} onPageChange={(changes) => setFilters((previous) => ({ ...previous, ...changes }))} />}
     </div>
   );
 }

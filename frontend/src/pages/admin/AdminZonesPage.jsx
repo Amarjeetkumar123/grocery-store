@@ -7,26 +7,27 @@ import { ZoneForm } from './zones/ZoneForm.jsx';
 import { TowerEditor } from './zones/TowerEditor.jsx';
 import { SlotTable } from './zones/SlotTable.jsx';
 
+// Cancel throws away unsaved edits by starting the form again from the saved zone.
 function ZoneDetails({ zone, onZoneSaved, reload }) {
+  const [formVersion, setFormVersion] = useState(0);
   return (
-    <div className="zone-details">
-      <section className="card form-section">
-        <div className="card-heading">
-          <h2>{zone.name}</h2>
-          <span className="badge-cell">
-            <span className="pill pill-blue">{zone.type === 'society' ? 'Society' : 'Local area'}</span>
-            <span className={`pill ${zone.active ? 'pill-green' : 'pill-gray'}`}>{zone.active ? 'Live' : 'Off'}</span>
-          </span>
-        </div>
-        <ZoneForm key={zone.id} zone={zone} onSaved={onZoneSaved} />
+    <>
+      <ZoneForm key={`${zone.id}-${formVersion}`} zone={zone} onSaved={onZoneSaved} onCancel={() => setFormVersion(formVersion + 1)}>
         {zone.type === 'society' && <TowerEditor zone={zone} onChanged={reload} />}
-      </section>
+      </ZoneForm>
       <SlotTable key={zone.id} zone={zone} onChanged={reload} />
-    </div>
+    </>
   );
 }
 
+function zonesSubtitle(zones) {
+  const societies = zones.filter((zone) => zone.type === 'society').length;
+  const localAreas = zones.length - societies;
+  return `${zones.length} delivery ${zones.length === 1 ? 'zone' : 'zones'} · ${societies} ${societies === 1 ? 'society' : 'societies'} and ${localAreas} ${localAreas === 1 ? 'local area' : 'local areas'}`;
+}
+
 // selectedZoneId: a zone id, 'new' while adding a zone, or null for the first zone.
+// The zone list and the editor each scroll on their own and the page fits the window.
 export function AdminZonesPage() {
   const { data, error, loading, reload } = useApiData('/api/admin/zones');
   const [selectedZoneId, setSelectedZoneId] = useState(null);
@@ -39,20 +40,19 @@ export function AdminZonesPage() {
   }
 
   return (
-    <>
-      <AdminPageHeader title="Zones & slots" />
+    <div className="fit-screen-page">
+      <AdminPageHeader title="Zones & slots" subtitle={data ? zonesSubtitle(zones) : null} />
       <LoadingOrError loading={loading && !data} error={error} onRetry={reload} />
       {data && (
         <div className="zones-layout">
           <ZoneList zones={zones} selectedZoneId={zone?.id} onSelect={setSelectedZoneId} onAddZone={() => setSelectedZoneId('new')} />
-          {selectedZoneId === 'new' ? (
-            <section className="card form-section zone-details">
-              <h2>New zone</h2>
-              <ZoneForm zone={null} onSaved={showSavedZone} />
-            </section>
-          ) : zone && <ZoneDetails zone={zone} onZoneSaved={showSavedZone} reload={reload} />}
+          <div className="zone-details">
+            {selectedZoneId === 'new'
+              ? <ZoneForm zone={null} onSaved={showSavedZone} onCancel={() => setSelectedZoneId(null)} />
+              : zone && <ZoneDetails zone={zone} onZoneSaved={showSavedZone} reload={reload} />}
+          </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

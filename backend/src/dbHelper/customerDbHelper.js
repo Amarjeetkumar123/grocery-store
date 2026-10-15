@@ -77,8 +77,8 @@ export async function upsertCustomerProfile(executor, user, zone, profile) {
   return result.rowCount > 0;
 }
 
-// customerFilter comes from filters/orderFilters.js (buildCustomerFilter).
-const adminCustomersQuery = (whereClause) => `
+// customerFilter comes from filters/orderFilters.js (buildCustomerFilter). $n+1 and $n+2 are limit and offset.
+const adminCustomersQuery = (whereClause, valueCount) => `
   select customer.id, customer.name, customer.phone, customer.email, customer.phone_confirmed, customer.blocked,
          zone.name as zone_name, customer.zone_type, tower.name as tower_name, customer.flat_number,
          customer.house_number, customer.street, customer.landmark, customer.created_at,
@@ -90,11 +90,28 @@ const adminCustomersQuery = (whereClause) => `
   left join orders placed on placed.customer_id = customer.id
   ${whereClause}
   group by customer.id, zone.name, tower.name
-  order by max(placed.created_at) desc nulls last, customer.created_at desc
-  limit 300`;
+  order by max(placed.created_at) desc nulls last, customer.created_at desc, customer.id
+  limit $${valueCount + 1} offset $${valueCount + 2}`;
 
-export async function findCustomersForAdmin(executor, customerFilter) {
-  const result = await executor.query(adminCustomersQuery(customerFilter.whereClause), customerFilter.values);
+const customerCountsQuery = (whereClause) => `
+  select count(*)::int as all_customers,
+         count(*) filter (where not customer.phone_confirmed and not customer.blocked)::int as unconfirmed,
+         count(*) filter (where customer.blocked)::int as blocked
+  from customers customer
+  join zones zone on zone.id = customer.zone_id
+  ${whereClause}`;
+
+// How many customers match the search and zone, in total and per status.
+export async function countCustomersByStatus(executor, customerFilter) {
+  const result = await executor.query(customerCountsQuery(customerFilter.whereClause), customerFilter.values);
+  const row = result.rows[0];
+  return { all: row.all_customers, unconfirmed: row.unconfirmed, blocked: row.blocked };
+}
+
+// page: { limit, offset } from validators/pagingValidation.js.
+export async function findCustomersForAdmin(executor, customerFilter, page) {
+  const { whereClause, values } = customerFilter;
+  const result = await executor.query(adminCustomersQuery(whereClause, values.length), [...values, page.limit, page.offset]);
   return result.rows.map((row) => ({
     id: row.id,
     name: row.name,
