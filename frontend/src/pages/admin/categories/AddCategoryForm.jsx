@@ -12,10 +12,9 @@ function PhotoPicker({ file, onChoose }) {
   useEffect(() => () => previewUrl && URL.revokeObjectURL(previewUrl), [previewUrl]);
   return (
     <div className="field">
-      <span className="field-label">Photo (optional)</span>
-      <label className="category-photo-upload category-photo-upload-large file-button">
-        {previewUrl ? <img src={previewUrl} alt="" /> : <span className="category-photo-empty"><Icon name="upload" /></span>}
-        <span>{file ? 'Change photo' : 'Choose photo'}</span>
+      <span className="field-label">Photo</span>
+      <label className="category-thumb file-button" title={file ? 'Change photo' : 'Choose photo'}>
+        {previewUrl ? <img src={previewUrl} alt="" /> : <Icon name="camera" />}
         <input type="file" accept="image/*" onChange={(event) => onChoose(event.target.files?.[0] ?? null)} aria-label="Category photo" />
       </label>
     </div>
@@ -29,6 +28,7 @@ export function AddCategoryForm({ onAdded }) {
   const categoryRequest = useSaveRequest();
   const photoRequest = useSaveRequest();
   const saving = categoryRequest.saving || photoRequest.saving;
+  const { fieldErrors } = categoryRequest;
   const update = (fieldName) => (value) => setValues((previous) => ({ ...previous, [fieldName]: value }));
 
   async function handleSubmit(event) {
@@ -41,17 +41,19 @@ export function AddCategoryForm({ onAdded }) {
     onAdded();
   }
   return (
-    <form className="card form-section" onSubmit={handleSubmit}>
+    <form className="card category-add" onSubmit={handleSubmit}>
       <h2>Add a category</h2>
-      <div className="field-row">
+      <div className="category-add-row">
         <PhotoPicker file={photoFile} onChoose={setPhotoFile} />
-        <TextField fieldId="categoryName" label="Name" value={values.name} onChange={update('name')} errorMessage={categoryRequest.fieldErrors.name} maxLength={60} required />
-        <TextField fieldId="categoryOrder" label="Order (smaller shows first)" inputMode="numeric" value={values.sortOrder} onChange={update('sortOrder')} errorMessage={categoryRequest.fieldErrors.sortOrder} />
+        <TextField fieldId="categoryName" className="category-add-name" label="Name" placeholder="e.g. Snacks & Namkeen" value={values.name} onChange={update('name')} errorMessage={fieldErrors.name} maxLength={60} required />
+        <TextField fieldId="categoryOrder" className="category-add-order" label="Order" inputMode="numeric" value={values.sortOrder} onChange={update('sortOrder')} errorMessage={fieldErrors.sortOrder} />
+        <label className="switch-label category-add-switch">
+          <input type="checkbox" className="switch" checked={values.comingSoon} onChange={(event) => update('comingSoon')(event.target.checked)} /> Coming soon
+        </label>
+        <button type="submit" className="button button-compact category-add-button" disabled={saving}><Icon name="plus" /> {saving ? 'Adding…' : 'Add'}</button>
       </div>
-      <label className="checkbox-label"><input type="checkbox" checked={values.comingSoon} onChange={(event) => update('comingSoon')(event.target.checked)} /> Coming soon (customers can ask to be told when it opens)</label>
-      {categoryRequest.error && <p className="error-text" role="alert">{categoryRequest.error}</p>}
+      {categoryRequest.error && !fieldErrors.name && !fieldErrors.sortOrder && <p className="error-text" role="alert">{categoryRequest.error}</p>}
       {photoRequest.error && <p className="error-text" role="alert">Category added, but its photo did not upload: {photoRequest.error} Add it again from the list below.</p>}
-      <div className="form-actions"><button type="submit" className="button button-compact" disabled={saving}>{saving ? 'Adding…' : 'Add'}</button></div>
     </form>
   );
 }

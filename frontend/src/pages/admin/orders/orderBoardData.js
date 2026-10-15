@@ -101,9 +101,9 @@ function uniqueOptions(orders, valueOf, labelOf) {
 export const zoneOptionsOf = (orders) => uniqueOptions(orders, (order) => String(order.zoneId), (order) => order.address.zoneName);
 export const timeOptionsOf = (orders) => uniqueOptions(orders, timeWindowOf, (order) => formatTimeRange(order.slot.startTime, order.slot.endTime));
 
-// "Capetown · Tower B-1204" or "42, Gali No. 3 · Near Shiv Mandir"
+// "Tower B · Flat 1204" or "42, Gali No. 3"
 export function shortAddressOf({ address }) {
-  if (address.zoneType === 'society') return `${address.towerName} · ${address.flatNumber}`;
+  if (address.zoneType === 'society') return `${address.towerName} · Flat ${address.flatNumber}`;
   return `${address.houseNumber}, ${address.street}`;
 }
 

@@ -36,6 +36,13 @@ const iconShapes = {
   back: <path d="M15 5l-7 7 7 7" />,
   right: <path d="m9 5 7 7-7 7" />,
   down: <path d="m6 9 6 6 6-6" />,
+  trash: <path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" />,
+  camera: (
+    <>
+      <path d="M4 8h3l2-3h6l2 3h3v11H4z" />
+      <circle cx="12" cy="13" r="3.5" />
+    </>
+  ),
   grid: <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" />,
   user: (
     <>

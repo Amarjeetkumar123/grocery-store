@@ -5,9 +5,10 @@ function FieldError({ fieldId, message }) {
   return <p id={`${fieldId}-error`} className="field-error">{message}</p>;
 }
 
-export function TextField({ fieldId, label, value, onChange, errorMessage, ...inputProperties }) {
+// className: extra class for the wrapper, e.g. to size it in a row.
+export function TextField({ fieldId, label, value, onChange, errorMessage, className, ...inputProperties }) {
   return (
-    <div className="field">
+    <div className={className ? `field ${className}` : 'field'}>
       <label htmlFor={fieldId}>{label}</label>
       <input
         id={fieldId}

@@ -5,6 +5,10 @@ import { Icon } from '../../../Icon.jsx';
 export function BoardFilters({ filters, setFilter, zoneOptions, timeOptions, showSearch = true, children }) {
   return (
     <div className="filter-row board-filters">
+      {showSearch && (
+        <input type="search" className="input admin-search" placeholder="Order no., name or phone" aria-label="Search orders"
+          value={filters.search} onChange={(event) => setFilter('search', event.target.value)} />
+      )}
       {children}
       <label className="filter-field">
         <Icon name="pin" size={18} /> Zone
@@ -20,10 +24,6 @@ export function BoardFilters({ filters, setFilter, zoneOptions, timeOptions, sho
           {timeOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
         </select>
       </label>
-      {showSearch && (
-        <input type="search" className="input admin-search" placeholder="Order no., name, phone" aria-label="Search orders"
-          value={filters.search} onChange={(event) => setFilter('search', event.target.value)} />
-      )}
     </div>
   );
 }

@@ -8,6 +8,8 @@ import { itemCountOf, shortAddressOf } from './orderBoardData.js';
 import { mapLinkFor, whatsAppLinkFor } from './customerContactLinks.js';
 import { RiderPicker } from './RiderPicker.jsx';
 
+const itemsLabel = (count) => `${count} ${count === 1 ? 'item' : 'items'}`;
+
 // The button that moves an order to the next column, and who sees it.
 const nextSteps = {
   new: { status: 'confirmed', label: 'Confirm', icon: 'check', roles: ['owner'] },
@@ -64,7 +66,7 @@ function CardActions({ order, role, save, onChanged }) {
         </button>
       )}
       {order.status === 'out_for_delivery' && role === 'owner' && <OwnerDeliveredButtons order={order} save={save} onChanged={onChanged} />}
-      <a className="icon-button icon-button-outline" href={whatsAppLinkFor(order, store.name)} target="_blank" rel="noreferrer" aria-label={`WhatsApp ${order.address.customerName}`}>
+      <a className="icon-button icon-button-outline icon-button-whatsapp" href={whatsAppLinkFor(order, store.name)} target="_blank" rel="noreferrer" aria-label={`WhatsApp ${order.address.customerName}`}>
         <Icon name="chat" />
       </a>
       {mapLink && <a className="icon-button icon-button-outline" href={mapLink} target="_blank" rel="noreferrer" aria-label="Open in Google Maps"><Icon name="pin" /></a>}
@@ -89,8 +91,8 @@ function CardDetails({ order, isOwner, save, onChanged }) {
 }
 
 function CardCorner({ order }) {
-  if (order.status === 'new') return <span className="hint">{formatTimeAgo(order.createdAt)}</span>;
-  if (order.status === 'out_for_delivery') return <span className="hint">{order.rider?.name}</span>;
+  if (order.status === 'new') return <small className="board-card-corner">{formatTimeAgo(order.createdAt)}</small>;
+  if (order.status === 'out_for_delivery') return <small className="board-card-corner">{order.rider?.name}</small>;
   if (order.paymentStatus === 'paid') return <span className="pill pill-green">{order.paymentMethod === 'upi' ? 'UPI' : 'Cash'} ✓</span>;
   return <span className="pill pill-gray">{order.status === 'delivered' ? 'Unpaid' : 'Cash/UPI'}</span>;
 }
@@ -102,10 +104,10 @@ export function OrderBoardCard({ order, riders, onChanged }) {
   const shared = { order, save, onChanged };
   return (
     <article className={`board-card${order.status === 'new' && !order.customer.phoneConfirmed ? ' board-card-attention' : ''}`}>
-      <div className="card-heading"><strong>#{order.orderNumber}</strong><CardCorner order={order} /></div>
-      <p className="board-card-place">{order.address.zoneName} · {shortAddressOf(order)}</p>
-      <p className="hint">{formatDeliveryDay(order.deliveryDate)} · {formatTimeRange(order.slot.startTime, order.slot.endTime)}</p>
-      <p className="hint">{itemCountOf(order)} items · <strong>{formatRupees(order.total)}</strong></p>
+      <div className="board-card-top"><strong>#{order.orderNumber}</strong><CardCorner order={order} /></div>
+      <p className="board-card-place"><small>{order.address.zoneName}</small><strong>{shortAddressOf(order)}</strong></p>
+      <p className="board-card-meta"><Icon name="clock" size={15} /> {formatDeliveryDay(order.deliveryDate)} · {formatTimeRange(order.slot.startTime, order.slot.endTime)}</p>
+      <p className="board-card-meta board-card-total"><span>{itemsLabel(itemCountOf(order))}</span><strong>{formatRupees(order.total)}</strong></p>
       <CardBadges {...shared} isOwner={isOwner} />
       {order.status === 'packed' && isOwner && <RiderPicker orderNumbers={[order.orderNumber]} rider={order.rider} riders={riders} save={save} onChanged={onChanged} />}
       <CardActions {...shared} role={account.role} />

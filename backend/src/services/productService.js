@@ -1,7 +1,7 @@
 import { uniqueViolationErrorCode, withTransaction } from '../dbHelper/databaseConnection.js';
 import { categoryExists } from '../dbHelper/categoryDbHelper.js';
 import {
-  findProducts, insertProduct, productExists, setProductImagePath, updateProduct as updateProductRow,
+  countProducts, findProducts, insertProduct, productExists, setProductImagePath, updateProduct as updateProductRow,
 } from '../dbHelper/productDbHelper.js';
 import { hidePackSizesExcept, insertPackSize, updatePackSize } from '../dbHelper/packSizeDbHelper.js';
 import { buildProductFilter } from '../filters/productFilters.js';
@@ -25,13 +25,22 @@ async function findAdminProduct({ database, productImageStorage }, productId) {
   return { product: toAdminProduct(product, productImageStorage) };
 }
 
+const pageSizes = [10, 25, 50];
+const defaultPageSize = 25;
+
+// One page of products. query: { categoryId, search, page, pageSize }.
 async function listProducts({ database, productImageStorage }, query) {
-  const products = await findProducts(database, buildProductFilter({
+  const productFilter = buildProductFilter({
     includeHidden: true,
     categoryId: readPositiveInteger(query.categoryId),
     searchText: query.search,
-  }));
-  return { products: products.map((product) => toAdminProduct(product, productImageStorage)) };
+  });
+  const pageSize = pageSizes.includes(Number(query.pageSize)) ? Number(query.pageSize) : defaultPageSize;
+  const total = await countProducts(database, productFilter);
+  const pageCount = Math.max(1, Math.ceil(total / pageSize));
+  const page = Math.min(readPositiveInteger(query.page) ?? 1, pageCount);
+  const products = await findProducts(database, productFilter, { limit: pageSize, offset: (page - 1) * pageSize });
+  return { products: products.map((product) => toAdminProduct(product, productImageStorage)), total, page, pageSize, pageCount };
 }
 
 async function validateProductForm(database, body) {

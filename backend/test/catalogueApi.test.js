@@ -180,6 +180,23 @@ test('bulk import with any bad row saves nothing and lists every problem', { ski
   assert.equal((await callApi('/api/products?search=besan')).body.products.length, 0, 'valid rows were not saved either');
 });
 
+test('the admin product list comes one page at a time', { skip }, async () => {
+  await testServer.database.query(`insert into products (category_id, name)
+    select id, 'Paging test ' || number from categories, generate_series(1, 12) number where name = 'Rice'`);
+  const listProducts = async (query) => (await callApi(`/api/admin/products?${query}`, { token: 'owner-token' })).body;
+  const everything = await listProducts('pageSize=50');
+  assert.ok(everything.total >= 12);
+  assert.equal(everything.products.length, everything.total);
+
+  const firstPage = await listProducts('pageSize=10&page=1');
+  assert.deepEqual([firstPage.products.length, firstPage.pageCount], [10, Math.ceil(everything.total / 10)]);
+  const lastPage = await listProducts('pageSize=10&page=99');
+  assert.equal(lastPage.page, lastPage.pageCount, 'a page past the end shows the last page');
+  assert.equal(lastPage.products.length, everything.total - (lastPage.pageCount - 1) * 10);
+  assert.equal((await listProducts('pageSize=7')).pageSize, 25, 'unknown page sizes fall back to 25');
+  assert.equal((await listProducts('search=paging test')).total, 12);
+});
+
 test('notify me works for coming-soon categories only, after an address is saved', { skip }, async () => {
   const fruitsId = categoryIds['Fruits & Vegetables'];
   const beforeAddress = await callApi('/api/account/notify-me', { token: 'customer-token', method: 'POST', body: { categoryId: fruitsId } });

@@ -4,7 +4,7 @@ import { callApi } from '../../apiClient.js';
 import { useAuthentication } from '../../AuthenticationContext.jsx';
 import { useStoreDetails } from '../../useStoreDetails.js';
 import { Icon } from '../../Icon.jsx';
-import { AlertsToggle } from '../../components/AlertsToggle.jsx';
+import { AlertsSwitch } from '../../components/AlertsToggle.jsx';
 import logoImage from '../../assets/logo.png';
 
 const navigationGroups = [
@@ -74,9 +74,12 @@ export function AdminLayout() {
           ))}
         </nav>
         <div className="admin-user">
-          <p>{account.staffName} <span>· {roleLabels[account.role]}</span></p>
-          <AlertsToggle label="new order alerts" className="admin-navigation-link" />
-          <button type="button" className="admin-navigation-link" onClick={signOut}><Icon name="logout" /> Sign out</button>
+          <AlertsSwitch label="New order alerts" />
+          <div className="admin-account">
+            <span className="admin-avatar" aria-hidden="true">{account.staffName?.charAt(0).toUpperCase()}</span>
+            <span className="admin-account-text"><strong>{account.staffName}</strong><small>{roleLabels[account.role]}</small></span>
+            <button type="button" className="icon-button admin-sign-out" onClick={signOut} aria-label="Sign out" title="Sign out"><Icon name="logout" size={18} /></button>
+          </div>
         </div>
       </aside>
       <main className="admin-main"><Outlet /></main>
@@ -90,10 +93,14 @@ export function AdminHomeRedirect() {
   return <Navigate to={account.role === 'owner' ? '/admin/dashboard' : '/admin/orders'} replace />;
 }
 
-export function AdminPageHeader({ title, children }) {
+// subtitle: one short summary line under the title, e.g. "24 products".
+export function AdminPageHeader({ title, subtitle, children }) {
   return (
     <header className="admin-page-header">
-      <h1>{title}</h1>
+      <div>
+        <h1>{title}</h1>
+        {subtitle && <p className="admin-page-subtitle">{subtitle}</p>}
+      </div>
       <div className="admin-page-actions">{children}</div>
     </header>
   );

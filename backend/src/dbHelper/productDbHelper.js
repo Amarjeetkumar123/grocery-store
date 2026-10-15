@@ -1,6 +1,8 @@
 // productFilter comes from filters/productFilters.js. The two fragments
 // below are fixed text chosen by includeHidden, never user input.
-function productsWithPackSizesQuery({ whereClause, includeHidden }) {
+// page: { limit, offset } for one page, or null for up to 500 products.
+function productsWithPackSizesQuery({ whereClause, includeHidden, values }, page) {
+  const pageClause = page ? `limit $${values.length + 1} offset $${values.length + 2}` : 'limit 500';
   const packSizeCondition = includeHidden ? '' : 'and pack.active';
   const onlyWithPackSizes = includeHidden ? '' : 'having count(pack.id) > 0';
   return `
@@ -21,7 +23,7 @@ function productsWithPackSizesQuery({ whereClause, includeHidden }) {
     group by product.id, category.name
     ${onlyWithPackSizes}
     order by product.name
-    limit 500`;
+    ${pageClause}`;
 }
 
 function toProduct(row) {
@@ -40,9 +42,20 @@ function toProduct(row) {
   };
 }
 
-export async function findProducts(executor, productFilter) {
-  const result = await executor.query(productsWithPackSizesQuery(productFilter), productFilter.values);
+export async function findProducts(executor, productFilter, page = null) {
+  const pageValues = page ? [page.limit, page.offset] : [];
+  const result = await executor.query(productsWithPackSizesQuery(productFilter, page), [...productFilter.values, ...pageValues]);
   return result.rows.map(toProduct);
+}
+
+// Admin only (includeHidden): products with or without pack sizes are counted.
+export async function countProducts(executor, { whereClause, values }) {
+  const result = await executor.query(
+    `select count(*)::int as product_count from products product
+     join categories category on category.id = product.category_id ${whereClause}`,
+    values,
+  );
+  return result.rows[0].product_count;
 }
 
 export async function productExists(executor, productId) {

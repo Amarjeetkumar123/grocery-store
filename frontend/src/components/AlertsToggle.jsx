@@ -60,3 +60,16 @@ export function AlertsBell() {
     </span>
   );
 }
+
+// On/off switch row, for the admin sidebar. Greyed out with the reason when alerts cannot work here.
+export function AlertsSwitch({ label }) {
+  const { state, note, toggle } = useAlerts();
+  if (state === 'checking') return null;
+  return (
+    <label className="alerts-switch" title={note}>
+      <Icon name="bell" size={16} />
+      <span>{label}</span>
+      <input type="checkbox" className="switch" role="switch" checked={state === 'on'} disabled={Boolean(note) || state === 'busy'} onChange={toggle} />
+    </label>
+  );
+}

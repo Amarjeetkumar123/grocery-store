@@ -9,21 +9,27 @@ import { UpcomingDays } from './orders/UpcomingDays.jsx';
 import { dateRangeLabel, listQueryOf, useBoardFilters, useBoardOrders, useRiders } from './orders/orderBoardData.js';
 
 const columns = [
-  { status: 'new', title: 'New' },
-  { status: 'confirmed', title: 'Confirmed' },
-  { status: 'packed', title: 'Packed' },
-  { status: 'out_for_delivery', title: 'Out for delivery' },
-  { status: 'delivered', title: 'Delivered' },
+  { status: 'new', title: 'New', empty: 'No new orders' },
+  { status: 'confirmed', title: 'Confirmed', empty: 'No orders to pack' },
+  { status: 'packed', title: 'Packed', empty: 'Nothing waiting for a rider' },
+  { status: 'out_for_delivery', title: 'Out for delivery', empty: 'Nothing on the road' },
+  { status: 'delivered', title: 'Delivered', empty: 'Nothing delivered yet' },
 ];
 
 // The count is for every page; the cards are this page's.
-function BoardColumn({ title, count, orders, riders, onChanged }) {
+function BoardColumn({ column, count, orders, riders, onChanged }) {
   return (
-    <section className="board-column" aria-label={title}>
-      <h2>{title} <span className="board-count">{count}</span></h2>
+    <section className={`board-column board-column-${column.status}`} aria-label={column.title}>
+      <h2><span className="board-dot" aria-hidden="true" />{column.title} <span className="board-count">{count}</span></h2>
+      {orders.length === 0 && <p className="board-empty">{column.empty}</p>}
       {orders.map((order) => <OrderBoardCard key={order.orderNumber} order={order} riders={riders} onChanged={onChanged} />)}
     </section>
   );
+}
+
+function boardSummary(filters, statusCounts) {
+  const waiting = statusCounts.new ?? 0;
+  return `${dateRangeLabel(filters)} · ${waiting > 0 ? `${waiting} new, waiting to confirm` : 'nothing waiting to confirm'}`;
 }
 
 function PageButtons({ page, pageCount, setFilter }) {
@@ -54,9 +60,9 @@ export function AdminOrdersPage() {
   const oneDay = filters.from && filters.from === filters.to ? filters.from : null;
   return (
     <>
-      <AdminPageHeader title={`Orders · ${dateRangeLabel(filters)}`}>
+      <AdminPageHeader title="Orders" subtitle={boardSummary(filters, statusCounts)}>
         <Link to={`/admin/picking-list?${listQueryOf(filters)}`} className="button button-compact button-outline"><Icon name="layers" /> Picking list</Link>
-        <Link to={`/admin/delivery-list?${listQueryOf(filters)}`} className="button button-compact"><Icon name="truck" /> Delivery list</Link>
+        <Link to={`/admin/delivery-list?${listQueryOf(filters)}`} className="button button-compact button-outline"><Icon name="truck" /> Delivery list</Link>
       </AdminPageHeader>
       <BoardFilters filters={filters} setFilter={setFilter} {...filterOptionsOf(data)}>
         <DateRangeFields filters={filters} setFilter={setFilter} setFilters={setFilters} />
@@ -66,13 +72,13 @@ export function AdminOrdersPage() {
       {data && (
         <div className="order-board">
           {columns.map((column) => (
-            <BoardColumn key={column.status} title={column.title} count={statusCounts[column.status] ?? 0} riders={riders} onChanged={reload}
+            <BoardColumn key={column.status} column={column} count={statusCounts[column.status] ?? 0} riders={riders} onChanged={reload}
               orders={orders.filter((order) => order.status === column.status)} />
           ))}
         </div>
       )}
       {data && <PageButtons page={data.page} pageCount={data.pageCount} setFilter={setFilter} />}
-      {statusCounts.cancelled > 0 && <p className="hint">{statusCounts.cancelled} cancelled {statusCounts.cancelled === 1 ? 'order is' : 'orders are'} not shown.</p>}
+      {statusCounts.cancelled > 0 && <p className="hint">{statusCounts.cancelled} cancelled {statusCounts.cancelled === 1 ? 'order is' : 'orders are'} hidden.</p>}
     </>
   );
 }
