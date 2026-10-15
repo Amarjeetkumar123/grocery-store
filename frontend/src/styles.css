@@ -98,8 +98,6 @@ h1, h2, h3, strong, b, th, dt { font-weight: 600; }
 }
 .brand { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 600; }
 .store-logo { width: 40px; height: 40px; display: block; border-radius: 12px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); }
-.store-logo-large { width: 72px; height: 72px; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25); border-radius: 20px; }
-.login-illustration { width: 86%; max-width: 300px; height: auto; margin-top: 6px; }
 .delivery-line {
   align-self: flex-start; max-width: 100%; display: inline-flex; align-items: center; gap: 8px; border-radius: 999px;
   padding: 6px 12px 6px 6px; font-size: 13px; color: #dcefe4; text-decoration: none;
@@ -108,45 +106,64 @@ h1, h2, h3, strong, b, th, dt { font-weight: 600; }
 .delivery-line strong { color: #fff; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .delivery-pin { flex: none; width: 26px; height: 26px; border-radius: 50%; background: var(--yellow); color: var(--green-dark); display: inline-flex; align-items: center; justify-content: center; }
 
-/* ── Login ────────────────────────────────────────── */
-.login-hero {
+/* ── Login: the logo with category pictures floating around it, then a sign-in sheet.
+   Phones: green on top, sheet at the bottom. Short phones: smaller picture group.
+   Tablets upright: the same, roomier. Computers and tablets sideways: split screen. ── */
+.login-page { min-height: 100dvh; display: flex; flex-direction: column; background: var(--card); }
+.login-welcome {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; text-align: center;
+  padding: 32px 24px 48px; color: #fff;
   background: radial-gradient(120% 100% at 50% 0%, var(--green-bright) 0%, var(--green) 50%, var(--green-dark) 100%);
-  color: #fff;
-  padding: 36px 24px 20px;
-  border-radius: 0 0 32px 32px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  text-align: center;
 }
-.login-hero h1 { font-size: 24px; }
-.login-hero p { color: #d6ebdf; font-size: 14px; line-height: 1.45; max-width: 30ch; }
-.login-logo { position: relative; display: flex; margin-bottom: 4px; }
-.login-logo::before { content: ''; position: absolute; inset: -7px; border-radius: 26px; border: 2px solid rgba(244, 201, 93, 0.55); }
-.login-body { padding-top: 20px; }
-.benefit-card { background: var(--card); border-radius: 20px; padding: 14px 4px; box-shadow: var(--shadow-small); }
-.benefit-card li { font-size: 12.5px; font-weight: 600; gap: 7px; }
-.benefit-card li + li { border-left: 1px dashed var(--border); }
-.benefit-card .benefit-icon { width: 40px; height: 40px; border-radius: 13px; color: var(--green); }
-.login-actions { margin-top: 12px; display: flex; flex-direction: column; gap: 12px; }
-.login-actions h2 { font-size: 16px; text-align: center; }
-.login-note { text-align: center; font-size: 12px; text-wrap: balance; }
-.benefits {
-  list-style: none;
-  margin: 8px 0 0;
-  padding: 0;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0;
-  font-size: 13px;
-  text-align: center;
-}
-.login-divider { display: flex; align-items: center; gap: 12px; color: var(--text-secondary); font-size: 13px; margin: 2px 0; }
-.login-divider::before, .login-divider::after { content: ''; flex: 1; border-top: 1px solid var(--border); }
+.login-welcome h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.01em; }
+.login-tagline { margin: 0; font-size: 14px; line-height: 1.5; color: #d6ebdf; max-width: 30ch; }
+.login-orbit { position: relative; flex: none; width: 280px; height: 230px; margin-bottom: 10px; }
+.login-orbit-logo { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 76px; height: 76px; border-radius: 22px; box-shadow: 0 10px 24px rgba(0, 0, 0, 0.3); }
+.login-bubble { position: absolute; border-radius: 50%; background: var(--cream); display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 18px rgba(0, 0, 0, 0.18); }
+.login-bubble img { width: 70%; height: 70%; object-fit: contain; }
+.login-bubble:nth-child(1) { width: 70px; height: 70px; left: 6px; top: 22px; }
+.login-bubble:nth-child(2) { width: 58px; height: 58px; left: 112px; top: 0; }
+.login-bubble:nth-child(3) { width: 74px; height: 74px; right: 4px; top: 30px; }
+.login-bubble:nth-child(4) { width: 60px; height: 60px; left: 22px; bottom: 6px; }
+.login-bubble:nth-child(5) { width: 56px; height: 56px; left: 116px; bottom: 0; }
+.login-bubble:nth-child(6) { width: 66px; height: 66px; right: 18px; bottom: 12px; }
+.login-sheet { flex: none; position: relative; margin-top: -22px; padding: 26px 20px 22px; background: var(--card); border-radius: 22px 22px 0 0; box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.06); }
+.login-sheet-inner { width: 100%; max-width: 400px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+.login-sheet h2 { font-size: 16px; font-weight: 600; text-align: center; }
+.login-lead { margin: -6px 0 4px; font-size: 13px; color: var(--text-secondary); text-align: center; text-wrap: balance; }
+.login-sheet .button-large { min-height: 0; height: 48px; font-size: 14px; font-weight: 500; gap: 10px; }
+.login-or { display: flex; align-items: center; gap: 12px; margin: 0; font-size: 12px; color: var(--text-secondary); }
+.login-or::before, .login-or::after { content: ''; flex: 1; border-top: 1px solid #ebe9e2; }
+.login-perks { display: flex; justify-content: center; flex-wrap: wrap; gap: 8px 16px; margin-top: 6px; padding-top: 14px; border-top: 1px solid #f0eee8; }
+.login-perks span { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; color: var(--text-secondary); white-space: nowrap; }
+.login-perks svg { color: var(--green); }
 .login-email-form { display: flex; flex-direction: column; gap: 12px; }
 .login-mode-links { display: flex; justify-content: space-between; }
-.benefits li { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+@media (max-height: 760px) {
+  .login-welcome { gap: 6px; padding: 20px 20px 40px; }
+  .login-orbit { transform: scale(0.78); margin: -24px 0 -20px; }
+  .login-welcome h1 { font-size: 20px; }
+  .login-tagline { font-size: 13px; }
+  .login-sheet { padding: 22px 18px 18px; }
+  .login-sheet-inner { gap: 10px; }
+  .login-sheet .button-large { height: 44px; }
+}
+@media (min-width: 700px) {
+  .login-welcome { gap: 10px; padding: 48px 40px 64px; }
+  .login-orbit { transform: scale(1.2); margin: 20px 0 40px; }
+  .login-sheet { margin-top: -28px; padding: 40px 32px 36px; border-radius: 28px 28px 0 0; }
+  .login-sheet-inner { max-width: 420px; gap: 14px; }
+  .login-sheet .button-large { height: 50px; }
+}
+@media (min-width: 1100px), (min-width: 900px) and (orientation: landscape) {
+  .login-page { flex-direction: row; }
+  .login-welcome { flex: 1 1 55%; padding: 48px; background: radial-gradient(120% 100% at 30% 0%, var(--green-bright) 0%, var(--green) 50%, var(--green-dark) 100%); }
+  .login-sheet { flex: 1 1 45%; display: flex; align-items: center; margin: 0; padding: 48px; border-radius: 0; box-shadow: none; }
+  .login-sheet-inner { max-width: 360px; }
+  .login-sheet h2 { font-size: 18px; text-align: left; }
+  .login-lead { text-align: left; }
+  .login-perks { justify-content: flex-start; }
+}
 .benefit-icon {
   width: 46px;
   height: 46px;

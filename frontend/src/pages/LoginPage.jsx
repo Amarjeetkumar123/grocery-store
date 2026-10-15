@@ -4,13 +4,13 @@ import { supabase } from '../supabaseClient.js';
 import { useAuthentication } from '../AuthenticationContext.jsx';
 import { useStoreDetails } from '../useStoreDetails.js';
 import logoImage from '../assets/logo.png';
-import groceriesImage from '../assets/login-groceries.png';
+import { categoryImageFor } from '../categoryImages.js';
 import { Icon } from '../Icon.jsx';
 import { EmailPasswordForm } from './login/EmailPasswordForm.jsx';
 
 function GoogleLogo() {
   return (
-    <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true">
+    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
       <path fill="#4285F4" d="M20.5 12.2c0-.7-.1-1.3-.2-1.9H12v3.6h4.8a4.1 4.1 0 0 1-1.8 2.7v2.2h2.9c1.7-1.6 2.6-3.9 2.6-6.6z" />
       <path fill="#34A853" d="M12 21c2.4 0 4.5-.8 5.9-2.2L15 16.6c-.8.5-1.8.9-3 .9-2.3 0-4.3-1.6-5-3.7H4v2.3A9 9 0 0 0 12 21z" />
       <path fill="#FBBC05" d="M7 13.8a5.4 5.4 0 0 1 0-3.5V8H4a9 9 0 0 0 0 8.1z" />
@@ -19,13 +19,25 @@ function GoogleLogo() {
   );
 }
 
-function StoreBenefits() {
+const floatingCategories = ['Oils & Ghee', 'Atta & Flours', 'Rice', 'Dals & Pulses', 'Fruits & Vegetables', 'Grains & Millets'];
+
+// The logo with the shop's category pictures floating around it.
+function FloatingItems() {
   return (
-    <ul className="benefits benefit-card">
-      <li><span className="benefit-icon"><Icon name="clock" /></span>Pick a slot</li>
-      <li><span className="benefit-icon"><Icon name="cash" /></span>Pay at door</li>
-      <li><span className="benefit-icon"><Icon name="truck" /></span>To your door</li>
-    </ul>
+    <div className="login-orbit" aria-hidden="true">
+      {floatingCategories.map((name) => <span key={name} className="login-bubble"><img src={categoryImageFor(name)} alt="" /></span>)}
+      <img className="login-orbit-logo" src={logoImage} alt="" />
+    </div>
+  );
+}
+
+function StorePerks() {
+  return (
+    <div className="login-perks">
+      <span><Icon name="clock" size={15} /> Pick a slot</span>
+      <span><Icon name="cash" size={15} /> Pay at door</span>
+      <span><Icon name="truck" size={15} /> To your door</span>
+    </div>
   );
 }
 
@@ -45,30 +57,29 @@ export function LoginPage() {
   }
 
   return (
-    <main className="app-shell">
-      <section className="login-hero">
-        <span className="login-logo"><img className="store-logo store-logo-large" src={logoImage} alt="" /></span>
+    <main className="login-page">
+      <section className="login-welcome">
+        <FloatingItems />
         <h1>{store.name}</h1>
-        <p>Daily groceries from your local store, delivered to your door in the slot you pick</p>
-        <img className="login-illustration" src={groceriesImage} alt="A basket of everyday groceries" />
+        <p className="login-tagline">Daily groceries from your local store, delivered to your door in the slot you pick</p>
       </section>
-      <div className="page-body login-body">
-        <StoreBenefits />
-        <div className="login-actions">
+      <section className="login-sheet">
+        <div className="login-sheet-inner">
           <h2>Sign in to start shopping</h2>
+          <p className="login-lead">New here? Your account is made the first time you sign in.</p>
           {errorMessage && <p className="error-text" role="alert">{errorMessage}</p>}
           <button type="button" className="button button-large button-google" onClick={signInWithGoogle}>
             <GoogleLogo /> Continue with Google
           </button>
-          <p className="login-divider"><span>or</span></p>
+          <p className="login-or">or</p>
           {showEmailForm ? <EmailPasswordForm /> : (
             <button type="button" className="button button-large button-soft" onClick={() => setShowEmailForm(true)}>
-              <Icon name="mail" /> Continue with email
+              <Icon name="mail" size={18} /> Continue with email
             </button>
           )}
-          <p className="hint login-note">New here? Your account is created the first time you sign in.</p>
+          <StorePerks />
         </div>
-      </div>
+      </section>
     </main>
   );
 }
