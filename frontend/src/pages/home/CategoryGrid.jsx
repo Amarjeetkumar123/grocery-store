@@ -5,13 +5,23 @@ import { useAuthentication } from '../../AuthenticationContext.jsx';
 import { callApi } from '../../apiClient.js';
 import { categoryImageFor } from '../../categoryImages.js';
 import { LoadingOrError } from '../../components/LoadingOrError.jsx';
+import { Icon } from '../../Icon.jsx';
 
-const tileColors = ['#fbf0cf', '#f3e8da', '#edf0e6', '#f9e5d8', '#eee7d3', '#eaeae6'];
-
-function CategoryTile({ category, colorIndex }) {
+// The owner's photo when there is one, otherwise the built-in picture.
+function CategoryPhoto({ category, children }) {
+  const className = category.imageUrl ? 'category-photo' : 'category-photo category-photo-illustration';
   return (
-    <Link to={`/category/${category.id}`} className="category-tile" style={{ background: tileColors[colorIndex % tileColors.length] }}>
-      <img src={categoryImageFor(category.name)} alt="" />
+    <span className={className}>
+      <img src={category.imageUrl ?? categoryImageFor(category.name)} alt="" loading="lazy" />
+      {children}
+    </span>
+  );
+}
+
+function CategoryTile({ category }) {
+  return (
+    <Link to={`/category/${category.id}`} className="category-tile">
+      <CategoryPhoto category={category} />
       <span>{category.name}</span>
     </Link>
   );
@@ -32,12 +42,16 @@ function ComingSoonTile({ category }) {
   }
   return (
     <div className="category-tile category-tile-coming-soon">
-      <img src={categoryImageFor(category.name)} alt="" />
+      <CategoryPhoto category={category}>
+        <span className="coming-soon-label">Coming soon</span>
+        {!alreadyRequested && (
+          <button type="button" className="notify-bell" onClick={requestNotification} aria-label={`Notify me when ${category.name} arrives`}>
+            <Icon name="bell" size={16} />
+          </button>
+        )}
+      </CategoryPhoto>
       <span>{category.name}</span>
-      <span className="pill pill-amber">Coming soon</span>
-      {alreadyRequested
-        ? <span className="hint">We'll let you know</span>
-        : <button type="button" className="text-button small-text-button" onClick={requestNotification}>Notify me</button>}
+      {alreadyRequested && <span className="hint">We'll let you know</span>}
       {requestError && <span className="field-error">{requestError}</span>}
     </div>
   );
@@ -48,9 +62,9 @@ export function CategoryGrid() {
   if (!data) return <LoadingOrError loading={loading} error={error} onRetry={reload} />;
   return (
     <div className="category-grid">
-      {data.categories.map((category, index) => (category.comingSoon
+      {data.categories.map((category) => (category.comingSoon
         ? <ComingSoonTile key={category.id} category={category} />
-        : <CategoryTile key={category.id} category={category} colorIndex={index} />))}
+        : <CategoryTile key={category.id} category={category} />))}
     </div>
   );
 }

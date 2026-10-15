@@ -14,6 +14,10 @@ export const fakeProductImageStorage = {
     this.uploadedImages.push({ productId, size: bytes.length, contentType });
     return `products/${productId}-test.${contentType.split('/')[1]}`;
   },
+  async uploadCategoryImage(categoryId, bytes, contentType) {
+    this.uploadedImages.push({ categoryId, size: bytes.length, contentType });
+    return `categories/${categoryId}-test.${contentType.split('/')[1]}`;
+  },
 };
 
 // Records alerts instead of sending them. Endpoints containing "gone" act

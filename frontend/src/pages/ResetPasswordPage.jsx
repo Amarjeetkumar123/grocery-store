@@ -4,6 +4,7 @@ import { supabase } from '../supabaseClient.js';
 import { useAuthentication } from '../AuthenticationContext.jsx';
 import { TextField } from '../FormFields.jsx';
 import { PageBar } from '../components/PageBar.jsx';
+import { LoadingScreen } from '../components/LoadingScreen.jsx';
 
 // The "set a new password" email link opens this page already signed in.
 export function ResetPasswordPage() {
@@ -23,7 +24,7 @@ export function ResetPasswordPage() {
     navigate('/', { replace: true });
   }
 
-  if (session === undefined) return <div className="center-screen" role="status">Loading…</div>;
+  if (session === undefined) return <LoadingScreen />;
   return (
     <main className="app-shell">
       <PageBar title="Set a new password" />

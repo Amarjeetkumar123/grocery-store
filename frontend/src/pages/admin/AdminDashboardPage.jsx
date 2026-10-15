@@ -2,16 +2,18 @@ import { Link } from 'react-router';
 import { useApiData } from '../../useApiData.js';
 import { addDays, formatRupees, formatShortDate, formatTimeRange } from '../../formatting.js';
 import { LoadingOrError } from '../../components/LoadingOrError.jsx';
+import { Icon } from '../../Icon.jsx';
 import { AdminPageHeader } from './AdminLayout.jsx';
 import { SalesByDayChart } from './reports/SalesByDayChart.jsx';
 
 const plural = (count, word) => `${count} ${word}${count === 1 ? '' : 's'}`;
 const shortDay = (isoDate) => formatShortDate(`${isoDate}T12:00:00Z`);
 
-function Tile({ to, label, value, note, noteClass = 'hint' }) {
+// tone colours the icon: green, blue, amber or red.
+function Tile({ to, label, value, note, noteClass = 'hint', icon, tone }) {
   return (
     <Link to={to} className="card stat-tile tile-link">
-      <p className="hint">{label}</p>
+      <p className="stat-tile-top">{label}<span className={`stat-icon stat-icon-${tone}`}><Icon name={icon} /></span></p>
       <strong>{value}</strong>
       <p className={noteClass}>{note}</p>
     </Link>
@@ -25,12 +27,12 @@ function Tiles({ dashboard }) {
   const salesToday = salesWeek.byDay.find((day) => day.date === today) ?? { sales: 0, orders: 0 };
   return (
     <div className="stat-tiles">
-      <Tile to={`/admin/orders?from=${tomorrow}&to=${tomorrow}`} label="Orders for tomorrow" value={ordersTomorrow}
+      <Tile to={`/admin/orders?from=${tomorrow}&to=${tomorrow}`} label="Orders for tomorrow" value={ordersTomorrow} icon="box" tone="green"
         note={waiting > 0 ? `${waiting} new, waiting to confirm` : 'None waiting to confirm'} noteClass={waiting > 0 ? 'tile-note-green' : 'hint'} />
-      <Tile to="/admin/reports" label="Sales today" value={formatRupees(salesToday.sales)} note={`${plural(salesToday.orders, 'order')} delivered`} />
-      <Tile to="/admin/cash-check" label="Cash with riders" value={formatRupees(cashWithRiders)}
+      <Tile to="/admin/reports" label="Sales today" value={formatRupees(salesToday.sales)} icon="tag" tone="blue" note={`${plural(salesToday.orders, 'order')} delivered`} />
+      <Tile to="/admin/cash-check" label="Cash with riders" value={formatRupees(cashWithRiders)} icon="cash" tone="amber"
         note={cashWithRiders > 0 ? 'Not handed over yet' : 'All handed over'} noteClass={cashWithRiders > 0 ? 'tile-note-amber' : 'hint'} />
-      <Tile to="/admin/stock" label="Low / out of stock" value={stock.outOfStock + stock.lowStock}
+      <Tile to="/admin/stock" label="Low / out of stock" value={stock.outOfStock + stock.lowStock} icon="layers" tone="red"
         note={`${plural(stock.outOfStock, 'item')} out of stock`} noteClass={stock.outOfStock > 0 ? 'tile-note-red' : 'hint'} />
     </div>
   );

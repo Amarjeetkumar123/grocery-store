@@ -96,3 +96,9 @@ export async function findUpcomingOrderDays(executor, fromDate) {
     limit 14`, [fromDate]);
   return result.rows;
 }
+
+// Orders placed by customers and not confirmed by the shop yet.
+export async function countNewOrders(executor) {
+  const result = await executor.query("select count(*)::int as new_orders from orders where status = 'new'");
+  return result.rows[0].new_orders;
+}

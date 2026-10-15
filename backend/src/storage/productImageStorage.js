@@ -36,7 +36,7 @@ async function ensureBucketExists(supabaseUrl, secretKey) {
   if (!created.ok) throw new Error(`Could not create the ${bucketName} bucket: ${await created.text()}`);
 }
 
-// Product photos live in a public Supabase Storage bucket. Uploading needs
+// Product and category photos live in a public Supabase Storage bucket. Uploading needs
 // the secret key, which only this server has.
 export function createProductImageStorage({ supabaseUrl, secretKey }) {
   return {
@@ -48,17 +48,23 @@ export function createProductImageStorage({ supabaseUrl, secretKey }) {
       return imagePath ? `${supabaseUrl}/storage/v1/object/public/${bucketName}/${imagePath}` : null;
     },
 
-    // ponytail: old photos are left in the bucket; clean up if storage nears the 1 GB free limit.
-    async uploadProductImage(productId, bytes, contentType) {
-      const imagePath = `products/${productId}-${Date.now()}.${imageSignatures[contentType].extension}`;
-      const response = await fetch(`${supabaseUrl}/storage/v1/object/${bucketName}/${imagePath}`, {
-        method: 'POST',
-        headers: { apikey: secretKey, Authorization: `Bearer ${secretKey}`, 'Content-Type': contentType },
-        body: bytes,
-        signal: AbortSignal.timeout(20000),
-      });
-      if (!response.ok) throw new Error(`Photo upload failed with status ${response.status}: ${await response.text()}`);
-      return imagePath;
-    },
+    uploadProductImage: (productId, bytes, contentType) =>
+      uploadImage({ supabaseUrl, secretKey }, `products/${productId}`, bytes, contentType),
+
+    uploadCategoryImage: (categoryId, bytes, contentType) =>
+      uploadImage({ supabaseUrl, secretKey }, `categories/${categoryId}`, bytes, contentType),
   };
+}
+
+// ponytail: old photos are left in the bucket; clean up if storage nears the 1 GB free limit.
+async function uploadImage({ supabaseUrl, secretKey }, pathStart, bytes, contentType) {
+  const imagePath = `${pathStart}-${Date.now()}.${imageSignatures[contentType].extension}`;
+  const response = await fetch(`${supabaseUrl}/storage/v1/object/${bucketName}/${imagePath}`, {
+    method: 'POST',
+    headers: { apikey: secretKey, Authorization: `Bearer ${secretKey}`, 'Content-Type': contentType },
+    body: bytes,
+    signal: AbortSignal.timeout(20000),
+  });
+  if (!response.ok) throw new Error(`Photo upload failed with status ${response.status}: ${await response.text()}`);
+  return imagePath;
 }

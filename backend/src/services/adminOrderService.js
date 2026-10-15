@@ -1,6 +1,6 @@
 import { withTransaction } from '../dbHelper/databaseConnection.js';
 import {
-  assignRiderToOrders, findAdminOrders, findBoardFilterOptions, findOrderStatusCounts, findUpcomingOrderDays, updateOrderStatus,
+  assignRiderToOrders, countNewOrders, findAdminOrders, findBoardFilterOptions, findOrderStatusCounts, findUpcomingOrderDays, updateOrderStatus,
 } from '../dbHelper/adminOrderDbHelper.js';
 import { lockOrder } from '../dbHelper/orderDbHelper.js';
 import { isActiveRider } from '../dbHelper/staffDbHelper.js';
@@ -112,5 +112,6 @@ export function createAdminOrderService(dependencies) {
     moveOrderForward: (staffMember, orderNumberInput, body) => moveOrderForward(dependencies, staffMember, orderNumberInput, body),
     cancelOrder: (orderNumberInput, body) => cancelOrder(dependencies, orderNumberInput, body),
     assignRider: (body) => assignRider(dependencies, body),
+    countNewOrders: async () => ({ newOrders: await countNewOrders(dependencies.database) }),
   };
 }

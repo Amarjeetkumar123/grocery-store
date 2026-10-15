@@ -8,8 +8,8 @@ const notes = {
   unsupported: 'On iPhone, first tap Share → Add to Home Screen, then open the app from there.',
 };
 
-// "Turn on order alerts" for this browser. label: what the alerts are about.
-export function AlertsToggle({ label = 'order alerts', className = 'button button-outline' }) {
+// state: checking | on | off | busy | denied | unavailable | unsupported. note: why alerts cannot be used.
+function useAlerts() {
   const [state, setState] = useState(isPushSupported() ? 'checking' : 'unsupported');
   useEffect(() => {
     if (state !== 'checking') return;
@@ -28,12 +28,35 @@ export function AlertsToggle({ label = 'order alerts', className = 'button butto
       setState('off');
     }
   }
+  return { state, note: notes[state], toggle };
+}
 
+// "Turn on order alerts" for this browser. label: what the alerts are about.
+export function AlertsToggle({ label = 'order alerts', className = 'button button-outline' }) {
+  const { state, note, toggle } = useAlerts();
   if (state === 'checking') return null;
-  if (notes[state]) return <p className="hint alerts-note"><Icon name="bell" size={16} /> {notes[state]}</p>;
+  if (note) return <p className="hint alerts-note"><Icon name="bell" size={16} /> {note}</p>;
   return (
     <button type="button" className={className} onClick={toggle} disabled={state === 'busy'}>
       <Icon name="bell" /> {state === 'on' ? `Turn off ${label}` : `Turn on ${label}`}
     </button>
+  );
+}
+
+// Round bell for the shop header. A yellow dot means alerts are still off.
+export function AlertsBell() {
+  const { state, note, toggle } = useAlerts();
+  const [showNote, setShowNote] = useState(false);
+  if (state === 'checking') return null;
+  const label = state === 'on' ? 'Turn off order alerts' : 'Turn on order alerts';
+  return (
+    <span className="alerts-bell-wrapper">
+      <button type="button" className="alerts-bell" onClick={note ? () => setShowNote(!showNote) : toggle}
+        disabled={state === 'busy'} aria-label={note ? 'Why alerts are off' : label} aria-pressed={state === 'on'} title={note ?? label}>
+        <Icon name="bell" />
+        {state !== 'on' && <span className="alerts-bell-dot" />}
+      </button>
+      {showNote && note && <span className="alerts-bell-note" role="status">{note}</span>}
+    </span>
   );
 }

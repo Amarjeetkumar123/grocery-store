@@ -5,6 +5,7 @@ import { Icon } from '../Icon.jsx';
 import { deliveryAddressLine } from '../formatting.js';
 import { TabBar } from '../components/TabBar.jsx';
 import { CategoryGrid } from './home/CategoryGrid.jsx';
+import { AlertsBell } from '../components/AlertsToggle.jsx';
 import logoImage from '../assets/logo.png';
 
 const staffHomeByRole = { owner: '/admin', packer: '/admin', rider: '/rider' };
@@ -12,18 +13,23 @@ const staffHomeByRole = { owner: '/admin', packer: '/admin', rider: '/rider' };
 function StoreHeader({ profile }) {
   const store = useStoreDetails();
   return (
-    <header className="store-header">
-      <div className="brand">
-        <img className="store-logo" src={logoImage} alt="" />
-        {store.name}
-      </div>
-      <Link to="/address" className="delivery-line">
-        <Icon name="pin" size={16} /> Delivering to <strong>{deliveryAddressLine(profile)}</strong>
-      </Link>
-      <Link to="/search" className="search-box">
+    <>
+      <header className="store-header">
+        <div className="brand">
+          <img className="store-logo" src={logoImage} alt="" />
+          <span className="brand-name-text">{store.name}</span>
+          <AlertsBell />
+        </div>
+        <Link to="/address" className="delivery-line">
+          <span className="delivery-pin"><Icon name="pin" size={16} /></span>
+          Deliver to <strong>{deliveryAddressLine(profile)}</strong>
+          <Icon name="down" size={16} />
+        </Link>
+      </header>
+      <Link to="/search" className="search-box search-box-floating">
         <Icon name="search" /> Search atta, oil, dal…
       </Link>
-    </header>
+    </>
   );
 }
 
@@ -36,7 +42,10 @@ export function HomePage() {
     <main className="app-shell">
       <StoreHeader profile={account.profile} />
       <div className="page-body">
-        <p className="offer-banner"><Icon name="cash" /> Pay at your door · Cash or UPI</p>
+        <div className="offer-banner">
+          <span className="offer-icon"><Icon name="cash" /></span>
+          <p><strong>Pay at your door</strong>Cash or UPI when your order arrives</p>
+        </div>
         <h2 className="section-title">Shop by category</h2>
         <CategoryGrid />
       </div>

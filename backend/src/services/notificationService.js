@@ -1,5 +1,5 @@
 import {
-  deleteSubscription, findSubscriptionsForOrderCustomer, findSubscriptionsForStaffMember, findSubscriptionsForStaffRoles,
+  deleteSubscription, findSubscriptionsForCategoryRequests, findSubscriptionsForOrderCustomer, findSubscriptionsForStaffMember, findSubscriptionsForStaffRoles,
 } from '../dbHelper/pushSubscriptionDbHelper.js';
 
 const rupees = (amount) => `₹${Number(amount).toLocaleString('en-IN')}`;
@@ -47,6 +47,11 @@ export function createNotificationService(dependencies) {
       dependencies,
       () => findSubscriptionsForOrderCustomer(database, orderNumber),
       { ...customerMessages[status]({ orderNumber, ...details }), url: `/orders/${orderNumber}` },
+    ),
+    categoryOpened: (categoryId, categoryName) => sendInBackground(
+      dependencies,
+      () => findSubscriptionsForCategoryRequests(database, categoryId),
+      { title: `${categoryName} is now in the shop`, body: 'You asked us to tell you. Tap to start shopping.', url: `/category/${categoryId}` },
     ),
     ridersAssigned: (riderId, orderCount) => sendInBackground(
       dependencies,

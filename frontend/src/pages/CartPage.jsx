@@ -108,7 +108,9 @@ export function CartPage() {
       </div>
       <div className="bottom-action">
         <button type="button" className="button button-large" disabled={!canPlace} onClick={placing.placeOrder}>
-          {placing.placing ? 'Placing your order…' : `Place order${cart ? ` · ${formatRupees(cart.total)}` : ''}`}
+          {placing.placing
+            ? <><span className="spinner" aria-hidden="true" /> Placing your order…</>
+            : `Place order${cart ? ` · ${formatRupees(cart.total)}` : ''}`}
         </button>
       </div>
     </main>

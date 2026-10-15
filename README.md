@@ -6,14 +6,15 @@ delivery slots, pay at the door (cash or UPI). The full plan is in
 
 ```
 backend/
-  database/         SQL: 001_schema.sql (tables), 002_sample_data.sql (Noida sample)
+  database/         SQL: 001_schema.sql (tables), 002_sample_data.sql (Noida sample),
+                    003_category_photos.sql (upgrade for older databases)
   src/
     routes/         thin: read the request, call a service, send the result
     services/       business rules; throw ServiceError for user-facing problems
     dbHelper/       every SQL query lives here (and only here)
     filters/        dynamic "where" conditions used by dbHelper (products, stock)
     validators/     form checks (address, product, pack sizes)
-    storage/        product photo upload to Supabase Storage
+    storage/        product and category photo upload to Supabase Storage
     utils/          CSV reader, distance between two points
   test/             npm test
 frontend/
@@ -33,6 +34,8 @@ Use Node 24: run `nvm use` in this folder (it reads `.nvmrc`).
 2. **SQL Editor:** paste and run `backend/database/001_schema.sql`.
 3. Edit `backend/database/002_sample_data.sql`: store location, UPI ID,
    WhatsApp number, your real societies and areas. Then run it.
+   Already set up before category photos existed? Run
+   `backend/database/003_category_photos.sql` once instead.
 4. Make yourself the owner (use the Google account you will sign in with):
    ```sql
    insert into staff (email, name, role) values ('you@gmail.com', 'Your Name', 'owner');

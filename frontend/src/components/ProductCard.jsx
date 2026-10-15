@@ -9,13 +9,14 @@ export function ProductImage({ product, className }) {
   return <img className={className} src={product.imageUrl ?? fallback} alt="" loading="lazy" />;
 }
 
-export function PriceLine({ packSize }) {
+// showDiscount: false when the "% off" is already shown on the photo.
+export function PriceLine({ packSize, showDiscount = true }) {
   const discount = percentOff(packSize.maximumRetailPrice, packSize.price);
   return (
     <p className="price-line">
       <strong className="price">{formatRupees(packSize.price)}</strong>
       {discount > 0 && <s className="maximum-retail-price">MRP {formatRupees(packSize.maximumRetailPrice)}</s>}
-      {discount > 0 && <span className="discount">{discount}% off</span>}
+      {showDiscount && discount > 0 && <span className="discount">{discount}% off</span>}
     </p>
   );
 }
@@ -30,17 +31,19 @@ export function StockStatus({ packSize }) {
 export function ProductCard({ product }) {
   const [chosenPackSizeId, setChosenPackSizeId] = useState(product.packSizes[0].id);
   const packSize = product.packSizes.find((candidate) => candidate.id === chosenPackSizeId) ?? product.packSizes[0];
+  const discount = percentOff(packSize.maximumRetailPrice, packSize.price);
   return (
     <article className={packSize.inStock ? 'product-card' : 'product-card product-card-unavailable'}>
       <Link to={`/product/${product.id}`} className="product-card-image-link" aria-label={product.name}>
         <ProductImage product={product} className="product-card-image" />
+        {discount > 0 && packSize.inStock && <span className="discount-badge">{discount}% OFF</span>}
       </Link>
       <div className="product-card-details">
+        {product.brand && <p className="brand-name">{product.brand}</p>}
         <Link to={`/product/${product.id}`} className="product-card-name">{product.name}</Link>
-        {product.brand && <p className="hint">{product.brand}</p>}
         <PackSizePicker product={product} chosenPackSizeId={packSize.id} onChoose={setChosenPackSizeId} />
         <div className="price-row">
-          <PriceLine packSize={packSize} />
+          <PriceLine packSize={packSize} showDiscount={false} />
           <QuantityStepper packSize={packSize} productName={product.name} />
         </div>
         <StockStatus packSize={packSize} />

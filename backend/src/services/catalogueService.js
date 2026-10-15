@@ -3,6 +3,7 @@ import { findProducts } from '../dbHelper/productDbHelper.js';
 import { buildProductFilter } from '../filters/productFilters.js';
 import { readPositiveInteger } from '../validators/commonValidation.js';
 import { ServiceError } from './serviceError.js';
+import { withCategoryImageUrl } from './categoryService.js';
 
 const minimumSearchLength = 2;
 
@@ -20,8 +21,9 @@ function toCustomerProduct(product, productImageStorage) {
   };
 }
 
-async function listCategories({ database }) {
-  return { categories: await findAllCategories(database) };
+async function listCategories({ database, productImageStorage }) {
+  const categories = await findAllCategories(database);
+  return { categories: categories.map((category) => withCategoryImageUrl(category, productImageStorage)) };
 }
 
 // query: { categoryId } for one category, or { search } to search everything.

@@ -108,7 +108,8 @@ create table categories (
   id          bigint generated always as identity primary key,
   name        text not null unique,
   sort_order  int not null default 0,
-  coming_soon boolean not null default false
+  coming_soon boolean not null default false,
+  image_path  text   -- path in the product-images bucket; null = built-in picture
 );
 
 create table products (

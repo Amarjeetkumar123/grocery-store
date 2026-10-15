@@ -44,3 +44,14 @@ export async function findSubscriptionsForOrderCustomer(executor, orderNumber) {
   );
   return result.rows.map(toSubscription);
 }
+
+// Customers who tapped "Notify me" on this category.
+export async function findSubscriptionsForCategoryRequests(executor, categoryId) {
+  const result = await executor.query(
+    `select subscription.endpoint, subscription.keys from push_subscriptions subscription
+     join customers customer on customer.user_id = subscription.user_id
+     join notify_me request on request.customer_id = customer.id where request.category_id = $1`,
+    [categoryId],
+  );
+  return result.rows.map(toSubscription);
+}

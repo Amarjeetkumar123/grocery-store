@@ -1,4 +1,6 @@
-import { Navigate, NavLink, Outlet } from 'react-router';
+import { useEffect, useState } from 'react';
+import { Navigate, NavLink, Outlet, useLocation } from 'react-router';
+import { callApi } from '../../apiClient.js';
 import { useAuthentication } from '../../AuthenticationContext.jsx';
 import { useStoreDetails } from '../../useStoreDetails.js';
 import { Icon } from '../../Icon.jsx';
@@ -14,6 +16,7 @@ const navigationGroups = [
   ] },
   { title: 'Catalogue', items: [
     { path: '/admin/products', label: 'Products', icon: 'tag', roles: ['owner'] },
+    { path: '/admin/categories', label: 'Categories', icon: 'grid', roles: ['owner'] },
     { path: '/admin/stock', label: 'Stock', icon: 'layers', roles: ['owner', 'packer'] },
   ] },
   { title: 'Setup', items: [
@@ -29,10 +32,25 @@ const navigationGroups = [
 ];
 
 const roleLabels = { owner: 'Owner', packer: 'Packer' };
+const newOrderCheckInterval = 60 * 1000;
+
+// Orders waiting to be confirmed, checked every minute and on each page change.
+function useNewOrderCount() {
+  const [newOrders, setNewOrders] = useState(0);
+  const { pathname } = useLocation();
+  useEffect(() => {
+    const check = () => callApi('/api/admin/orders/new-count').then((result) => setNewOrders(result.newOrders)).catch(() => {});
+    check();
+    const timer = setInterval(check, newOrderCheckInterval);
+    return () => clearInterval(timer);
+  }, [pathname]);
+  return newOrders;
+}
 
 export function AdminLayout() {
   const { account, signOut } = useAuthentication();
   const store = useStoreDetails();
+  const newOrders = useNewOrderCount();
   const visibleGroups = navigationGroups
     .map((group) => ({ ...group, items: group.items.filter((item) => item.roles.includes(account.role)) }))
     .filter((group) => group.items.length > 0);
@@ -47,6 +65,9 @@ export function AdminLayout() {
               {group.items.map((item) => (
                 <NavLink key={item.path} to={item.path} className="admin-navigation-link">
                   <Icon name={item.icon} /> {item.label}
+                  {item.path === '/admin/orders' && newOrders > 0 && (
+                    <span className="navigation-count" aria-label={`${newOrders} new`}>{newOrders}</span>
+                  )}
                 </NavLink>
               ))}
             </div>

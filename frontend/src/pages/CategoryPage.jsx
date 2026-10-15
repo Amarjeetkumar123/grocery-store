@@ -4,6 +4,7 @@ import { PageBar } from '../components/PageBar.jsx';
 import { ProductCard } from '../components/ProductCard.jsx';
 import { LoadingOrError } from '../components/LoadingOrError.jsx';
 import { TabBar } from '../components/TabBar.jsx';
+import { CartBar } from '../components/CartBar.jsx';
 
 export function CategoryPage() {
   const { categoryId } = useParams();
@@ -22,6 +23,7 @@ export function CategoryPage() {
           {productList.map((product) => <ProductCard key={product.id} product={product} />)}
         </div>
       </div>
+      <CartBar aboveTabBar />
       <TabBar />
     </main>
   );

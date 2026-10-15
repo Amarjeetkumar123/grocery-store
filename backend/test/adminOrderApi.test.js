@@ -57,6 +57,8 @@ test('the board lists a day of orders for owner and packer, not customers', { sk
   assert.deepEqual([first.customer.firstOrder, second.customer.firstOrder, first.customer.phoneConfirmed], [true, false, false]);
   assert.equal(first.address.towerName, 'Tower A');
   assert.equal(first.items[0].quantity, 2);
+  const newOrders = body.orders.filter((order) => order.status === 'new').length;
+  assert.deepEqual((await callApi('/api/admin/orders/new-count', { token: 'packer-token' })).body, { newOrders });
 });
 
 test('the board takes a date range (none = all orders), search and pages', { skip }, async () => {

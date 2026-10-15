@@ -16,6 +16,7 @@ import { RiderOrderPage } from './pages/rider/RiderOrderPage.jsx';
 import { RiderPaymentPage } from './pages/rider/RiderPaymentPage.jsx';
 import { AdminHomeRedirect, AdminLayout } from './pages/admin/AdminLayout.jsx';
 import { AdminProductsPage } from './pages/admin/AdminProductsPage.jsx';
+import { AdminCategoriesPage } from './pages/admin/AdminCategoriesPage.jsx';
 import { AdminProductFormPage } from './pages/admin/AdminProductFormPage.jsx';
 import { AdminBulkImportPage } from './pages/admin/AdminBulkImportPage.jsx';
 import { AdminStockPage } from './pages/admin/AdminStockPage.jsx';
@@ -45,6 +46,7 @@ function adminRoutes() {
       <Route path="products/new" element={ownerOnly(<AdminProductFormPage key="new" />)} />
       <Route path="products/import" element={ownerOnly(<AdminBulkImportPage />)} />
       <Route path="products/:productId" element={ownerOnly(<AdminProductFormPage />)} />
+      <Route path="categories" element={ownerOnly(<AdminCategoriesPage />)} />
       <Route path="stock" element={<AdminStockPage />} />
       <Route path="zones" element={ownerOnly(<AdminZonesPage />)} />
       <Route path="store-settings" element={ownerOnly(<AdminStoreSettingsPage />)} />

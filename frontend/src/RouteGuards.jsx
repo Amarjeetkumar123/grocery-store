@@ -1,9 +1,6 @@
 import { Navigate, Outlet } from 'react-router';
 import { useAuthentication } from './AuthenticationContext.jsx';
-
-function LoadingScreen() {
-  return <div className="center-screen" role="status">Loading…</div>;
-}
+import { LoadingScreen } from './components/LoadingScreen.jsx';
 
 function AccountErrorScreen({ message, onRetry, onSignOut }) {
   return (
