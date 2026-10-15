@@ -51,7 +51,8 @@ test('a new order alerts the shop, status changes alert the customer, assignment
   const { rows: [setup] } = await testServer.database.query(`
     select zone.id as zone_id, tower.id as tower_id, slot.id as slot_id, (select id from pack_sizes) as pack_id,
            ((now() at time zone 'Asia/Kolkata')::date + 1)::text as tomorrow
-    from zones zone join towers tower on tower.zone_id = zone.id join slots slot on slot.zone_id = zone.id limit 1`);
+    from zones zone join towers tower on tower.zone_id = zone.id join slots slot on slot.zone_id = zone.id
+    where slot.name = 'Anytime' limit 1`);
   await callApi('/api/account/profile', { token: 'riya-token', method: 'PUT', body: { zoneId: setup.zone_id, towerId: setup.tower_id, flatNumber: '1', name: 'Riya', phone: '9876543210' } });
   await callApi('/api/orders', { token: 'riya-token', method: 'POST', body: { items: [{ packSizeId: setup.pack_id, quantity: 2 }], slotId: setup.slot_id, deliveryDate: setup.tomorrow } });
   await waitFor(() => alertsTo('owner-phone').length === 1);
