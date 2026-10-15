@@ -56,7 +56,7 @@ function CustomerRow({ customer, expanded, onToggle, onChanged }) {
           <button type="button" className="text-button small-text-button" onClick={onToggle} aria-expanded={expanded}>{customer.orderCount} {customer.orderCount === 1 ? 'order' : 'orders'}</button>
           {customer.lastOrderAt && <span className="hint"> · last {formatShortDate(customer.lastOrderAt)}</span>}
         </td>
-        <td className="badge-cell"><CustomerFlags customer={customer} onChanged={onChanged} /></td>
+        <td><div className="badge-cell"><CustomerFlags customer={customer} onChanged={onChanged} /></div></td>
       </tr>
       {expanded && <tr><td colSpan={5}><OrderHistory customerId={customer.id} /></td></tr>}
     </Fragment>

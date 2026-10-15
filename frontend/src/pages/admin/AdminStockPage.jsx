@@ -6,6 +6,7 @@ import { formatMonthYear } from '../../formatting.js';
 import { Icon } from '../../Icon.jsx';
 import { LoadingOrError } from '../../components/LoadingOrError.jsx';
 import { AdminPageHeader } from './AdminLayout.jsx';
+import { TablePager } from './TablePager.jsx';
 
 const statusFilters = [
   { status: 'all', label: 'All' },
@@ -52,7 +53,7 @@ function StockBadges({ stockItem }) {
   return (
     <>
       {stockItem.outOfStock && <span className="pill pill-red">Out of stock</span>}
-      {stockItem.lowStock && <span className="pill pill-amber">Low</span>}
+      {stockItem.lowStock && <span className="pill pill-amber">Low stock</span>}
       {stockItem.expiringSoon && <span className="pill pill-amber">Expiring</span>}
     </>
   );
@@ -64,45 +65,54 @@ function StockRow({ stockItem, onAdjusted }) {
       <td><strong>{stockItem.productName}</strong><p className="hint">{[stockItem.brand, stockItem.categoryName].filter(Boolean).join(' · ')}</p></td>
       <td>{stockItem.label}</td>
       <td className="number"><strong className="stock-count">{stockItem.stock}</strong></td>
-      <td className="badge-cell"><StockBadges stockItem={stockItem} /></td>
+      <td><div className="badge-cell"><StockBadges stockItem={stockItem} /></div></td>
       <td>{formatMonthYear(stockItem.bestBefore) || '—'}</td>
       <td><StockAdjuster stockItem={stockItem} onAdjusted={onAdjusted} /></td>
     </tr>
   );
 }
 
+function StockTable({ data, onAdjusted, onPageChange }) {
+  return (
+    <div className="table-box">
+      <div className="table-scroll">
+        <table className="admin-table">
+          <thead><tr><th>Product</th><th>Pack</th><th className="number">In stock</th><th>Status</th><th>Best before</th><th>Add or remove stock</th></tr></thead>
+          <tbody>{data.stockItems.map((stockItem) => <StockRow key={stockItem.packSizeId} stockItem={stockItem} onAdjusted={onAdjusted} />)}</tbody>
+        </table>
+      </div>
+      <TablePager page={data.page} pageCount={data.pageCount} pageSize={data.pageSize} total={data.total} shownCount={data.stockItems.length} onChange={onPageChange} />
+    </div>
+  );
+}
+
+// Same layout as Products: the table fills the window and scrolls inside, page buttons under it.
 export function AdminStockPage() {
-  const [status, setStatus] = useState('all');
-  const [searchText, setSearchText] = useState('');
-  const debouncedSearchText = useDebouncedValue(searchText.trim());
-  const query = new URLSearchParams({ status, search: debouncedSearchText }).toString();
+  const [filters, setFilters] = useState({ status: 'all', search: '', page: 1, pageSize: 25 });
+  const changeFilters = (changes) => setFilters((previous) => ({ ...previous, page: 1, ...changes }));
+  const debouncedSearchText = useDebouncedValue(filters.search.trim());
+  const query = new URLSearchParams({ status: filters.status, search: debouncedSearchText, page: filters.page, pageSize: filters.pageSize }).toString();
   const { data, error, loading, reload } = useApiData(`/api/admin/stock?${query}`);
+  const subtitle = data ? `${data.total} ${data.total === 1 ? 'pack size' : 'pack sizes'}` : null;
 
   return (
-    <>
-      <AdminPageHeader title="Stock" />
+    <div className="fit-screen-page">
+      <AdminPageHeader title="Stock" subtitle={subtitle} />
       <div className="filter-row">
+        <label className="search-input admin-search">
+          <Icon name="search" size={16} />
+          <input type="search" value={filters.search} onChange={(event) => changeFilters({ search: event.target.value })} placeholder="Search product or brand" aria-label="Search stock" />
+        </label>
         <div className="chip-row" role="group" aria-label="Show">
           {statusFilters.map((filter) => (
-            <button key={filter.status} type="button" className="chip" aria-pressed={status === filter.status}
-              onClick={() => setStatus(filter.status)}>{filter.label}</button>
+            <button key={filter.status} type="button" className="chip" aria-pressed={filters.status === filter.status}
+              onClick={() => changeFilters({ status: filter.status })}>{filter.label}</button>
           ))}
         </div>
-        <label className="search-input admin-search">
-          <Icon name="search" />
-          <input type="search" value={searchText} onChange={(event) => setSearchText(event.target.value)} placeholder="Search product" aria-label="Search stock" />
-        </label>
       </div>
       <LoadingOrError loading={loading && !data} error={error} onRetry={reload} />
-      {data && data.stockItems.length === 0 && <p className="hint centered">Nothing to show here.</p>}
-      {data && data.stockItems.length > 0 && (
-        <div className="table-box">
-          <table className="admin-table">
-            <thead><tr><th>Product</th><th>Pack</th><th className="number">In stock</th><th /><th>Best before</th><th>Add or remove stock</th></tr></thead>
-            <tbody>{data.stockItems.map((stockItem) => <StockRow key={stockItem.packSizeId} stockItem={stockItem} onAdjusted={reload} />)}</tbody>
-          </table>
-        </div>
-      )}
-    </>
+      {data && data.total === 0 && <p className="hint centered">Nothing to show here.</p>}
+      {data && data.total > 0 && <StockTable data={data} onAdjusted={reload} onPageChange={(changes) => setFilters((previous) => ({ ...previous, ...changes }))} />}
+    </div>
   );
 }

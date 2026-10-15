@@ -1,19 +1,23 @@
-import { adjustPackSizeStock, findStockItems, packSizeExists } from '../dbHelper/packSizeDbHelper.js';
+import { adjustPackSizeStock, countStockItems, findStockItems, packSizeExists } from '../dbHelper/packSizeDbHelper.js';
+import { readPage } from '../validators/pagingValidation.js';
 import { buildStockFilter, stockStatuses } from '../filters/stockFilters.js';
 import { readPositiveInteger } from '../validators/commonValidation.js';
 import { ServiceError } from './serviceError.js';
 
 const largestStockChange = 10000;
 
-// query: { status: all | out | low | expiring, categoryId, search }
+// One page of pack sizes. query: { status: all | out | low | expiring, categoryId, search, page, pageSize }
 async function listStock({ database }, query) {
   const status = stockStatuses.includes(query.status) ? query.status : 'all';
-  const stockItems = await findStockItems(database, buildStockFilter({
+  const stockFilter = buildStockFilter({
     status,
     categoryId: readPositiveInteger(query.categoryId),
     searchText: query.search,
-  }));
-  return { stockItems };
+  });
+  const total = await countStockItems(database, stockFilter);
+  const { page, pageSize, pageCount, limit, offset } = readPage(query, total);
+  const stockItems = await findStockItems(database, stockFilter, { limit, offset });
+  return { stockItems, total, page, pageSize, pageCount };
 }
 
 // body: { quantityChange: 12 } adds stock, { quantityChange: -2 } removes it.

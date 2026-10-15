@@ -195,6 +195,13 @@ test('the admin product list comes one page at a time', { skip }, async () => {
   assert.equal(lastPage.products.length, everything.total - (lastPage.pageCount - 1) * 10);
   assert.equal((await listProducts('pageSize=7')).pageSize, 25, 'unknown page sizes fall back to 25');
   assert.equal((await listProducts('search=paging test')).total, 12);
+
+  await testServer.database.query(`insert into pack_sizes (product_id, label, maximum_retail_price, price, stock)
+    select id, '1 kg', 100, 90, 5 from products where name like 'Paging test%'`);
+  const stockPage = (await callApi('/api/admin/stock?pageSize=10&page=2', { token: 'packer-token' })).body;
+  assert.equal(stockPage.page, 2);
+  assert.equal(stockPage.stockItems.length, Math.min(10, stockPage.total - 10));
+  assert.equal(stockPage.pageCount, Math.ceil(stockPage.total / 10));
 });
 
 test('notify me works for coming-soon categories only, after an address is saved', { skip }, async () => {

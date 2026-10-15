@@ -7,6 +7,7 @@ import { hidePackSizesExcept, insertPackSize, updatePackSize } from '../dbHelper
 import { buildProductFilter } from '../filters/productFilters.js';
 import { readPositiveInteger } from '../validators/commonValidation.js';
 import { validateProductInput } from '../validators/productValidation.js';
+import { readPage } from '../validators/pagingValidation.js';
 import { isRealImage } from '../storage/productImageStorage.js';
 import { ServiceError, throwIfFieldErrors } from './serviceError.js';
 
@@ -25,9 +26,6 @@ async function findAdminProduct({ database, productImageStorage }, productId) {
   return { product: toAdminProduct(product, productImageStorage) };
 }
 
-const pageSizes = [10, 25, 50];
-const defaultPageSize = 25;
-
 // One page of products. query: { categoryId, search, page, pageSize }.
 async function listProducts({ database, productImageStorage }, query) {
   const productFilter = buildProductFilter({
@@ -35,11 +33,9 @@ async function listProducts({ database, productImageStorage }, query) {
     categoryId: readPositiveInteger(query.categoryId),
     searchText: query.search,
   });
-  const pageSize = pageSizes.includes(Number(query.pageSize)) ? Number(query.pageSize) : defaultPageSize;
   const total = await countProducts(database, productFilter);
-  const pageCount = Math.max(1, Math.ceil(total / pageSize));
-  const page = Math.min(readPositiveInteger(query.page) ?? 1, pageCount);
-  const products = await findProducts(database, productFilter, { limit: pageSize, offset: (page - 1) * pageSize });
+  const { page, pageSize, pageCount, limit, offset } = readPage(query, total);
+  const products = await findProducts(database, productFilter, { limit, offset });
   return { products: products.map((product) => toAdminProduct(product, productImageStorage)), total, page, pageSize, pageCount };
 }
 

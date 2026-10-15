@@ -64,8 +64,15 @@ export async function adjustPackSizeStock(executor, packSizeId, quantityChange) 
   return result.rows[0]?.stock ?? null;
 }
 
-// stockFilter comes from filters/stockFilters.js.
-export async function findStockItems(executor, stockFilter) {
+const stockItemsFrom = `
+     from pack_sizes pack
+     join products product on product.id = pack.product_id
+     join categories category on category.id = product.category_id`;
+
+// stockFilter comes from filters/stockFilters.js. page: { limit, offset }, or null for all.
+export async function findStockItems(executor, stockFilter, page = null) {
+  const values = stockFilter.values;
+  const pageClause = page ? `limit $${values.length + 1} offset $${values.length + 2}` : '';
   const result = await executor.query(
     `select pack.id as pack_size_id, product.id as product_id, product.name as product_name, product.brand,
             category.name as category_name, pack.label, pack.stock, pack.low_stock_level, pack.best_before,
@@ -73,14 +80,18 @@ export async function findStockItems(executor, stockFilter) {
             pack.stock > 0 and pack.stock <= pack.low_stock_level as low_stock,
             pack.best_before is not null
               and pack.best_before <= (now() at time zone 'Asia/Kolkata')::date + 30 as expiring_soon
-     from pack_sizes pack
-     join products product on product.id = pack.product_id
-     join categories category on category.id = product.category_id
+     ${stockItemsFrom}
      ${stockFilter.whereClause}
-     order by pack.stock = 0 desc, pack.stock <= pack.low_stock_level desc, product.name, pack.sort_order`,
-    stockFilter.values,
+     order by pack.stock = 0 desc, pack.stock <= pack.low_stock_level desc, product.name, pack.sort_order, pack.id
+     ${pageClause}`,
+    page ? [...values, page.limit, page.offset] : values,
   );
   return result.rows.map(toStockItem);
+}
+
+export async function countStockItems(executor, stockFilter) {
+  const result = await executor.query(`select count(*)::int as item_count ${stockItemsFrom} ${stockFilter.whereClause}`, stockFilter.values);
+  return result.rows[0].item_count;
 }
 
 function toStockItem(row) {
