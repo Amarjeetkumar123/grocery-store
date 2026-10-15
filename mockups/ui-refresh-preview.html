@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Kitchen Pantry UI Refresh</title>
+<title>Grocery Store UI Refresh</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap">
 <style>
@@ -293,6 +293,44 @@ figcaption b { display: block; color: var(--page-fg); font-size: 14px; margin-bo
 .btn-loading .ring { border-color: rgba(255,255,255,.35); border-top-color: #fff; }
 @media (prefers-reduced-motion: reduce) { .skeleton, .bounce i, .splash .logo-ring img, .splash .logo-ring::before, .ring { animation-duration: 3s; } .bounce i { animation: none; opacity: .8; } }
 
+
+/* ───────────── LOGIN ───────────── */
+.screen.flex-screen { display: flex; flex-direction: column; }
+.old .login-hero { background: var(--green); color: #fff; padding: 56px 24px 28px; display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center; }
+.old .login-hero img.logo { width: 84px; height: 84px; border-radius: 19px; box-shadow: 0 6px 16px rgba(0,0,0,.18); }
+.old .login-hero h1 { font-size: 26px; font-family: var(--font-body); }
+.old .login-hero p { color: #dcefe4; font-size: 15px; }
+.old .login-hero img.art { width: 100%; max-width: 300px; margin-top: 6px; }
+.old .login-body { flex: 1; display: flex; flex-direction: column; gap: 16px; padding: 18px 16px 24px; }
+.old .benefits { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font-size: 13px; text-align: center; list-style: none; margin: 0; padding: 0; }
+.old .benefits li { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.old .benefit-icon { width: 46px; height: 46px; border-radius: 12px; background: var(--green-light); color: var(--green-text); display: flex; align-items: center; justify-content: center; }
+.old .spacer { flex: 1; }
+.old .btn { min-height: 54px; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; font-size: 16px; background: #fff; }
+.old .btn-google { border: 1.5px solid var(--line-strong); }
+.old .btn-email { border: 1.5px solid var(--green); color: var(--green); }
+.old .divider, .new .divider { display: flex; align-items: center; gap: 12px; color: var(--muted); font-size: 13px; }
+.old .divider::before, .old .divider::after, .new .divider::before, .new .divider::after { content: ''; flex: 1; border-top: 1px solid var(--line); }
+
+.new .login-hero { position: relative; background: radial-gradient(120% 100% at 50% 0%, var(--green-bright) 0%, var(--green) 50%, var(--green-deep) 100%); color: #fff; padding: 34px 24px 0; border-radius: 0 0 32px 32px; display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
+.new .login-logo { position: relative; display: flex; margin-bottom: 4px; }
+.new .login-logo img { width: 72px; height: 72px; border-radius: 20px; box-shadow: 0 10px 24px rgba(0,0,0,.25); }
+.new .login-logo::before { content: ''; position: absolute; inset: -7px; border-radius: 26px; border: 2px solid rgba(244,201,93,.55); }
+.new .login-hero h1 { font-family: var(--font-display); font-size: 26px; font-weight: 800; letter-spacing: -0.02em; }
+.new .login-hero p { color: #d6ebdf; font-size: 14px; line-height: 1.45; max-width: 28ch; }
+.new .login-hero img.art { width: 86%; max-width: 270px; margin: 6px 0 -30px; filter: drop-shadow(0 14px 16px rgba(0,0,0,.22)); }
+.new .login-body { flex: 1; display: flex; flex-direction: column; gap: 14px; padding: 46px 16px 20px; }
+.new .benefit-card { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--card); border-radius: 20px; box-shadow: var(--shadow-sm); padding: 14px 4px; list-style: none; margin: 0; }
+.new .benefit-card li { display: flex; flex-direction: column; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 600; text-align: center; }
+.new .benefit-card li + li { border-left: 1px dashed var(--line); }
+.new .benefit-card .chip-icon { width: 40px; height: 40px; border-radius: 13px; background: var(--green-light); color: var(--green); display: flex; align-items: center; justify-content: center; }
+.new .login-actions { margin-top: auto; display: flex; flex-direction: column; gap: 12px; }
+.new .login-actions h2 { font-family: var(--font-display); font-size: 17px; font-weight: 800; text-align: center; }
+.new .btn { min-height: 54px; border-radius: 16px; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 700; font-size: 15.5px; width: 100%; }
+.new .btn-google { background: var(--card); box-shadow: var(--shadow-sm), inset 0 0 0 1px var(--line); }
+.new .btn-email { background: var(--green-light); color: var(--green-text); }
+.new .login-note { text-align: center; font-size: 12px; color: var(--muted); }
+
 /* change list */
 .changes { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
 .change { background: var(--page-surface); border: 1px solid var(--page-line); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 6px; }
@@ -321,13 +359,15 @@ figcaption b { display: block; color: var(--page-fg); font-size: 14px; margin-bo
   <symbol id="settings" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8M14 4v6M8 14v6"/></symbol>
   <symbol id="building" viewBox="0 0 24 24"><path d="M4 21V4h10v17M14 9h6v12M2 21h20M7 8h1M10 8h1M7 12h1M10 12h1M7 16h1M10 16h1"/></symbol>
   <symbol id="bell2" viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4"/></symbol>
+  <symbol id="clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="mail" viewBox="0 0 24 24"><path d="M3 6h18v12H3zM3 6l9 7 9-7"/></symbol>
   <symbol id="check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
 </svg>
 
 <main class="sheet">
   <header class="sheet-head">
-    <h1>Kitchen Pantry, refreshed</h1>
-    <p>The same green and yellow, the same screens and the same flow. What changes is depth, shape and type: soft shadows instead of hairline borders, rounder corners, a curved header and a floating tab bar. Prices and headings get a bolder display font.</p>
+    <h1>Grocery Store, refreshed</h1>
+    <p>Screens that are designed but not built into the app yet. The home, category, product, loading and admin screens are already in the code, so they've been removed from this page.</p>
     <div class="swatches">
       <span class="swatch"><i style="background:#1E6B45"></i>#1E6B45 green</span>
       <span class="swatch"><i style="background:#163F2A"></i>#163F2A sidebar</span>
@@ -338,314 +378,64 @@ figcaption b { display: block; color: var(--page-fg); font-size: 14px; margin-bo
     </div>
   </header>
 
-  <!-- ROW 1: home before / after -->
+  <!-- ROW 0: login before / after -->
   <section>
     <div class="row-head">
-      <h2>Home: now vs refreshed</h2>
-      <p>The search bar sits over the curved header edge. The delivery address becomes a tappable pill, and the category tiles get soft lighting, so the tiles look like things you can tap.</p>
+      <h2>Login: now vs refreshed</h2>
+      <p>Right now there's a big empty gap between the benefits and the sign-in buttons. In the refreshed version, the green top curves at the bottom and the groceries hang over its edge. The three benefits sit together on one card, and the sign-in buttons sit together at the bottom with a short heading.</p>
     </div>
     <div class="phones">
       <figure>
-        <div class="phone"><div class="screen old"><div class="scroll">
-          <header class="store-header">
-            <div class="brand"><img src="../frontend/src/assets/logo.png" alt="">Kitchen Pantry</div>
-            <div class="delivery"><svg class="i i-sm"><use href="#pin"/></svg>Delivering to <b>Green Valley · B-1204</b></div>
-            <div class="search"><svg class="i"><use href="#search"/></svg>Search atta, oil, dal…</div>
-          </header>
-          <div class="body">
-            <p class="offer"><svg class="i"><use href="#cash"/></svg>Pay at your door · Cash or UPI</p>
-            <h3>Shop by category</h3>
-            <div class="grid">
-              <div class="tile" style="background:#fbf0cf"><img src="../frontend/src/assets/categories/oils-ghee.png" alt="">Oils &amp; Ghee</div>
-              <div class="tile" style="background:#f3e8da"><img src="../frontend/src/assets/categories/atta-flours.png" alt="">Atta &amp; Flours</div>
-              <div class="tile" style="background:#edf0e6"><img src="../frontend/src/assets/categories/rice.png" alt="">Rice</div>
-              <div class="tile" style="background:#f9e5d8"><img src="../frontend/src/assets/categories/dals-pulses.png" alt="">Dals &amp; Pulses</div>
-              <div class="tile" style="background:#eee7d3"><img src="../frontend/src/assets/categories/grains-millets.png" alt="">Grains &amp; Millets</div>
-              <div class="tile soon"><img src="../frontend/src/assets/categories/fruits-vegetables.png" alt="">Fruits &amp; Veg<span class="pill">Coming soon</span><span class="soon-link">Notify me</span></div>
-            </div>
+        <div class="phone"><div class="screen old flex-screen"><div class="scroll" style="display:flex;flex-direction:column">
+          <section class="login-hero">
+            <img class="logo" src="../frontend/src/assets/logo.png" alt="">
+            <h1>Grocery Store</h1>
+            <p>Oils, atta, rice &amp; dals, delivered to your door in your chosen slot</p>
+            <img class="art" src="../frontend/src/assets/login-groceries.png" alt="">
+          </section>
+          <div class="login-body">
+            <ul class="benefits">
+              <li><span class="benefit-icon"><svg class="i"><use href="#clock"/></svg></span>Pick a slot</li>
+              <li><span class="benefit-icon"><svg class="i"><use href="#cash"/></svg></span>Pay at door</li>
+              <li><span class="benefit-icon"><svg class="i"><use href="#truck"/></svg></span>To your door</li>
+            </ul>
+            <div class="spacer"></div>
+            <div class="btn btn-google"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M20.5 12.2c0-.7-.1-1.3-.2-1.9H12v3.6h4.8a4.1 4.1 0 0 1-1.8 2.7v2.2h2.9c1.7-1.6 2.6-3.9 2.6-6.6z"/><path fill="#34A853" d="M12 21c2.4 0 4.5-.8 5.9-2.2L15 16.6c-.8.5-1.8.9-3 .9-2.3 0-4.3-1.6-5-3.7H4v2.3A9 9 0 0 0 12 21z"/><path fill="#FBBC05" d="M7 13.8a5.4 5.4 0 0 1 0-3.5V8H4a9 9 0 0 0 0 8.1z"/><path fill="#EA4335" d="M12 6.6c1.3 0 2.5.5 3.4 1.3L18 5.4A9 9 0 0 0 4 8l3 2.3c.7-2.1 2.7-3.7 5-3.7z"/></svg> Continue with Google</div>
+            <p class="divider">or</p>
+            <div class="btn btn-email"><svg class="i"><use href="#mail"/></svg> Continue with email</div>
           </div>
-        </div>
-        <nav class="tabbar">
-          <span class="tab on"><svg class="i"><use href="#home"/></svg>Home</span>
-          <span class="tab"><svg class="i"><use href="#search"/></svg>Search</span>
-          <span class="tab"><svg class="i"><use href="#cart"/></svg>Cart</span>
-          <span class="tab"><svg class="i"><use href="#box"/></svg>Orders</span>
-          <span class="tab"><svg class="i"><use href="#user"/></svg>Profile</span>
-        </nav></div></div>
-        <figcaption><b>Home <span class="tag-now">Now</span></b>Flat header, 1px borders, fixed tab bar</figcaption>
-      </figure>
-
-      <figure>
-        <div class="phone"><div class="screen new"><div class="scroll">
-          <header class="hero">
-            <div class="brand-row">
-              <img src="../frontend/src/assets/logo.png" alt=""><b>Kitchen Pantry</b>
-              <button class="round glass" aria-label="Alerts"><svg class="i"><use href="#bell"/></svg><span class="dot"></span></button>
-            </div>
-            <button class="deliver glass"><span class="pin"><svg class="i i-sm"><use href="#pin"/></svg></span>Deliver to <b>Green Valley · B-1204</b><svg class="i i-sm"><use href="#down"/></svg></button>
-          </header>
-          <div class="search"><svg class="i"><use href="#search"/></svg><span>Search atta, oil, dal…</span></div>
-          <div class="body">
-            <div class="offer"><span class="chip-icon"><svg class="i"><use href="#cash"/></svg></span><div><b>Pay at your door</b><small>Cash or UPI when your order arrives</small></div></div>
-            <div class="section"><h3>Shop by category</h3></div>
-            <div class="grid">
-              <div class="tile" tabindex="0"><span class="photo"><img src="category-photos/oils-ghee.jpg" alt=""></span>Oils &amp; Ghee</div>
-              <div class="tile" tabindex="0"><span class="photo"><img src="category-photos/atta-flours.jpg" alt=""></span>Atta &amp; Flours</div>
-              <div class="tile" tabindex="0"><span class="photo"><img src="category-photos/rice.jpg" alt=""></span>Rice</div>
-              <div class="tile" tabindex="0"><span class="photo"><img src="category-photos/dals-pulses.jpg" alt=""></span>Dals &amp; Pulses</div>
-              <div class="tile" tabindex="0"><span class="photo"><img src="category-photos/grains-millets.jpg" alt=""></span>Grains &amp; Millets</div>
-              <div class="tile soon"><span class="photo"><img src="category-photos/fruits-vegetables.jpg" alt=""><span class="soon-label">Coming soon</span><button class="bell" aria-label="Notify me when Fruits &amp; Veg arrives"><svg class="i i-sm"><use href="#bell"/></svg></button></span>Fruits &amp; Veg</div>
-            </div>
-          </div>
-        </div>
-        <nav class="tabbar">
-          <span class="tab on"><span class="ico"><svg class="i"><use href="#home"/></svg></span>Home</span>
-          <span class="tab"><span class="ico"><svg class="i"><use href="#search"/></svg></span>Search</span>
-          <span class="tab"><span class="ico"><svg class="i"><use href="#cart"/></svg><span class="count">2</span></span>Cart</span>
-          <span class="tab"><span class="ico"><svg class="i"><use href="#box"/></svg></span>Orders</span>
-          <span class="tab"><span class="ico"><svg class="i"><use href="#user"/></svg></span>Profile</span>
-        </nav></div></div>
-        <figcaption><b>Home <span class="tag-new">Refreshed</span></b>Curved header, floating search and frosted tab bar</figcaption>
-      </figure>
-    </div>
-  </section>
-
-  <!-- ROW 2: category + product after -->
-  <section>
-    <div class="row-head">
-      <h2>Category list and product page</h2>
-      <p>The discount moves onto the photo, so the price line stays clean. ADD is a tinted button that turns solid once something is in the cart. The cart bar shows what's inside. Pack sizes on the product page show their own price.</p>
-    </div>
-    <div class="phones">
-      <figure>
-        <div class="phone"><div class="screen new"><div class="scroll">
-          <div class="topbar">
-            <button class="soft" aria-label="Back"><svg class="i"><use href="#back"/></svg></button>
-            <h3>Oils &amp; Ghee</h3>
-            <button class="soft" aria-label="Search"><svg class="i"><use href="#search"/></svg></button>
-          </div>
-          <div class="chips">
-            <span class="chip on">All</span><span class="chip">Sunflower</span><span class="chip">Mustard</span><span class="chip">Groundnut</span><span class="chip">Ghee</span>
-          </div>
-          <div class="list">
-            <article class="product">
-              <div class="thumb"><span class="off">14% OFF</span><img src="../frontend/src/assets/categories/oils-ghee.png" alt=""></div>
-              <div class="details">
-                <span class="brand">Fortune</span><span class="name">Sunflower Oil</span>
-                <span class="pack">1 L<svg class="i i-sm"><use href="#down"/></svg></span>
-                <div class="price-row"><div><span class="price">₹155</span><s class="mrp">MRP ₹180</s></div><button class="add"><svg class="i i-sm"><use href="#plus"/></svg>ADD</button></div>
-              </div>
-            </article>
-            <article class="product">
-              <div class="thumb"><span class="off">14% OFF</span><img src="../frontend/src/assets/categories/oils-ghee.png" alt=""></div>
-              <div class="details">
-                <span class="brand">Saffola</span><span class="name">Gold Refined Oil</span>
-                <span class="pack">5 L<svg class="i i-sm"><use href="#down"/></svg></span>
-                <div class="price-row"><div><span class="price">₹899</span><s class="mrp">MRP ₹1,050</s></div><span class="stepper"><button aria-label="Less"><svg class="i i-sm"><use href="#minus"/></svg></button>2<button aria-label="More"><svg class="i i-sm"><use href="#plus"/></svg></button></span></div>
-              </div>
-            </article>
-            <article class="product out">
-              <div class="thumb"><img src="../frontend/src/assets/categories/oils-ghee.png" alt=""></div>
-              <div class="details">
-                <span class="brand">Dhara</span><span class="name">Kachi Ghani Mustard Oil</span>
-                <span class="out-pill">Out of stock</span>
-                <div class="price-row"><div><span class="price" style="color:#8a928b">₹189</span></div><button class="notify-btn"><svg class="i i-sm"><use href="#bell"/></svg>Notify</button></div>
-              </div>
-            </article>
-            <article class="product">
-              <div class="thumb"><span class="off">6% OFF</span><img src="../frontend/src/assets/categories/oils-ghee.png" alt=""></div>
-              <div class="details">
-                <span class="brand">Amul</span><span class="name">Pure Ghee</span>
-                <span class="pack">1 L<svg class="i i-sm"><use href="#down"/></svg></span>
-                <div class="price-row"><div><span class="price">₹610</span><s class="mrp">MRP ₹650</s></div><button class="add"><svg class="i i-sm"><use href="#plus"/></svg>ADD</button></div>
-              </div>
-            </article>
-          </div>
-        </div>
-        <div class="cartbar">
-          <span class="stack"><span><img src="../frontend/src/assets/categories/oils-ghee.png" alt=""></span><span><img src="../frontend/src/assets/categories/atta-flours.png" alt=""></span></span>
-          <span class="sum"><b>₹1,798</b><small>2 items</small></span>
-          <span class="go">View cart<svg class="i i-sm"><use href="#right"/></svg></span>
-        </div>
-        <nav class="tabbar">
-          <span class="tab on"><span class="ico"><svg class="i"><use href="#home"/></svg></span>Home</span>
-          <span class="tab"><span class="ico"><svg class="i"><use href="#search"/></svg></span>Search</span>
-          <span class="tab"><span class="ico"><svg class="i"><use href="#cart"/></svg><span class="count">2</span></span>Cart</span>
-          <span class="tab"><span class="ico"><svg class="i"><use href="#box"/></svg></span>Orders</span>
-          <span class="tab"><span class="ico"><svg class="i"><use href="#user"/></svg></span>Profile</span>
-        </nav></div></div>
-        <figcaption><b>Category <span class="tag-new">Refreshed</span></b>Shadow cards, discount badge, cart preview</figcaption>
-      </figure>
-
-      <figure>
-        <div class="phone"><div class="screen new"><div class="scroll">
-          <div class="product-hero">
-            <div class="float">
-              <button class="soft" aria-label="Back"><svg class="i"><use href="#back"/></svg></button>
-              <button class="soft" aria-label="Cart"><svg class="i"><use href="#cart"/></svg><span class="count">2</span></button>
-            </div>
-            <img src="../frontend/src/assets/categories/oils-ghee.png" alt="">
-            <div class="dots"><i></i><i></i><i></i></div>
-          </div>
-          <div class="pd">
-            <div><span class="label">Saffola</span><h3>Saffola Gold Refined Oil</h3></div>
-            <div class="big-price"><strong>₹899</strong><s class="mrp" style="font-size:14px">MRP ₹1,050</s><span class="save">Save ₹151</span></div>
-            <span class="stock"><i></i>In stock · delivered tomorrow 7–9 AM</span>
-            <span class="label">Pack size</span>
-            <div class="packs">
-              <button>1 L<small>₹189</small></button>
-              <button class="on">5 L<small>₹899</small></button>
-              <button>15 L jar<small>₹2,540</small></button>
-            </div>
-            <dl class="facts">
-              <div><dt>Net quantity</dt><dd>5 L</dd></div>
-              <div><dt>Manufacturer</dt><dd>Marico Ltd</dd></div>
-              <div><dt>Best before</dt><dd>Mar 2027</dd></div>
-              <div><dt>Country of origin</dt><dd>India</dd></div>
-            </dl>
-          </div>
-        </div>
-        <div class="buy">
-          <span class="stepper"><button aria-label="Less"><svg class="i"><use href="#minus"/></svg></button>2<button aria-label="More"><svg class="i"><use href="#plus"/></svg></button></span>
-          <button class="cta cta-cart"><span><b>Go to cart</b><small>2 items · ₹1,798</small></span><svg class="i"><use href="#right"/></svg></button>
         </div></div></div>
-        <figcaption><b>Product <span class="tag-new">Refreshed</span></b>Large photo, pack cards with prices, frosted buy bar</figcaption>
-      </figure>
-    </div>
-  </section>
-
-  <!-- ROW 2b: loaders -->
-  <section>
-    <div class="row-head">
-      <h2>Loaders</h2>
-      <p>Right now both the app start and every page show the word "Loading…" on a blank screen. Instead, the app opens on a branded green screen. Pages show grey placeholder cards in the shape of the content that's coming, so nothing jumps when it arrives. Buttons that are saving get a small spinner.</p>
-    </div>
-    <div class="phones">
-      <figure>
-        <div class="phone"><div class="screen old"><div class="loading-text">Loading…</div></div></div>
-        <figcaption><b>App start <span class="tag-now">Now</span></b>Plain text on an empty screen</figcaption>
+        <figcaption><b>Login <span class="tag-now">Now</span></b>Flat green block, empty gap above the buttons</figcaption>
       </figure>
 
       <figure>
-        <div class="phone"><div class="screen new splash" role="status">
-          <div class="logo-ring"><img src="../frontend/src/assets/logo.png" alt=""></div>
-          <div><b>Kitchen Pantry</b><small>Getting your store ready</small></div>
-          <div class="bounce"><i></i><i></i><i></i></div>
-        </div></div>
-        <figcaption><b>App start <span class="tag-new">Refreshed</span></b>Breathing logo, yellow dots</figcaption>
-      </figure>
-
-      <figure>
-        <div class="phone"><div class="screen new"><div class="scroll">
-          <div class="topbar">
-            <button class="soft" aria-label="Back"><svg class="i"><use href="#back"/></svg></button>
-            <h3>Oils &amp; Ghee</h3>
-            <button class="soft" aria-label="Search"><svg class="i"><use href="#search"/></svg></button>
+        <div class="phone"><div class="screen new flex-screen"><div class="scroll" style="display:flex;flex-direction:column">
+          <section class="login-hero">
+            <span class="login-logo"><img src="../frontend/src/assets/logo.png" alt=""></span>
+            <h1>Grocery Store</h1>
+            <p>Daily groceries from your local store, delivered to your door in the slot you pick</p>
+            <img class="art" src="../frontend/src/assets/login-groceries.png" alt="A basket of everyday groceries">
+          </section>
+          <div class="login-body">
+            <ul class="benefit-card">
+              <li><span class="chip-icon"><svg class="i"><use href="#clock"/></svg></span>Pick a slot</li>
+              <li><span class="chip-icon"><svg class="i"><use href="#cash"/></svg></span>Pay at door</li>
+              <li><span class="chip-icon"><svg class="i"><use href="#truck"/></svg></span>To your door</li>
+            </ul>
+            <div class="login-actions">
+              <h2>Sign in to start shopping</h2>
+              <button class="btn btn-google"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M20.5 12.2c0-.7-.1-1.3-.2-1.9H12v3.6h4.8a4.1 4.1 0 0 1-1.8 2.7v2.2h2.9c1.7-1.6 2.6-3.9 2.6-6.6z"/><path fill="#34A853" d="M12 21c2.4 0 4.5-.8 5.9-2.2L15 16.6c-.8.5-1.8.9-3 .9-2.3 0-4.3-1.6-5-3.7H4v2.3A9 9 0 0 0 12 21z"/><path fill="#FBBC05" d="M7 13.8a5.4 5.4 0 0 1 0-3.5V8H4a9 9 0 0 0 0 8.1z"/><path fill="#EA4335" d="M12 6.6c1.3 0 2.5.5 3.4 1.3L18 5.4A9 9 0 0 0 4 8l3 2.3c.7-2.1 2.7-3.7 5-3.7z"/></svg> Continue with Google</button>
+              <p class="divider">or</p>
+              <button class="btn btn-email"><svg class="i"><use href="#mail"/></svg> Continue with email</button>
+              <p class="login-note">New here? Your account is created the first time you sign in.</p>
+            </div>
           </div>
-          <div class="chips">
-            <span class="chip skeleton" style="width:52px;box-shadow:none"></span><span class="chip skeleton" style="width:96px;box-shadow:none"></span><span class="chip skeleton" style="width:82px;box-shadow:none"></span><span class="chip skeleton" style="width:90px;box-shadow:none"></span>
-          </div>
-          <div class="list" role="status" aria-label="Loading products">
-            <article class="product ghost"><div class="thumb skeleton"></div><div class="details"><span class="skeleton" style="height:10px;width:30%"></span><span class="skeleton" style="height:14px;width:75%"></span><span class="skeleton" style="height:22px;width:42px;border-radius:999px"></span><div class="price-row"><span class="skeleton" style="height:18px;width:56px"></span><span class="skeleton" style="height:36px;width:76px;border-radius:12px"></span></div></div></article>
-            <article class="product ghost"><div class="thumb skeleton"></div><div class="details"><span class="skeleton" style="height:10px;width:25%"></span><span class="skeleton" style="height:14px;width:60%"></span><span class="skeleton" style="height:22px;width:42px;border-radius:999px"></span><div class="price-row"><span class="skeleton" style="height:18px;width:56px"></span><span class="skeleton" style="height:36px;width:76px;border-radius:12px"></span></div></div></article>
-            <article class="product ghost"><div class="thumb skeleton"></div><div class="details"><span class="skeleton" style="height:10px;width:35%"></span><span class="skeleton" style="height:14px;width:82%"></span><span class="skeleton" style="height:22px;width:42px;border-radius:999px"></span><div class="price-row"><span class="skeleton" style="height:18px;width:56px"></span><span class="skeleton" style="height:36px;width:76px;border-radius:12px"></span></div></div></article>
-            <article class="product ghost"><div class="thumb skeleton"></div><div class="details"><span class="skeleton" style="height:10px;width:28%"></span><span class="skeleton" style="height:14px;width:55%"></span><span class="skeleton" style="height:22px;width:42px;border-radius:999px"></span><div class="price-row"><span class="skeleton" style="height:18px;width:56px"></span><span class="skeleton" style="height:36px;width:76px;border-radius:12px"></span></div></div></article>
-            <button class="cta btn-loading" style="flex:none"><span class="ring"></span>Placing order…</button>
-            <p class="loader-pair"><span class="ring"></span>Checking slots…</p>
-          </div>
-        </div>
-        <nav class="tabbar">
-          <span class="tab on"><span class="ico"><svg class="i"><use href="#home"/></svg></span>Home</span>
-          <span class="tab"><span class="ico"><svg class="i"><use href="#search"/></svg></span>Search</span>
-          <span class="tab"><span class="ico"><svg class="i"><use href="#cart"/></svg></span>Cart</span>
-          <span class="tab"><span class="ico"><svg class="i"><use href="#box"/></svg></span>Orders</span>
-          <span class="tab"><span class="ico"><svg class="i"><use href="#user"/></svg></span>Profile</span>
-        </nav></div></div>
-        <figcaption><b>Page loading <span class="tag-new">Refreshed</span></b>Shimmer cards, plus button and inline spinners</figcaption>
+        </div></div></div>
+        <figcaption><b>Login <span class="tag-new">Refreshed</span></b>Curved hero, one benefits card, buttons grouped</figcaption>
       </figure>
     </div>
   </section>
 
-  <!-- ROW 3: admin -->
-  <section>
-    <div class="row-head">
-      <h2>Admin dashboard</h2>
-      <p>The sidebar gets a yellow icon on the active page and a count badge on Orders. Each stat tile has an icon and a status dot, and the tables lose most of their lines. On a phone, scroll this frame sideways.</p>
-    </div>
-    <div class="browser-wrap"><div class="browser">
-      <div class="browser-bar"><i></i><i></i><i></i><span>kitchenpantry.duckdns.org/admin/dashboard</span></div>
-      <div class="admin">
-        <aside class="side">
-          <div class="brand-row"><img src="../frontend/src/assets/logo.png" alt="">Kitchen Pantry</div>
-          <div class="group"><p>Daily</p>
-            <span class="nav on"><svg class="i"><use href="#home"/></svg>Dashboard</span>
-            <span class="nav"><svg class="i"><use href="#box"/></svg>Orders<span class="n">3</span></span>
-            <span class="nav"><svg class="i"><use href="#layers"/></svg>Picking list</span>
-            <span class="nav"><svg class="i"><use href="#truck"/></svg>Delivery list</span>
-          </div>
-          <div class="group"><p>Catalogue</p>
-            <span class="nav"><svg class="i"><use href="#tag"/></svg>Products</span>
-            <span class="nav"><svg class="i"><use href="#layers"/></svg>Stock</span>
-          </div>
-          <div class="group"><p>Setup</p>
-            <span class="nav"><svg class="i"><use href="#pin"/></svg>Zones &amp; slots</span>
-            <span class="nav"><svg class="i"><use href="#user"/></svg>Customers</span>
-            <span class="nav"><svg class="i"><use href="#settings"/></svg>Store settings</span>
-          </div>
-          <div class="who"><span class="av">R</span><span><b>Ramesh</b>Owner</span></div>
-        </aside>
-        <div class="main">
-          <div class="head"><div><h3>Dashboard</h3><p>Thursday, 15 October</p></div><span class="btn"><svg class="i i-sm"><use href="#plus"/></svg>Add product</span></div>
-          <div class="tiles">
-            <div class="tile-a"><div class="top">Orders for tomorrow<span class="ic g"><svg class="i"><use href="#box"/></svg></span></div><strong>24</strong><span class="note g">3 new, waiting to confirm</span></div>
-            <div class="tile-a"><div class="top">Sales today<span class="ic b"><svg class="i"><use href="#tag"/></svg></span></div><strong>₹18,420</strong><span class="note m">17 orders delivered</span></div>
-            <div class="tile-a"><div class="top">Cash with riders<span class="ic a"><svg class="i"><use href="#cash"/></svg></span></div><strong>₹4,260</strong><span class="note a">Not handed over yet</span></div>
-            <div class="tile-a"><div class="top">Low / out of stock<span class="ic r"><svg class="i"><use href="#layers"/></svg></span></div><strong>5</strong><span class="note r">2 items out of stock</span></div>
-          </div>
-          <div class="cols">
-            <section class="panel">
-              <div class="panel-h"><h4>Tomorrow's slots</h4><span>Fri 16 Oct</span></div>
-              <table>
-                <thead><tr><th>Zone</th><th>Slot</th><th>Filled</th><th class="num">Orders</th></tr></thead>
-                <tbody>
-                  <tr><td><b>Green Valley</b></td><td>7–9 AM</td><td><div class="bar"><span style="width:90%" class="warn"></span></div></td><td class="num">18 / 20</td></tr>
-                  <tr><td><b>Green Valley</b></td><td>5–7 PM</td><td><div class="bar"><span style="width:35%"></span></div></td><td class="num">7 / 20</td></tr>
-                  <tr><td><b>Lake View</b></td><td>8–10 AM</td><td><div class="bar"><span style="width:50%"></span></div></td><td class="num">5 / 10</td></tr>
-                  <tr><td><b>Lake View</b></td><td>6–8 PM</td><td><div class="bar"><span style="width:20%"></span></div></td><td class="num">2 / 10</td></tr>
-                </tbody>
-              </table>
-            </section>
-            <section class="panel">
-              <div class="panel-h"><h4>Stock alerts</h4><span>Open stock</span></div>
-              <ul class="alerts">
-                <li><img src="../frontend/src/assets/categories/oils-ghee.png" alt=""><div><b>Dhara Mustard Oil</b><small>1 L</small></div><span class="p r">Out</span></li>
-                <li><img src="../frontend/src/assets/categories/dals-pulses.png" alt=""><div><b>Tata Toor Dal</b><small>1 kg</small></div><span class="p r">Out</span></li>
-                <li><img src="../frontend/src/assets/categories/atta-flours.png" alt=""><div><b>Aashirvaad Atta</b><small>10 kg</small></div><span class="p a">3 left</span></li>
-                <li><img src="../frontend/src/assets/categories/rice.png" alt=""><div><b>India Gate Basmati</b><small>5 kg · expires 2 Nov</small></div><span class="p a">Expiring</span></li>
-              </ul>
-            </section>
-          </div>
-        </div>
-      </div>
-    </div></div>
-  </section>
-
-  <!-- ROW 4: what changes -->
-  <section>
-    <div class="row-head">
-      <h2>What changes in the code</h2>
-      <p>Most of this is in <code>styles.css</code>. A few components need small markup changes. No new packages, no logic changes.</p>
-    </div>
-    <div class="changes">
-      <div class="change"><h3>Depth instead of lines</h3><p>Card borders become two soft shadows tinted with the brand green. Corner radius goes from 12–16px up to 16–20px.</p></div>
-      <div class="change"><h3>Display font</h3><p>Plus Jakarta Sans for headings, prices and stat numbers. Noto Sans stays for everything else. It's one more Google Fonts weight set.</p></div>
-      <div class="change"><h3>Curved header</h3><p>Gradient green with a rounded bottom edge. The search box overlaps that edge, and the delivery line becomes a glass pill.</p></div>
-      <div class="change"><h3>Floating tab bar</h3><p>A frosted pill with a green-tint highlight behind the active icon. Same <code>TabBar.jsx</code>, one extra wrapper span.</p></div>
-      <div class="change"><h3>Product cards</h3><p>The discount badge moves onto the photo, ADD becomes a tinted button and the pack picker becomes a pill. Small changes in <code>ProductCard.jsx</code>.</p></div>
-      <div class="change"><h3>Loaders</h3><p><code>LoadingScreen</code> in <code>RouteGuards.jsx</code> becomes the green start screen. <code>LoadingOrError</code> shows shimmer cards instead of the word "Loading…", so every page that uses it changes at once.</p></div>
-      <div class="change"><h3>Feel</h3><p>Buttons shrink slightly when pressed and colours change with 150ms transitions. Both turn off under reduced motion. Yellow focus rings stay as they are.</p></div>
-    </div>
-  </section>
 </main>
 
 </html>

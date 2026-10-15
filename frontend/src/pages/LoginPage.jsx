@@ -21,7 +21,7 @@ function GoogleLogo() {
 
 function StoreBenefits() {
   return (
-    <ul className="benefits">
+    <ul className="benefits benefit-card">
       <li><span className="benefit-icon"><Icon name="clock" /></span>Pick a slot</li>
       <li><span className="benefit-icon"><Icon name="cash" /></span>Pay at door</li>
       <li><span className="benefit-icon"><Icon name="truck" /></span>To your door</li>
@@ -47,24 +47,27 @@ export function LoginPage() {
   return (
     <main className="app-shell">
       <section className="login-hero">
-        <img className="store-logo store-logo-large" src={logoImage} alt="" />
+        <span className="login-logo"><img className="store-logo store-logo-large" src={logoImage} alt="" /></span>
         <h1>{store.name}</h1>
-        <p>Oils, atta, rice &amp; dals, delivered to your door in your chosen slot</p>
-        <img className="login-illustration" src={groceriesImage} alt="Oil, atta, rice and dals" />
+        <p>Daily groceries from your local store, delivered to your door in the slot you pick</p>
+        <img className="login-illustration" src={groceriesImage} alt="A basket of everyday groceries" />
       </section>
-      <div className="page-body">
+      <div className="page-body login-body">
         <StoreBenefits />
-        <div className="spacer" />
-        {errorMessage && <p className="error-text" role="alert">{errorMessage}</p>}
-        <button type="button" className="button button-large button-google" onClick={signInWithGoogle}>
-          <GoogleLogo /> Continue with Google
-        </button>
-        <p className="login-divider"><span>or</span></p>
-        {showEmailForm ? <EmailPasswordForm /> : (
-          <button type="button" className="button button-large button-outline" onClick={() => setShowEmailForm(true)}>
-            <Icon name="mail" /> Continue with email
+        <div className="login-actions">
+          <h2>Sign in to start shopping</h2>
+          {errorMessage && <p className="error-text" role="alert">{errorMessage}</p>}
+          <button type="button" className="button button-large button-google" onClick={signInWithGoogle}>
+            <GoogleLogo /> Continue with Google
           </button>
-        )}
+          <p className="login-divider"><span>or</span></p>
+          {showEmailForm ? <EmailPasswordForm /> : (
+            <button type="button" className="button button-large button-soft" onClick={() => setShowEmailForm(true)}>
+              <Icon name="mail" /> Continue with email
+            </button>
+          )}
+          <p className="hint login-note">New here? Your account is created the first time you sign in.</p>
+        </div>
       </div>
     </main>
   );
