@@ -33,19 +33,24 @@ export function SocietyFields({ towers, formValues, updateField, fieldErrors }) 
 
 const locationMessages = {
   finding: 'Finding your location…',
+  reading: 'Finding your address…',
+  filled: 'Address filled from your location. Please check it.',
+  'not-found': 'Location saved. We could not read the address here, so please type it.',
   saved: 'Location saved',
   failed: 'Could not get your location. Please allow location access, or skip this step.',
 };
 
-export function LocationCapture({ status, onCapture, errorMessage }) {
-  const message = errorMessage ?? locationMessages[status];
+// addressLookup: 'reading' | 'filled' | 'not-found' | null, after the location is found.
+export function LocationCapture({ status, addressLookup, onCapture, errorMessage }) {
+  const shownStatus = status === 'saved' && addressLookup ? addressLookup : status;
+  const message = errorMessage ?? locationMessages[shownStatus];
   return (
     <div className="field">
       <button type="button" className="button button-outline" onClick={onCapture} disabled={status === 'finding'}>
         <Icon name="pin" /> {status === 'saved' ? 'Update my location' : 'Use my current location'}
       </button>
       {message && (
-        <p className={status === 'saved' && !errorMessage ? 'notice notice-success' : 'field-error'} role="status">
+        <p className={status === 'saved' && !errorMessage ? 'notice notice-success' : 'field-error'} role="status" aria-live="polite">
           {status === 'saved' && !errorMessage && <Icon name="check" size={16} />} {message}
         </p>
       )}

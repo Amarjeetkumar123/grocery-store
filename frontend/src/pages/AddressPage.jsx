@@ -5,6 +5,7 @@ import { callApi } from '../apiClient.js';
 import { SelectField, TextField } from '../FormFields.jsx';
 import { SocietyFields, ZoneTypeSwitch } from './address/AddressFields.jsx';
 import { LocalityFields } from './address/LocalityFields.jsx';
+import { fillEmptyFields, matchZone, readAddressFromLocation } from './address/readAddressFromLocation.js';
 import {
   buildProfileRequest, initialFormValues, useCurrentLocation, useDeliveryZones,
 } from './address/useAddressForm.js';
@@ -36,12 +37,30 @@ function useSaveAddress() {
   return { saveProfile, fieldErrors, submitError, saving };
 }
 
+// After "Use my current location": look up the address there and fill the empty boxes.
+function useFillFromLocation(zones, setFormValues) {
+  const [addressLookup, setAddressLookup] = useState(null);
+  async function fillFromLocation(location) {
+    setAddressLookup('reading');
+    try {
+      const parts = await readAddressFromLocation(location);
+      const zone = matchZone(zones.filter((candidate) => candidate.type === 'locality'), parts.placeNames);
+      setFormValues((previousValues) => fillEmptyFields(previousValues, parts, zone));
+      setAddressLookup(parts.street || parts.houseNumber || zone ? 'filled' : 'not-found');
+    } catch {
+      setAddressLookup('not-found');
+    }
+  }
+  return { addressLookup, fillFromLocation };
+}
+
 function useAddressPageState() {
   const { account } = useAuthentication();
   const { zones, loadError } = useDeliveryZones();
   const [formValues, setFormValues] = useState(() => initialFormValues(account.profile));
   const [chosenZoneType, setChosenZoneType] = useState(account.profile?.zoneType ?? 'society');
-  const currentLocation = useCurrentLocation(savedLocationOf(account.profile));
+  const { addressLookup, fillFromLocation } = useFillFromLocation(zones, setFormValues);
+  const currentLocation = { ...useCurrentLocation(savedLocationOf(account.profile), fillFromLocation), addressLookup };
   const { saveProfile, fieldErrors, submitError, saving } = useSaveAddress();
 
   const zoneTypesOffered = new Set(zones.map((zone) => zone.type));

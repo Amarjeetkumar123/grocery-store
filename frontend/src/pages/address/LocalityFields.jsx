@@ -28,6 +28,7 @@ export function LocalityFields({ formValues, updateField, fieldErrors, currentLo
       />
       <LocationCapture
         status={currentLocation.status}
+        addressLookup={currentLocation.addressLookup}
         onCapture={currentLocation.captureLocation}
         errorMessage={fieldErrors.location}
       />

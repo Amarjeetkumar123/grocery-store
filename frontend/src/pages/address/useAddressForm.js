@@ -12,8 +12,8 @@ export function useDeliveryZones() {
   return { zones, loadError };
 }
 
-// Reads the phone's GPS. status: 'idle' | 'finding' | 'saved' | 'failed'.
-export function useCurrentLocation(savedLocation) {
+// Reads the phone's GPS. status: 'idle' | 'finding' | 'saved' | 'failed'. onFound(location) runs after a new reading.
+export function useCurrentLocation(savedLocation, onFound) {
   const [location, setLocation] = useState(savedLocation);
   const [status, setStatus] = useState(savedLocation ? 'saved' : 'idle');
 
@@ -25,8 +25,10 @@ export function useCurrentLocation(savedLocation) {
     setStatus('finding');
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        setLocation({ latitude: position.coords.latitude, longitude: position.coords.longitude });
+        const found = { latitude: position.coords.latitude, longitude: position.coords.longitude };
+        setLocation(found);
         setStatus('saved');
+        onFound?.(found);
       },
       () => setStatus('failed'),
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 },

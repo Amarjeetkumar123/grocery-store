@@ -31,7 +31,7 @@ export function validateProfileInput(body, zoneType) {
     floor: null,
     ...readCoordinates(body, fieldErrors),
   };
-  if (!profile.phone) fieldErrors.phone = 'Please enter a valid 10-digit mobile number.';
+  if (!profile.phone) fieldErrors.phone = 'Please enter your 10-digit mobile number. It starts with 6, 7, 8 or 9.';
 
   if (zoneType === 'society') {
     profile.towerId = readPositiveInteger(body.towerId);
