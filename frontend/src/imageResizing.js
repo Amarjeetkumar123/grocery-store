@@ -8,7 +8,11 @@ export async function shrinkImage(file, longestSide = 1000) {
   canvas.height = Math.round(bitmap.height * scale);
   canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
   bitmap.close();
+  return canvasToImage(canvas);
+}
 
+// WebP when the browser can make it, else JPEG.
+export async function canvasToImage(canvas) {
   const toBlob = (type) => new Promise((resolve) => canvas.toBlob(resolve, type, 0.85));
   const webpImage = await toBlob('image/webp');
   // Older iPhones cannot make WebP and quietly return PNG; JPEG is smaller then.

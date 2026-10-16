@@ -12,7 +12,7 @@ export function VisibilityCard({ shown, onChange }) {
 }
 
 // The product card as customers will see it, built from the first pack size.
-export function ShopPreview({ formValues, imageUrl }) {
+export function ShopPreview({ formValues, imageUrl, isPhoto }) {
   const packSize = formValues.packSizes[0];
   const price = Number(packSize?.price) || 0;
   const discount = percentOff(Number(packSize?.maximumRetailPrice) || 0, price);
@@ -21,7 +21,7 @@ export function ShopPreview({ formValues, imageUrl }) {
       <header className="form-panel-heading form-panel-heading-row"><h2>In the shop</h2><span className="hint">Preview</span></header>
       <div className="form-panel-body">
         <div className="shop-preview-card">
-          <div className="shop-preview-image">{discount > 0 && <span className="discount-badge">{discount}% OFF</span>}<img src={imageUrl} alt="" /></div>
+          <div className={`shop-preview-image${isPhoto ? ' is-photo' : ''}`}>{discount > 0 && <span className="discount-badge">{discount}% OFF</span>}<img src={imageUrl} alt="" /></div>
           <div className="shop-preview-details">
             <small>{formValues.brand || 'Brand'}</small>
             <strong>{formValues.name || 'Your product name'}</strong>

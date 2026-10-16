@@ -6,7 +6,8 @@ import { QuantityStepper } from './QuantityStepper.jsx';
 
 export function ProductImage({ product, className }) {
   const fallback = categoryImageFor(product.categoryName);
-  return <img className={className} src={product.imageUrl ?? fallback} alt="" loading="lazy" />;
+  const photoClass = product.imageUrl ? ' is-photo' : '';
+  return <img className={`${className}${photoClass}`} src={product.imageUrl ?? fallback} alt="" loading="lazy" />;
 }
 
 // showDiscount: false when the "% off" is already shown on the photo.

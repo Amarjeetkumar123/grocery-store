@@ -1474,3 +1474,44 @@ body:has(.cart-drawer[open]) { overflow: hidden; }
 .selection-bar { display: flex; align-items: center; gap: 12px; flex: none; padding: 8px 14px; background: var(--green-light); border-bottom: 1px solid var(--line); font-size: 13px; animation: fade-in 0.15s ease-out; }
 .selection-bar strong { font-weight: 600; color: var(--green-text); }
 .selection-bar .button { margin-left: auto; width: auto; padding: 0 12px; }
+
+/* A real product photo usually has a white background: show it on a white tile with
+   little padding, so it does not look like a white square on cream. The cream tile
+   stays for the category drawings. */
+.is-photo { background: #fff; box-shadow: inset 0 0 0 1px var(--border); }
+.product-card-image.is-photo { padding: 5%; }
+.product-hero-image.is-photo { padding: 12px; }
+.photo-current.is-photo img, .shop-preview-image.is-photo img { padding: 4%; }
+
+/* Square crop in the product photo panel (productForm/PhotoCropper.jsx) */
+.photo-cropper { display: flex; flex-direction: column; gap: 10px; }
+.crop-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; font-weight: 500; }
+.crop-modes { height: 30px; padding: 3px; border-radius: 8px; }
+.crop-modes button { flex: none; height: 24px; padding: 0 12px; border-radius: 6px; font-size: 12.5px; font-weight: 500; }
+.crop-square { position: relative; aspect-ratio: 1; overflow: hidden; border-radius: 10px; background: #fff; border: 1px solid var(--line); container-type: inline-size; cursor: grab; touch-action: none; user-select: none; }
+.crop-dragging { cursor: grabbing; }
+.crop-square img { position: absolute; left: 50%; top: 50%; max-width: none; transform: translate(-50%, -50%); pointer-events: none; transition: opacity 0.2s ease; }
+.crop-grid { position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 0.15s ease; background:
+  linear-gradient(rgba(30, 107, 69, 0.35), rgba(30, 107, 69, 0.35)) 33.33% 0 / 1px 100% no-repeat,
+  linear-gradient(rgba(30, 107, 69, 0.35), rgba(30, 107, 69, 0.35)) 66.66% 0 / 1px 100% no-repeat,
+  linear-gradient(rgba(30, 107, 69, 0.35), rgba(30, 107, 69, 0.35)) 0 33.33% / 100% 1px no-repeat,
+  linear-gradient(rgba(30, 107, 69, 0.35), rgba(30, 107, 69, 0.35)) 0 66.66% / 100% 1px no-repeat; }
+.crop-dragging .crop-grid { opacity: 1; }
+.crop-corner { position: absolute; width: 18px; height: 18px; border: 0 solid var(--green); pointer-events: none; }
+.crop-corner-top-left { top: 6px; left: 6px; border-top-width: 2.5px; border-left-width: 2.5px; border-top-left-radius: 4px; }
+.crop-corner-top-right { top: 6px; right: 6px; border-top-width: 2.5px; border-right-width: 2.5px; border-top-right-radius: 4px; }
+.crop-corner-bottom-left { bottom: 6px; left: 6px; border-bottom-width: 2.5px; border-left-width: 2.5px; border-bottom-left-radius: 4px; }
+.crop-corner-bottom-right { bottom: 6px; right: 6px; border-bottom-width: 2.5px; border-right-width: 2.5px; border-bottom-right-radius: 4px; }
+.crop-loading { position: absolute; top: 50%; left: 50%; margin: -8px 0 0 -8px; }
+.crop-zoom { display: flex; align-items: center; gap: 6px; }
+.crop-zoom .icon-button { width: 28px; height: 28px; flex: none; }
+.crop-zoom-value { min-width: 40px; text-align: right; font-size: 12px; font-weight: 500; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.crop-zoom input[type='range'] { flex: 1; min-width: 0; height: 4px; margin: 0; border-radius: 999px; appearance: none; cursor: pointer;
+  background: linear-gradient(var(--green), var(--green)) 0 / var(--filled, 0%) 100% no-repeat, var(--line); }
+.crop-zoom input[type='range']::-webkit-slider-thumb { appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #fff; border: 2px solid var(--green); box-shadow: var(--shadow-xs); }
+.crop-zoom input[type='range']::-moz-range-thumb { width: 12px; height: 12px; border-radius: 50%; background: #fff; border: 2px solid var(--green); }
+.crop-zoom input[type='range']:disabled { opacity: 0.5; cursor: default; }
+.crop-note { margin: -2px 0 0; font-size: 12px; }
+.crop-actions, .photo-buttons { display: flex; gap: 8px; }
+.crop-actions .button { flex: 1; }
+.photo-buttons .button { width: auto; }

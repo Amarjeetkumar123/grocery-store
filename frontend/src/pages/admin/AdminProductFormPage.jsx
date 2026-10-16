@@ -48,7 +48,7 @@ function ProductForm({ product, savedMessage, onSaved, onPhotoUploaded }) {
         <aside className="product-form-side">
           <ProductPhotoCard photo={{ imageUrl, fallbackUrl: categoryImageFor(categoryName), hasPhoto: Boolean(imageUrl) }} onPhotoChosen={choosePhoto} />
           <VisibilityCard shown={form.formValues.active} onChange={(shown) => form.updateField('active', shown)} />
-          <ShopPreview formValues={form.formValues} imageUrl={imageUrl ?? categoryImageFor(categoryName)} />
+          <ShopPreview formValues={form.formValues} imageUrl={imageUrl ?? categoryImageFor(categoryName)} isPhoto={Boolean(imageUrl)} />
         </aside>
       </form>
     </>
