@@ -30,7 +30,7 @@ function StoreHeader({ profile }) {
         </Link>
       </header>
       <Link to="/search" className="search-box search-box-floating">
-        <Icon name="search" /> Search atta, oil, dal…
+        <Icon name="search" /> Search groceries &amp; essentials…
       </Link>
     </>
   );
@@ -50,7 +50,7 @@ export function HomePage() {
           <NextSlotsCard />
         </div>
         <section className="home-section">
-          <h2 className="section-title">Shop by category</h2>
+          <h2 className="section-title">Explore categories</h2>
           <CategoryGrid />
         </section>
         <PopularProducts />

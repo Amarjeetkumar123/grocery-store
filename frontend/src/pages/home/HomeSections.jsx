@@ -20,15 +20,15 @@ export function NextSlotsCard() {
   );
 }
 
-// Best sellers of the week. A sideways row on phones, a grid on computers.
+// Best sellers of the week, in the same grid as a category page.
 export function PopularProducts() {
   const { data } = useApiData('/api/products/popular');
   const products = data?.products ?? [];
   if (products.length === 0) return null;
   return (
     <section className="home-section">
-      <h2 className="section-title">Popular this week</h2>
-      <div className="product-row">
+      <h2 className="section-title">Neighbours' picks</h2>
+      <div className="product-list">
         {products.map((product) => <ProductCard key={product.id} product={product} />)}
       </div>
     </section>

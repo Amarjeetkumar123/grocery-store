@@ -26,7 +26,7 @@ function ShopTopBar() {
         {account.profile && (
           <Link to="/address" className="shop-top-address"><span className="hint">Deliver to</span><strong>{deliveryAddressLine(account.profile)}</strong></Link>
         )}
-        <Link to="/search" className="shop-top-search"><Icon name="search" size={18} /> Search atta, oil, dal…</Link>
+        <Link to="/search" className="shop-top-search"><Icon name="search" size={18} /> Search groceries &amp; essentials…</Link>
         <div className="shop-top-links">
           {topLinks.map((link) => (
             <NavLink key={link.path} to={link.path} end={link.path === '/'} className="shop-top-link"><Icon name={link.icon} size={18} />{link.label}</NavLink>

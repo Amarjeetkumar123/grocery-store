@@ -25,7 +25,7 @@ export function SearchPage() {
         <label className="search-input">
           <Icon name="search" />
           <input type="search" value={searchText} onChange={(event) => setSearchText(event.target.value)}
-            placeholder="Search atta, oil, dal…" aria-label="Search products" autoFocus />
+            placeholder="Search groceries & essentials…" aria-label="Search products" autoFocus />
         </label>
       </header>
       <div className="page-body">
