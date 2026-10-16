@@ -25,7 +25,7 @@ let staffIds;
 
 const asOwner = (path, options = {}) => callApi(path, { token: 'owner-token', ...options });
 const moveTo = (orderNumber, status, token = 'owner-token') => callApi(`/api/admin/orders/${orderNumber}/status`, { token, method: 'POST', body: { status } });
-const boardOrder = async (orderNumber) => (await asOwner(`/api/admin/orders?date=${tomorrow}`)).body.orders.find((order) => order.orderNumber === orderNumber);
+const boardOrder = async (orderNumber) => (await asOwner(`/api/admin/orders?from=${tomorrow}&to=${tomorrow}`)).body.orders.find((order) => order.orderNumber === orderNumber);
 const stockOfDal = async () => (await testServer.database.query("select stock from pack_sizes where label = '1 kg'")).rows[0].stock;
 
 before(async () => {
@@ -49,9 +49,10 @@ after(async () => {
 });
 
 test('the board lists a day of orders for owner and packer, not customers', { skip }, async () => {
-  assert.equal((await callApi(`/api/admin/orders?date=${tomorrow}`, { token: 'riya-token' })).status, 403);
-  assert.equal((await asOwner('/api/admin/orders')).status, 400);
-  const { body } = await callApi(`/api/admin/orders?date=${tomorrow}`, { token: 'packer-token' });
+  assert.equal((await callApi(`/api/admin/orders?from=${tomorrow}&to=${tomorrow}`, { token: 'riya-token' })).status, 403);
+  assert.equal((await asOwner('/api/admin/orders?status=lost')).status, 400);
+  assert.deepEqual((await asOwner('/api/admin/orders?status=packed')).body.orders, []);
+  const { body } = await callApi(`/api/admin/orders?from=${tomorrow}&to=${tomorrow}`, { token: 'packer-token' });
   assert.deepEqual(body.orders.map((order) => order.orderNumber), [1001, 1002]);
   const [first, second] = body.orders;
   assert.deepEqual([first.customer.firstOrder, second.customer.firstOrder, first.customer.phoneConfirmed], [true, false, false]);

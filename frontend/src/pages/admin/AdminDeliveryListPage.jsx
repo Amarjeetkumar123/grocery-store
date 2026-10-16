@@ -1,14 +1,14 @@
 import { useAuthentication } from '../../AuthenticationContext.jsx';
 import { useSaveRequest } from '../../useSaveRequest.js';
-import { formatDeliveryDay, formatRupees } from '../../formatting.js';
+import { formatDeliveryDay, formatRupees, formatTimeRange } from '../../formatting.js';
 import { Icon } from '../../Icon.jsx';
 import { LoadingOrError } from '../../components/LoadingOrError.jsx';
 import { StatusPill } from '../orders/OrderParts.jsx';
 import { AdminPageHeader } from './AdminLayout.jsx';
-import { BoardFilters, DayField } from './orders/BoardFilters.jsx';
+import { BoardFilters, DateRangeFields } from './orders/BoardFilters.jsx';
 import { RiderPicker } from './orders/RiderPicker.jsx';
 import { mapLinkFor } from './orders/customerContactLinks.js';
-import { filterOrders, itemCountOf, shortAddressOf, timeOptionsOf, useBoardFilters, useDayOrders, useRiders, zoneOptionsOf } from './orders/orderBoardData.js';
+import { dateRangeLabel, filterOrders, itemCountOf, shortAddressOf, timeOptionsOf, useBoardFilters, useListOrders, useRiders, zoneOptionsOf } from './orders/orderBoardData.js';
 
 // Confirmed orders onwards; new ones are checked by the owner first.
 const onTheListStatuses = ['confirmed', 'packed', 'out_for_delivery'];
@@ -34,7 +34,7 @@ function DeliveryRow({ order }) {
   const mapLink = mapLinkFor(order);
   return (
     <tr>
-      <td><strong>#{order.orderNumber}</strong></td>
+      <td><strong>#{order.orderNumber}</strong><br /><small className="hint">{formatDeliveryDay(order.deliveryDate)} · {formatTimeRange(order.slot.startTime, order.slot.endTime)}</small></td>
       <td>{shortAddressOf(order)}{order.address.landmark && <span className="hint"> · near {order.address.landmark}</span>}</td>
       <td>{order.address.customerName}<br /><a href={`tel:+91${order.address.customerPhone}`}>{order.address.customerPhone}</a></td>
       <td>{itemCountOf(order)} items</td>
@@ -70,20 +70,20 @@ function ZoneGroup({ group, riders, onChanged }) {
 }
 
 export function AdminDeliveryListPage() {
-  const { filters, setFilter } = useBoardFilters();
-  const { orders, data, error, loading, reload } = useDayOrders(filters.date);
+  const { filters, setFilter, setFilters } = useBoardFilters();
+  const { orders, data, error, loading, reload } = useListOrders(filters, onTheListStatuses);
   const riders = useRiders();
-  const onTheList = filterOrders(orders, { ...filters, search: '' }).filter((order) => onTheListStatuses.includes(order.status));
+  const onTheList = filterOrders(orders, { ...filters, search: '' });
   return (
     <>
-      <AdminPageHeader title={`Delivery list · ${formatDeliveryDay(filters.date)}`}>
+      <AdminPageHeader title={`Delivery list · ${dateRangeLabel(filters)}`}>
         <button type="button" className="button button-compact button-outline" onClick={() => window.print()}><Icon name="layers" /> Print</button>
       </AdminPageHeader>
       <BoardFilters filters={filters} setFilter={setFilter} zoneOptions={zoneOptionsOf(orders)} timeOptions={timeOptionsOf(orders)} showSearch={false}>
-        <DayField filters={filters} setFilter={setFilter} />
+        <DateRangeFields filters={filters} setFilter={setFilter} setFilters={setFilters} />
       </BoardFilters>
       <LoadingOrError loading={loading && !data} error={data ? null : error} onRetry={reload} />
-      {data && onTheList.length === 0 && <p className="hint">No confirmed orders to deliver for this day and slot yet.</p>}
+      {data && onTheList.length === 0 && <p className="hint">No confirmed orders to deliver for these dates and slot yet.</p>}
       {groupForDelivery(onTheList).map((group) => <ZoneGroup key={group.zoneName} group={group} riders={riders} onChanged={reload} />)}
     </>
   );

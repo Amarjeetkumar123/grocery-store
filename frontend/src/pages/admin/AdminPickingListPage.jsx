@@ -1,9 +1,8 @@
 import { Icon } from '../../Icon.jsx';
-import { formatDeliveryDay } from '../../formatting.js';
 import { LoadingOrError } from '../../components/LoadingOrError.jsx';
 import { AdminPageHeader } from './AdminLayout.jsx';
-import { BoardFilters, DayField } from './orders/BoardFilters.jsx';
-import { filterOrders, timeOptionsOf, useBoardFilters, useDayOrders, zoneOptionsOf } from './orders/orderBoardData.js';
+import { BoardFilters, DateRangeFields } from './orders/BoardFilters.jsx';
+import { dateRangeLabel, filterOrders, timeOptionsOf, useBoardFilters, useListOrders, zoneOptionsOf } from './orders/orderBoardData.js';
 
 // Orders still to be packed.
 const toPackStatuses = ['new', 'confirmed'];
@@ -42,17 +41,17 @@ function PickingTable({ lines }) {
 }
 
 export function AdminPickingListPage() {
-  const { filters, setFilter } = useBoardFilters();
-  const { orders, data, error, loading, reload } = useDayOrders(filters.date);
-  const toPack = filterOrders(orders, { ...filters, search: '' }).filter((order) => toPackStatuses.includes(order.status));
+  const { filters, setFilter, setFilters } = useBoardFilters();
+  const { orders, data, error, loading, reload } = useListOrders(filters, toPackStatuses);
+  const toPack = filterOrders(orders, { ...filters, search: '' });
   const notConfirmed = toPack.filter((order) => order.status === 'new').length;
   return (
     <>
-      <AdminPageHeader title={`Picking list · ${formatDeliveryDay(filters.date)}`}>
+      <AdminPageHeader title={`Picking list · ${dateRangeLabel(filters)}`}>
         <button type="button" className="button button-compact button-outline" onClick={() => window.print()}><Icon name="layers" /> Print</button>
       </AdminPageHeader>
       <BoardFilters filters={filters} setFilter={setFilter} zoneOptions={zoneOptionsOf(orders)} timeOptions={timeOptionsOf(orders)} showSearch={false}>
-        <DayField filters={filters} setFilter={setFilter} />
+        <DateRangeFields filters={filters} setFilter={setFilter} setFilters={setFilters} />
       </BoardFilters>
       <LoadingOrError loading={loading && !data} error={data ? null : error} onRetry={reload} />
       {data && (

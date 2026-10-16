@@ -74,7 +74,7 @@ test('riders see only their own deliveries; others cannot use rider screens', { 
   assert.deepEqual([body.cashInHand, body.store.upiId], [0, 'yourstore@upi']);
   assert.equal((await rider('riya-token', '/deliveries')).status, 403);
   assert.equal((await rider('packer-token', '/deliveries')).status, 403);
-  assert.equal((await callApi('/api/admin/orders?date=x', { token: 'ravi-token' })).status, 403);
+  assert.equal((await callApi('/api/admin/orders', { token: 'ravi-token' })).status, 403);
 });
 
 test('at the door: start, take payment once, then delivered', { skip }, async () => {

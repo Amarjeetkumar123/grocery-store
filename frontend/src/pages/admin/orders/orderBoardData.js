@@ -2,19 +2,16 @@ import { useEffect } from 'react';
 import { useSearchParams } from 'react-router';
 import { useApiData } from '../../../useApiData.js';
 import { useAuthentication } from '../../../AuthenticationContext.jsx';
-import { formatDeliveryDay, formatTimeRange, todayInIndia } from '../../../formatting.js';
+import { formatDeliveryDay, formatTimeRange } from '../../../formatting.js';
 
 const refreshEverySeconds = 20;
 
-// Filters live in the page address. The board uses a delivery date range
-// (from today on by default; both cleared = all orders); Picking list and
-// Delivery list use one day. Zone and time window are shared by all three.
+// Filters live in the page address, shared by the board, Picking list and
+// Delivery list: a delivery date range (all dates by default), zone and time window.
 export function useBoardFilters() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const today = todayInIndia();
   const filters = {
-    date: searchParams.get('date') ?? today,
-    from: searchParams.get('from') ?? today,
+    from: searchParams.get('from') ?? '',
     to: searchParams.get('to') ?? '',
     zoneId: searchParams.get('zone') ?? '',
     time: searchParams.get('time') ?? '',
@@ -26,8 +23,7 @@ export function useBoardFilters() {
     const next = new URLSearchParams(previous);
     if (!('page' in changes)) next.delete('page');
     for (const [name, value] of Object.entries(changes)) {
-      // An empty "from" is kept, so it means "no start date" rather than "today".
-      if (value || name === 'from') next.set(name, value ?? '');
+      if (value) next.set(name, value);
       else next.delete(name);
     }
     return next;
@@ -46,9 +42,10 @@ function useRefreshed(path) {
   return request;
 }
 
-// All orders for one day, fetched again every 20 seconds.
-export function useDayOrders(date) {
-  const request = useRefreshed(`/api/admin/orders?date=${encodeURIComponent(date)}`);
+// Orders in the date range with one of the statuses, fetched again every 20 seconds.
+export function useListOrders(filters, statuses) {
+  const query = new URLSearchParams({ from: filters.from, to: filters.to, status: statuses.join(',') });
+  const request = useRefreshed(`/api/admin/orders?${query}`);
   return { ...request, orders: request.data?.orders ?? [] };
 }
 
@@ -59,10 +56,11 @@ export function useBoardOrders(filters) {
   return { ...request, orders: request.data?.orders ?? [] };
 }
 
-// Picking list and Delivery list open on the board's day (if one day is shown) and zone/time.
+// Picking list and Delivery list open on the board's dates and zone/time.
 export function listQueryOf(filters) {
   const query = new URLSearchParams();
-  if (filters.from && filters.from === filters.to) query.set('date', filters.from);
+  if (filters.from) query.set('from', filters.from);
+  if (filters.to) query.set('to', filters.to);
   if (filters.zoneId) query.set('zone', filters.zoneId);
   if (filters.time) query.set('time', filters.time);
   return query.toString();

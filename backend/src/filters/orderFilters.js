@@ -1,11 +1,14 @@
 import { createFilterBuilder } from './filterBuilder.js';
 
-// Orders for one delivery date, or one customer's history.
-export function buildAdminOrderFilter({ deliveryDate, customerId }) {
-  return createFilterBuilder()
-    .whereEquals('placed.delivery_date', deliveryDate)
-    .whereEquals('placed.customer_id', customerId)
-    .build();
+// Picking and delivery lists: delivery dates fromDate..toDate (either may be
+// missing) and statuses (null = all); or one customer's history.
+export function buildAdminOrderFilter({ fromDate, toDate, statuses, customerId }) {
+  const builder = createFilterBuilder()
+    .whereCompared('placed.delivery_date', '>=', fromDate)
+    .whereCompared('placed.delivery_date', '<=', toDate)
+    .whereEquals('placed.customer_id', customerId);
+  if (statuses) builder.where(`placed.status = any(${builder.addValue(statuses)})`);
+  return builder.build();
 }
 
 // Order board: delivery dates fromDate..toDate (either may be missing), zone,

@@ -6,8 +6,7 @@ import { lockOrder } from '../dbHelper/orderDbHelper.js';
 import { isActiveRider } from '../dbHelper/staffDbHelper.js';
 import { buildAdminOrderFilter, buildBoardOrderFilter } from '../filters/orderFilters.js';
 import { readPositiveInteger, readRequiredText } from '../validators/commonValidation.js';
-import { readOptionalDate } from '../validators/productValidation.js';
-import { readBoardQuery } from '../validators/orderValidation.js';
+import { readBoardQuery, readListQuery } from '../validators/orderValidation.js';
 import { todayInIndia } from '../utils/indianDate.js';
 import { cancelLockedOrder } from './orderCancellation.js';
 import { ServiceError } from './serviceError.js';
@@ -22,12 +21,14 @@ const statusSteps = {
 const maximumOrdersPerAssignment = 200;
 const boardPageSize = 30;
 
-// query: { date: "2026-10-04" } for the picking and delivery lists, or { customerId } for one customer's history.
+// query: { from, to, status: "new,confirmed" } for the picking and delivery lists
+// (no dates = every date), or { customerId } for one customer's history.
 async function listOrders({ database }, query) {
-  const deliveryDate = readOptionalDate(query.date).date ?? null;
   const customerId = readPositiveInteger(query.customerId);
-  if (!deliveryDate && !customerId) throw ServiceError.badRequest('Choose a delivery date.');
-  return { orders: await findAdminOrders(database, buildAdminOrderFilter({ deliveryDate, customerId })) };
+  if (customerId) return { orders: await findAdminOrders(database, buildAdminOrderFilter({ customerId })) };
+  const { listQuery, errorMessage } = readListQuery(query);
+  if (errorMessage) throw ServiceError.badRequest(errorMessage);
+  return { orders: await findAdminOrders(database, buildAdminOrderFilter(listQuery)) };
 }
 
 // The order board: one page of orders for a date range (none = all orders), the

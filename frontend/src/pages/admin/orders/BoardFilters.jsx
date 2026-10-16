@@ -1,4 +1,32 @@
+import { addDays, todayInIndia } from '../../../formatting.js';
 import { Icon } from '../../../Icon.jsx';
+
+// One-tap delivery date ranges: days from today, or none for all dates.
+const datePresets = [
+  { label: 'Yesterday', from: -1, to: -1 },
+  { label: 'Today', from: 0, to: 0 },
+  { label: 'Tomorrow', from: 1, to: 1 },
+  { label: 'Next 7 days', from: 0, to: 6 },
+  { label: 'All dates' },
+];
+
+function presetRange(preset, today) {
+  if (preset.from === undefined) return { from: '', to: '' };
+  return { from: addDays(today, preset.from), to: addDays(today, preset.to) };
+}
+
+function DatePresets({ filters, setFilters }) {
+  const today = todayInIndia();
+  return (
+    <div className="segmented date-presets" role="group" aria-label="Delivery dates">
+      {datePresets.map((preset) => {
+        const range = presetRange(preset, today);
+        const pressed = range.from === filters.from && range.to === filters.to;
+        return <button key={preset.label} type="button" aria-pressed={pressed} onClick={() => setFilters(range)}>{preset.label}</button>;
+      })}
+    </div>
+  );
+}
 
 // Date fields (children), zone, time window and (optionally) search, shared by the board and both lists.
 // zoneOptions / timeOptions: [{ value, label }].
@@ -28,20 +56,11 @@ export function BoardFilters({ filters, setFilter, zoneOptions, timeOptions, sho
   );
 }
 
-// The picking and delivery lists: one delivery day.
-export function DayField({ filters, setFilter }) {
-  return (
-    <label className="filter-field">
-      <Icon name="clock" size={18} /> Delivery
-      <input type="date" className="input input-small" value={filters.date} onChange={(event) => setFilter('date', event.target.value)} required />
-    </label>
-  );
-}
-
-// The board: a delivery date range. Clearing both shows every order.
+// A delivery date range, with one-tap presets. Clearing both shows every order.
 export function DateRangeFields({ filters, setFilter, setFilters }) {
   return (
     <>
+      <DatePresets filters={filters} setFilters={setFilters} />
       <label className="filter-field">
         <Icon name="clock" size={18} /> From
         <input type="date" className="input input-small" value={filters.from} max={filters.to || undefined} onChange={(event) => setFilter('from', event.target.value)} />
@@ -50,7 +69,6 @@ export function DateRangeFields({ filters, setFilter, setFilters }) {
         To
         <input type="date" className="input input-small" value={filters.to} min={filters.from || undefined} onChange={(event) => setFilter('to', event.target.value)} />
       </label>
-      {(filters.from || filters.to) && <button type="button" className="text-button" onClick={() => setFilters({ from: '', to: '' })}>All dates</button>}
     </>
   );
 }

@@ -2,6 +2,7 @@ import { readPositiveInteger } from './commonValidation.js';
 import { readOptionalDate } from './productValidation.js';
 
 export const maximumQuantityPerItem = 20;
+const orderStatuses = ['new', 'confirmed', 'packed', 'out_for_delivery', 'delivered', 'cancelled'];
 const maximumCartLines = 30;
 
 // input: [{ packSizeId, quantity }]. The same pack twice is added together.
@@ -53,4 +54,14 @@ export function readBoardQuery(query) {
       page: readPositiveInteger(query.page) ?? 1,
     },
   };
+}
+
+// Picking and delivery list query: ?from=&to=&status=new,confirmed. No dates
+// means every date, no status every status. Returns { listQuery } or { errorMessage }.
+export function readListQuery(query) {
+  const { boardQuery, errorMessage } = readBoardQuery({ from: query.from, to: query.to });
+  if (errorMessage) return { errorMessage };
+  const statuses = query.status ? String(query.status).split(',') : null;
+  if (statuses?.some((status) => !orderStatuses.includes(status))) return { errorMessage: 'Unknown status.' };
+  return { listQuery: { fromDate: boardQuery.fromDate, toDate: boardQuery.toDate, statuses } };
 }

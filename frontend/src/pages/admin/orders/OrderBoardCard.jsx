@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { callApi } from '../../../apiClient.js';
 import { useAuthentication } from '../../../AuthenticationContext.jsx';
 import { useStoreDetails } from '../../../useStoreDetails.js';
@@ -55,14 +56,18 @@ function CardActions({ order, role, save, onChanged }) {
   const store = useStoreDetails();
   const step = nextSteps[order.status];
   const mapLink = mapLinkFor(order);
+  const [moving, setMoving] = useState(false);
+  // The spinner stays until the board has reloaded and the card has moved column.
   async function moveForward() {
-    if (await save(() => callApi(`/api/admin/orders/${order.orderNumber}/status`, { method: 'POST', body: { status: step.status } }))) onChanged();
+    setMoving(true);
+    if (await save(() => callApi(`/api/admin/orders/${order.orderNumber}/status`, { method: 'POST', body: { status: step.status } }))) await onChanged();
+    setMoving(false);
   }
   return (
     <div className="board-card-actions">
       {step?.roles.includes(role) && (
-        <button type="button" className="button button-compact" onClick={moveForward} disabled={step.status === 'out_for_delivery' && !order.rider}>
-          <Icon name={step.icon} size={18} /> {step.label}
+        <button type="button" className="button button-compact" onClick={moveForward} disabled={moving || (step.status === 'out_for_delivery' && !order.rider)}>
+          {moving ? <span className="spinner" aria-hidden="true" /> : <Icon name={step.icon} size={18} />} {step.label}
         </button>
       )}
       {order.status === 'out_for_delivery' && role === 'owner' && <OwnerDeliveredButtons order={order} save={save} onChanged={onChanged} />}
