@@ -3,6 +3,8 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter } from 'react-router';
 import { AuthenticationProvider } from './AuthenticationContext.jsx';
 import { CartProvider } from './cart/CartContext.jsx';
+import { DialogProvider } from './components/DialogProvider.jsx';
+import { ToastProvider } from './components/ToastProvider.jsx';
 import { App } from './App.jsx';
 import './styles.css';
 
@@ -16,7 +18,11 @@ createRoot(document.getElementById('root')).render(
     <BrowserRouter>
       <AuthenticationProvider>
         <CartProvider>
-          <App />
+          <ToastProvider>
+            <DialogProvider>
+              <App />
+            </DialogProvider>
+          </ToastProvider>
         </CartProvider>
       </AuthenticationProvider>
     </BrowserRouter>

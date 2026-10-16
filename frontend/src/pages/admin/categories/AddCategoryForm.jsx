@@ -3,6 +3,7 @@ import { callApi } from '../../../apiClient.js';
 import { useSaveRequest } from '../../../useSaveRequest.js';
 import { TextField } from '../../../FormFields.jsx';
 import { Icon } from '../../../Icon.jsx';
+import { useToast } from '../../../components/ToastProvider.jsx';
 import { uploadCategoryPhoto } from './uploadCategoryPhoto.js';
 
 const blankCategory = { name: '', sortOrder: '0', comingSoon: false };
@@ -27,6 +28,7 @@ export function AddCategoryForm({ onAdded }) {
   const [photoFile, setPhotoFile] = useState(null);
   const categoryRequest = useSaveRequest();
   const photoRequest = useSaveRequest();
+  const showToast = useToast();
   const saving = categoryRequest.saving || photoRequest.saving;
   const { fieldErrors } = categoryRequest;
   const update = (fieldName) => (value) => setValues((previous) => ({ ...previous, [fieldName]: value }));
@@ -38,6 +40,7 @@ export function AddCategoryForm({ onAdded }) {
     setValues(blankCategory);
     setPhotoFile(null);
     if (photoFile) await photoRequest.save(() => uploadCategoryPhoto(created.categoryId, photoFile));
+    showToast(`${values.name.trim()} added`);
     onAdded();
   }
   return (

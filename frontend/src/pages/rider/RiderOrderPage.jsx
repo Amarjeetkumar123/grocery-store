@@ -4,6 +4,7 @@ import { deliveryAddressLine, formatRupees } from '../../formatting.js';
 import { Icon } from '../../Icon.jsx';
 import { PageBar } from '../../components/PageBar.jsx';
 import { LoadingOrError } from '../../components/LoadingOrError.jsx';
+import { useDialog } from '../../components/DialogProvider.jsx';
 import { StatusPill } from '../orders/OrderParts.jsx';
 import { mapLinkFor, whatsAppLinkFor } from '../admin/orders/customerContactLinks.js';
 import { useRiderAction, useRiderDay } from './riderData.js';
@@ -38,13 +39,18 @@ function ItemList({ order }) {
 
 // packed -> Start delivery; out for delivery -> payment, then Mark delivered.
 function DoorActions({ order, action }) {
+  const dialog = useDialog();
   const paid = order.paymentStatus === 'paid';
   if (order.status === 'delivered') return <p className="notice notice-success"><Icon name="check" size={18} /> Delivered · paid by {order.paymentMethod === 'upi' ? 'UPI' : 'cash'}</p>;
   if (order.status === 'packed') {
     return <button type="button" className="button button-large" disabled={action.busy} onClick={() => action.run('start')}><Icon name="truck" /> Start delivery</button>;
   }
   async function cashCollected() {
-    if (window.confirm(`Collected ${formatRupees(order.total)} in cash?`)) await action.run('payment', { method: 'cash' });
+    const confirmed = await dialog.confirm({
+      title: 'Cash collected?', message: `Take ${formatRupees(order.total)} from the customer before you confirm.`,
+      confirmLabel: 'Yes, collected', cancelLabel: 'Not yet', icon: 'cash',
+    });
+    if (confirmed) await action.run('payment', { method: 'cash' });
   }
   return (
     <>

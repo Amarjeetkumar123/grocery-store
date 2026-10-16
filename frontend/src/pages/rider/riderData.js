@@ -2,6 +2,9 @@ import { useCallback, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { callApi } from '../../apiClient.js';
 import { useApiData } from '../../useApiData.js';
+import { useToast } from '../../components/ToastProvider.jsx';
+
+const doneMessages = { start: 'Delivery started', payment: 'Payment recorded', delivered: 'Order delivered' };
 
 // Today's deliveries for the signed-in rider, plus cash in hand and the store's UPI ID.
 export function useRiderDay() {
@@ -12,16 +15,18 @@ export function useRiderDay() {
 // Runs a door-step action (start / payment / delivered), then reloads or moves on.
 export function useRiderAction(orderNumber, onDone) {
   const [state, setState] = useState({ busy: false, error: null });
+  const showToast = useToast();
   const run = useCallback(async (action, body = {}) => {
     setState({ busy: true, error: null });
     try {
       await callApi(`/api/rider/orders/${orderNumber}/${action}`, { method: 'POST', body });
       setState({ busy: false, error: null });
+      showToast(doneMessages[action]);
       await onDone();
     } catch (error) {
       setState({ busy: false, error: error.message });
     }
-  }, [orderNumber, onDone]);
+  }, [orderNumber, onDone, showToast]);
   return { ...state, run };
 }
 

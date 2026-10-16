@@ -9,6 +9,8 @@ import { Icon } from '../Icon.jsx';
 import { PageBar } from '../components/PageBar.jsx';
 import { LoadingOrError } from '../components/LoadingOrError.jsx';
 import { AlertsToggle } from '../components/AlertsToggle.jsx';
+import { useDialog } from '../components/DialogProvider.jsx';
+import { useToast } from '../components/ToastProvider.jsx';
 import { OrderProgress, ReorderButton, StatusPill, cancellableStatuses, deliveryWindowOf } from './orders/OrderParts.jsx';
 
 function OrderPlacedHeader({ orderNumber }) {
@@ -69,12 +71,19 @@ function OrderItems({ order }) {
 
 function CancelOrderButton({ order, onCancelled }) {
   const [state, setState] = useState({ cancelling: false, error: null });
+  const dialog = useDialog();
+  const showToast = useToast();
   if (!cancellableStatuses.includes(order.status)) return null;
   async function cancelOrder() {
-    if (!window.confirm(`Cancel order #${order.orderNumber}?`)) return;
+    const confirmed = await dialog.confirm({
+      title: `Cancel order #${order.orderNumber}?`, message: 'It will not be delivered, and this cannot be undone.',
+      confirmLabel: 'Cancel order', cancelLabel: 'Keep order', tone: 'danger', icon: 'close',
+    });
+    if (!confirmed) return;
     setState({ cancelling: true, error: null });
     try {
       await callApi(`/api/orders/${order.orderNumber}/cancel`, { method: 'POST' });
+      showToast(`Order #${order.orderNumber} cancelled`);
       onCancelled();
     } catch (error) {
       setState({ cancelling: false, error: error.message });

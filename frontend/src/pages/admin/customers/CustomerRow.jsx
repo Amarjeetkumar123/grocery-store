@@ -5,6 +5,8 @@ import { useSaveRequest } from '../../../useSaveRequest.js';
 import { formatRupees, formatShortDate } from '../../../formatting.js';
 import { LoadingOrError } from '../../../components/LoadingOrError.jsx';
 import { Icon } from '../../../Icon.jsx';
+import { useDialog } from '../../../components/DialogProvider.jsx';
+import { useToast } from '../../../components/ToastProvider.jsx';
 import { StatusPill } from '../../orders/OrderParts.jsx';
 
 const initialsOf = (name) => name.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
@@ -24,22 +26,31 @@ function StatusCell({ customer }) {
 // Confirm phone stays one tap away; Block hides in the "more" menu so it is not pressed by mistake.
 function CustomerActions({ customer, onChanged }) {
   const { saving, error, save } = useSaveRequest();
-  async function setFlags(flags, question) {
-    if (question && !window.confirm(question)) return;
-    if (await save(() => callApi(`/api/admin/customers/${customer.id}`, { method: 'PUT', body: flags }))) onChanged();
+  const dialog = useDialog();
+  const showToast = useToast();
+  // question: a popup to answer first; done: the toast afterwards.
+  async function setFlags(flags, done, question) {
+    if (question && !(await dialog.confirm(question))) return;
+    if (!(await save(() => callApi(`/api/admin/customers/${customer.id}`, { method: 'PUT', body: flags })))) return;
+    showToast(done);
+    onChanged();
   }
+  const blockQuestion = {
+    title: `Block ${customer.name}?`, message: 'They will not be able to place orders until you unblock them.',
+    confirmLabel: 'Block', tone: 'danger', icon: 'close',
+  };
   return (
     <div className="row-actions">
-      {customer.blocked && <button type="button" className="button button-compact button-outline" disabled={saving} onClick={() => setFlags({ blocked: false })}>Unblock</button>}
+      {customer.blocked && <button type="button" className="button button-compact button-outline" disabled={saving} onClick={() => setFlags({ blocked: false }, `${customer.name} unblocked`)}>Unblock</button>}
       {!customer.blocked && !customer.phoneConfirmed && (
-        <button type="button" className="button button-compact button-outline" disabled={saving} onClick={() => setFlags({ phoneConfirmed: true })}><Icon name="check" size={16} /> Confirm phone</button>
+        <button type="button" className="button button-compact button-outline" disabled={saving} onClick={() => setFlags({ phoneConfirmed: true }, `${customer.name}'s phone confirmed`)}><Icon name="check" size={16} /> Confirm phone</button>
       )}
       <details className="row-menu">
         <summary className="icon-button" aria-label={`More for ${customer.name}`}><Icon name="more" /></summary>
         <div className="row-menu-list">
           <a href={`tel:+91${customer.phone}`}><Icon name="phone" size={16} /> Call</a>
           {!customer.blocked && (
-            <button type="button" className="danger-text" disabled={saving} onClick={() => setFlags({ blocked: true }, `Block ${customer.name}? They will not be able to order.`)}>
+            <button type="button" className="danger-text" disabled={saving} onClick={() => setFlags({ blocked: true }, `${customer.name} blocked`, blockQuestion)}>
               <Icon name="close" size={16} /> Block
             </button>
           )}

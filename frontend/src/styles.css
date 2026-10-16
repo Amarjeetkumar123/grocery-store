@@ -1425,3 +1425,52 @@ body:has(.cart-drawer[open]) { overflow: hidden; }
 .import-problems header .hint { color: var(--error); }
 .problem-row-number { width: 90px; white-space: nowrap; font-weight: 500; color: var(--error); }
 @media (max-width: 1000px) { .import-steps { grid-template-columns: minmax(0, 1fr); } }
+
+/* Popups (components/DialogProvider.jsx): small for yes/no, medium when typing. A sheet on phones. */
+.popup { width: calc(100% - 32px); padding: 0; border: 0; border-radius: 18px; background: var(--card); color: var(--text); box-shadow: var(--shadow-large); }
+.popup-small { max-width: 400px; }
+.popup-medium { max-width: 480px; }
+.popup::backdrop { background: rgba(22, 31, 26, 0.45); backdrop-filter: blur(2px); }
+.popup[open] { animation: popup-in 0.18s ease-out; }
+.popup[open]::backdrop { animation: fade-in 0.18s ease-out; }
+.popup form { display: flex; flex-direction: column; gap: 6px; padding: 22px 22px 18px; }
+.popup h2 { margin: 6px 0 0; font-size: 16px; font-weight: 600; }
+.popup-message { margin: 0; font-size: 14px; line-height: 1.5; color: var(--text-secondary); }
+.popup-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--green-light); color: var(--green); }
+.popup-danger .popup-icon { background: var(--error-light); color: var(--error); }
+.popup-field { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; font-size: 13px; font-weight: 500; color: var(--text-secondary); }
+.popup-field .input { width: 100%; font: inherit; font-size: 14px; color: var(--text); }
+.popup-field input.input { height: 42px; }
+.popup-field textarea.input { min-height: 84px; padding: 10px 12px; resize: vertical; }
+.popup-actions { display: flex; gap: 10px; margin-top: 16px; }
+.popup-actions .button { min-height: 40px; border-radius: 10px; box-shadow: none; }
+.button.button-danger { background: var(--error); }
+@keyframes popup-in { from { opacity: 0; transform: translateY(8px) scale(0.98); } }
+@media (max-width: 599px) {
+  .popup { width: 100%; max-width: none; margin: auto 0 0; border-radius: 20px 20px 0 0; }
+  .popup form { padding-bottom: calc(18px + env(safe-area-inset-bottom)); }
+  .popup[open] { animation: sheet-in 0.22s ease-out; }
+  @keyframes sheet-in { from { transform: translateY(100%); } }
+}
+
+/* Toasts (components/ToastProvider.jsx): top right on computers, top centre on phones. */
+.toast-stack { position: fixed; top: 16px; right: 16px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; width: min(360px, calc(100% - 32px)); pointer-events: none; }
+.toast { pointer-events: auto; display: flex; align-items: flex-start; gap: 10px; padding: 12px 10px 12px 12px; border-radius: 12px; background: var(--green-dark); color: #fff; box-shadow: var(--shadow-large); animation: toast-in 0.2s ease-out; }
+.toast p { flex: 1; margin: 1px 0 0; font-size: 13px; line-height: 1.45; }
+.toast-icon { flex: none; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--green-bright); color: #fff; }
+.toast-error { background: #3a1410; }
+.toast-error .toast-icon { background: var(--error); }
+.toast-info .toast-icon { background: var(--yellow); color: var(--text); }
+.toast-close { flex: none; border: 0; background: none; color: rgba(255, 255, 255, 0.7); cursor: pointer; padding: 2px; border-radius: 6px; display: flex; }
+.toast-close:hover { color: #fff; background: rgba(255, 255, 255, 0.1); }
+@keyframes toast-in { from { opacity: 0; transform: translateY(-8px); } }
+@media (max-width: 599px) { .toast-stack { left: 16px; right: 16px; width: auto; margin: 0 auto; max-width: 420px; } }
+
+/* Ticking rows to delete them together (pages/admin/RowSelection.jsx) */
+.admin-shell .admin-table .checkbox-cell { width: 44px; padding-right: 0; }
+.row-checkbox { width: 16px; height: 16px; margin: 0; accent-color: var(--green); cursor: pointer; vertical-align: middle; }
+.row-checkbox:disabled { cursor: not-allowed; opacity: 0.4; }
+.admin-table .row-selected td { background: var(--green-light); }
+.selection-bar { display: flex; align-items: center; gap: 12px; flex: none; padding: 8px 14px; background: var(--green-light); border-bottom: 1px solid var(--line); font-size: 13px; animation: fade-in 0.15s ease-out; }
+.selection-bar strong { font-weight: 600; color: var(--green-text); }
+.selection-bar .button { margin-left: auto; width: auto; padding: 0 12px; }

@@ -4,6 +4,8 @@ import { useApiData } from '../../useApiData.js';
 import { useSaveRequest } from '../../useSaveRequest.js';
 import { formatDeliveryDay, formatRupees, todayInIndia } from '../../formatting.js';
 import { LoadingOrError } from '../../components/LoadingOrError.jsx';
+import { useDialog } from '../../components/DialogProvider.jsx';
+import { useToast } from '../../components/ToastProvider.jsx';
 import { StatusPill } from '../orders/OrderParts.jsx';
 import { AdminPageHeader } from './AdminLayout.jsx';
 
@@ -12,10 +14,17 @@ const sumOf = (rows, field) => rows.reduce((sum, row) => sum + row[field], 0);
 // "Handed over": records the cash the owner received from this person.
 function HandOverButton({ person, date, onSaved }) {
   const { saving, error, save } = useSaveRequest();
+  const dialog = useDialog();
+  const showToast = useToast();
   async function handOver() {
-    const answer = window.prompt(`Cash received from ${person.name} (₹)`, String(person.cashInHand));
-    if (!answer) return;
-    if (await save(() => callApi('/api/admin/cash-handovers', { method: 'POST', body: { staffId: person.staffId, amount: answer, date } }))) onSaved();
+    const amount = await dialog.prompt({
+      title: `Cash from ${person.name}`, message: `They have ${formatRupees(person.cashInHand)} in hand.`, icon: 'cash',
+      label: 'Amount received (₹)', defaultValue: String(person.cashInHand), inputMode: 'decimal', required: true, confirmLabel: 'Record handover',
+    });
+    if (!amount) return;
+    if (!(await save(() => callApi('/api/admin/cash-handovers', { method: 'POST', body: { staffId: person.staffId, amount, date } })))) return;
+    showToast(`${formatRupees(Number(amount))} received from ${person.name}`);
+    onSaved();
   }
   if (person.cashInHand <= 0) return <span className="pill pill-green">All handed over</span>;
   return (

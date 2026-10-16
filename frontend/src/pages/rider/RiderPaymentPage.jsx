@@ -5,6 +5,7 @@ import { formatRupees } from '../../formatting.js';
 import { Icon } from '../../Icon.jsx';
 import { PageBar } from '../../components/PageBar.jsx';
 import { LoadingOrError } from '../../components/LoadingOrError.jsx';
+import { useDialog } from '../../components/DialogProvider.jsx';
 import { useBackToOrder, useRiderAction, useRiderDay } from './riderData.js';
 import { upiPaymentLink } from './upiPaymentLink.js';
 
@@ -35,6 +36,14 @@ export function RiderPaymentPage() {
   const backToOrder = useBackToOrder(orderNumber);
   const action = useRiderAction(orderNumber, backToOrder);
   const order = orders.find((candidate) => candidate.orderNumber === orderNumber);
+  const dialog = useDialog();
+  async function upiReceived() {
+    const confirmed = await dialog.confirm({
+      title: 'UPI payment received?', message: `Check that ${formatRupees(order.total)} has arrived in the store's UPI app first.`,
+      confirmLabel: 'Yes, received', cancelLabel: 'Not yet',
+    });
+    if (confirmed) await action.run('payment', { method: 'upi' });
+  }
   return (
     <main className="app-shell">
       <PageBar title="Collect payment" />
@@ -49,7 +58,7 @@ export function RiderPaymentPage() {
             {action.error && <p className="error-text" role="alert">{action.error}</p>}
             <div className="spacer" />
             <button type="button" className="button button-large" disabled={action.busy}
-              onClick={() => window.confirm(`Seen ${formatRupees(order.total)} received in the store's UPI app?`) && action.run('payment', { method: 'upi' })}>
+              onClick={upiReceived}>
               <Icon name="check" /> UPI received
             </button>
             <button type="button" className="text-button" disabled={action.busy} onClick={() => action.run('payment', { method: 'cash' })}>

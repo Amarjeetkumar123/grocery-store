@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { callApi } from '../../../apiClient.js';
 import { useSaveRequest } from '../../../useSaveRequest.js';
 import { Icon } from '../../../Icon.jsx';
+import { useDialog } from '../../../components/DialogProvider.jsx';
+import { useToast } from '../../../components/ToastProvider.jsx';
 
 function AddTowerForm({ zone, save, saving, onChanged }) {
   const [newTowerName, setNewTowerName] = useState('');
@@ -27,9 +29,16 @@ function AddTowerForm({ zone, save, saving, onChanged }) {
 // Towers or blocks of a society. A tower someone lives in cannot be removed.
 export function TowerEditor({ zone, onChanged }) {
   const { saving, error, save } = useSaveRequest();
+  const dialog = useDialog();
+  const showToast = useToast();
   async function removeTower(tower) {
-    if (!window.confirm(`Remove ${tower.name}?`)) return;
-    if (await save(() => callApi(`/api/admin/towers/${tower.id}`, { method: 'DELETE' }))) onChanged();
+    const confirmed = await dialog.confirm({
+      title: `Remove ${tower.name}?`, message: `Customers in ${zone.name} will no longer be able to pick it.`,
+      confirmLabel: 'Remove', tone: 'danger',
+    });
+    if (!confirmed || !(await save(() => callApi(`/api/admin/towers/${tower.id}`, { method: 'DELETE' })))) return;
+    showToast(`${tower.name} removed`);
+    onChanged();
   }
   return (
     <div className="tower-editor">
