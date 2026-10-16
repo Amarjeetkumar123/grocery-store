@@ -22,6 +22,9 @@ export function createAdminProductRouter({ productService, productImportService 
   router.put('/products/:productId', ownerOnly, async (request, response) => {
     response.json(await productService.updateProduct(request.params.productId, request.body ?? {}));
   });
+  router.delete('/products/:productId', ownerOnly, async (request, response) => {
+    response.json(await productService.deleteProduct(request.params.productId));
+  });
   router.post('/products/:productId/image', ownerOnly, readImageBody, async (request, response) => {
     response.json(await productService.uploadProductImage(
       request.params.productId, request.body, request.get('content-type'),

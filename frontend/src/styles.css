@@ -618,12 +618,14 @@ h1, h2, h3, strong, b, th, dt { font-weight: 600; }
 .row-inactive td { color: var(--text-secondary); background: #faf9f6; }
 .order-history { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
 .picking-table .stock-count { font-size: 18px; }
-.print-only { display: none; }
+.print-only, .off-page-row { display: none; }
 
 @media print {
   .admin-sidebar, .board-filters, .upcoming-days, .page-buttons, .admin-page-actions, .rider-picker, .icon-button { display: none !important; }
   .admin-main { padding: 0; }
   .print-only { display: table-cell; }
+  .off-page-row { display: table-row; }
+  .table-pager { display: none; }
   .card, .table-box { border: 0; }
   .admin-table th, .admin-table td { padding: 6px 8px; }
 }
@@ -1191,6 +1193,7 @@ button.tab { border: 0; background: none; padding: 0; cursor: pointer; }
 .profile-card { flex-direction: row; align-items: center; gap: 14px; }
 .profile-avatar { flex: none; width: 52px; height: 52px; border-radius: 50%; background: var(--green-light); color: var(--green-text); font-size: 18px; font-weight: 600; display: flex; align-items: center; justify-content: center; }
 .address-change-button { margin-top: 10px; }
+.logout-button { color: var(--error); border-color: var(--error); }
 .recent-orders { gap: 0; }
 .recent-orders .card-heading { margin-bottom: 4px; }
 .recent-order-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--border); color: var(--text); text-decoration: none; font-size: 14px; }

@@ -41,7 +41,6 @@ export function ProfilePage() {
             <div><h2>{name}</h2>{profile && <p className="hint">+91 {profile.phone}</p>}<p className="hint">{account.email}</p></div>
           </section>
           <AlertsToggle />
-          <button type="button" className="text-button danger-text" onClick={signOut}><Icon name="logout" /> Sign out</button>
         </div>
         <div className="column-stack">
           <section className="card">
@@ -52,6 +51,7 @@ export function ProfilePage() {
           </section>
           <RecentOrders />
         </div>
+        <button type="button" className="button button-outline logout-button" onClick={signOut}><Icon name="logout" /> Logout</button>
       </div>
       <TabBar />
     </main>

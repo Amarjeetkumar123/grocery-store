@@ -7,7 +7,7 @@ function AccountErrorScreen({ message, onRetry, onSignOut }) {
     <div className="center-screen">
       <p className="error-text" role="alert">{message}</p>
       <button type="button" className="button" onClick={onRetry}>Try again</button>
-      <button type="button" className="text-button" onClick={onSignOut}>Sign out</button>
+      <button type="button" className="text-button" onClick={onSignOut}>Logout</button>
     </div>
   );
 }

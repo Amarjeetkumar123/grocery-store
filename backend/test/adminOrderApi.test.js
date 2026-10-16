@@ -137,3 +137,9 @@ test('the owner finds customers, confirms phones and blocks', { skip }, async ()
   const history = await asOwner(`/api/admin/orders?customerId=${riya.id}`);
   assert.equal(history.body.orders.length, 2);
 });
+
+test('a product in past orders cannot be deleted', { skip }, async () => {
+  const [{ product_id: productId }] = await testServer.database.query(
+    'select pack.product_id from order_items item join pack_sizes pack on pack.id = item.pack_size_id limit 1').then((result) => result.rows);
+  assert.equal((await asOwner(`/api/admin/products/${productId}`, { method: 'DELETE' })).status, 409);
+});

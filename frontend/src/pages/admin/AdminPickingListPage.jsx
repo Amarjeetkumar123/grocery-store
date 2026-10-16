@@ -1,41 +1,61 @@
+import { useState } from 'react';
 import { Icon } from '../../Icon.jsx';
 import { LoadingOrError } from '../../components/LoadingOrError.jsx';
 import { AdminPageHeader } from './AdminLayout.jsx';
+import { TablePager } from './TablePager.jsx';
 import { BoardFilters, DateRangeFields } from './orders/BoardFilters.jsx';
 import { dateRangeLabel, filterOrders, timeOptionsOf, useBoardFilters, useListOrders, zoneOptionsOf } from './orders/orderBoardData.js';
 
 // Orders still to be packed.
 const toPackStatuses = ['new', 'confirmed'];
 
-// One line per pack size: how many to take off the shelf in total.
+// One line per pack size: how many to take off the shelf in total, and which
+// orders they go into: orders: [{ orderNumber: 1004, quantity: 2 }].
 function totalsByPackSize(orders) {
   const lines = new Map();
   for (const order of orders) {
     for (const item of order.items) {
-      const line = lines.get(item.packSizeId) ?? { ...item, quantity: 0, orderCount: 0 };
-      lines.set(item.packSizeId, { ...line, quantity: line.quantity + item.quantity, orderCount: line.orderCount + 1 });
+      const line = lines.get(item.packSizeId) ?? { ...item, quantity: 0, orders: [] };
+      const forOrder = { orderNumber: order.orderNumber, quantity: item.quantity };
+      lines.set(item.packSizeId, { ...line, quantity: line.quantity + item.quantity, orders: [...line.orders, forOrder] });
     }
   }
   return [...lines.values()].sort((first, second) => first.productName.localeCompare(second.productName) || first.packLabel.localeCompare(second.packLabel));
 }
 
+function PickingRow({ line, onPage }) {
+  return (
+    <tr className={onPage ? undefined : 'off-page-row'}>
+      <td className="print-only">☐</td>
+      <td><strong>{line.productName}</strong></td>
+      <td>{line.packLabel}</td>
+      <td className="stock-count"><strong>{line.quantity}</strong></td>
+      <td>
+        <div className="badge-cell">
+          {line.orders.map((order) => <span key={order.orderNumber} className="pill pill-gray">#{order.orderNumber} × {order.quantity}</span>)}
+        </div>
+      </td>
+    </tr>
+  );
+}
+
+// Every line is drawn so Print gets them all; lines off this page are hidden on screen.
 function PickingTable({ lines }) {
+  const [pager, setPager] = useState({ page: 1, pageSize: 25 });
+  const pageCount = Math.max(1, Math.ceil(lines.length / pager.pageSize));
+  const page = Math.min(pager.page, pageCount);
+  const firstIndex = (page - 1) * pager.pageSize;
+  const isOnPage = (index) => index >= firstIndex && index < firstIndex + pager.pageSize;
   return (
     <div className="table-box">
-      <table className="admin-table picking-table">
-        <thead><tr><th className="print-only">✓</th><th>Product</th><th>Pack</th><th>Quantity</th><th>In orders</th></tr></thead>
-        <tbody>
-          {lines.map((line) => (
-            <tr key={line.packSizeId}>
-              <td className="print-only">☐</td>
-              <td><strong>{line.productName}</strong></td>
-              <td>{line.packLabel}</td>
-              <td className="stock-count"><strong>{line.quantity}</strong></td>
-              <td>{line.orderCount}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <div className="table-scroll">
+        <table className="admin-table picking-table">
+          <thead><tr><th className="print-only">✓</th><th>Product</th><th>Pack size</th><th>Total to pick</th><th>Goes into order (× packs)</th></tr></thead>
+          <tbody>{lines.map((line, index) => <PickingRow key={line.packSizeId} line={line} onPage={isOnPage(index)} />)}</tbody>
+        </table>
+      </div>
+      <TablePager page={page} pageCount={pageCount} pageSize={pager.pageSize} total={lines.length}
+        shownCount={lines.filter((line, index) => isOnPage(index)).length} onChange={(changes) => setPager({ ...pager, page, ...changes })} />
     </div>
   );
 }
@@ -58,7 +78,8 @@ export function AdminPickingListPage() {
         <>
           <p className="hint">
             {toPack.length} {toPack.length === 1 ? 'order' : 'orders'} to pack
-            {notConfirmed > 0 && ` (${notConfirmed} not confirmed yet)`}. Packed and cancelled orders are not included.
+            {notConfirmed > 0 && ` (${notConfirmed} not confirmed yet)`}. Take the total off the shelf once, then split it into each order's bag.
+            Packed and cancelled orders are left out.
           </p>
           {toPack.length > 0 && <PickingTable lines={totalsByPackSize(toPack)} />}
         </>

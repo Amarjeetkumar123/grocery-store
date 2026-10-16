@@ -1,7 +1,7 @@
-import { uniqueViolationErrorCode, withTransaction } from '../dbHelper/databaseConnection.js';
+import { foreignKeyViolationErrorCode, uniqueViolationErrorCode, withTransaction } from '../dbHelper/databaseConnection.js';
 import { categoryExists } from '../dbHelper/categoryDbHelper.js';
 import {
-  countProducts, findProducts, insertProduct, productExists, setProductImagePath, updateProduct as updateProductRow,
+  countProducts, deleteProduct as deleteProductRow, findProducts, insertProduct, productExists, setProductImagePath, updateProduct as updateProductRow,
 } from '../dbHelper/productDbHelper.js';
 import { hidePackSizesExcept, insertPackSize, updatePackSize } from '../dbHelper/packSizeDbHelper.js';
 import { buildProductFilter } from '../filters/productFilters.js';
@@ -120,12 +120,27 @@ async function uploadProductImage(dependencies, productIdInput, imageBytes, cont
   return findAdminProduct(dependencies, productId);
 }
 
+// A product never ordered is removed with its pack sizes. One in past orders
+// stays, so those orders keep their items; the owner hides it instead.
+// ponytail: its photo stays in storage; remove it too if storage space matters.
+async function deleteProduct({ database }, productIdInput) {
+  const productId = readPositiveInteger(productIdInput);
+  try {
+    if (productId && await deleteProductRow(database, productId)) return { deleted: true };
+  } catch (error) {
+    if (error.code !== foreignKeyViolationErrorCode) throw error;
+    throw ServiceError.conflict('This product is in past orders, so it cannot be deleted. Edit it and turn off "Show in the shop" to hide it.');
+  }
+  throw ServiceError.notFound('Product not found.');
+}
+
 export function createProductService(dependencies) {
   return {
     listProducts: (query) => listProducts(dependencies, query),
     getProduct: (productIdInput) => findAdminProduct(dependencies, readPositiveInteger(productIdInput)),
     createProduct: (body) => createProduct(dependencies, body),
     updateProduct: (productIdInput, body) => updateProduct(dependencies, productIdInput, body),
+    deleteProduct: (productIdInput) => deleteProduct(dependencies, productIdInput),
     uploadProductImage: (productIdInput, imageBytes, contentType) =>
       uploadProductImage(dependencies, productIdInput, imageBytes, contentType),
   };

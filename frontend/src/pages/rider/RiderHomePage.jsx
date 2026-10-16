@@ -52,7 +52,7 @@ export function RiderHomePage() {
       <header className="rider-header">
         <div className="card-heading">
           <div><p className="rider-date">{formatDeliveryDay(todayInIndia())}</p><h1>My deliveries</h1></div>
-          <button type="button" className="rider-avatar" onClick={signOut} aria-label="Sign out">{account.staffName?.[0] ?? 'R'}</button>
+          <button type="button" className="rider-avatar" onClick={signOut} aria-label="Logout">{account.staffName?.[0] ?? 'R'}</button>
         </div>
         {data && <RiderSummary orders={orders} cashInHand={data.cashInHand} />}
       </header>

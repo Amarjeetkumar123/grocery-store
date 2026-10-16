@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
+import { callApi } from '../../apiClient.js';
+import { useAuthentication } from '../../AuthenticationContext.jsx';
 import { useApiData } from '../../useApiData.js';
 import { useDebouncedValue } from '../../useDebouncedValue.js';
 import { formatMonthYear, formatRupees } from '../../formatting.js';
@@ -15,7 +17,28 @@ function StockBadge({ packSize }) {
   return <span>{packSize.stock}</span>;
 }
 
-function ProductRows({ product }) {
+// Owner only. A product in past orders cannot go; the server explains how to hide it.
+function DeleteProductButton({ product, onDeleted }) {
+  const [deleting, setDeleting] = useState(false);
+  async function deleteProduct() {
+    if (!window.confirm(`Delete ${product.name} and all its pack sizes? This cannot be undone.`)) return;
+    setDeleting(true);
+    try {
+      await callApi(`/api/admin/products/${product.id}`, { method: 'DELETE' });
+      await onDeleted();
+    } catch (error) {
+      window.alert(error.message);
+    }
+    setDeleting(false);
+  }
+  return (
+    <button type="button" className="icon-button icon-button-danger" disabled={deleting} onClick={deleteProduct} aria-label={`Delete ${product.name}`} title="Delete">
+      {deleting ? <span className="spinner spinner-dark" aria-hidden="true" /> : <Icon name="trash" size={18} />}
+    </button>
+  );
+}
+
+function ProductRows({ product, isOwner, onDeleted }) {
   return product.packSizes.map((packSize, index) => (
     <tr key={packSize.id} className={packSize.active && product.active ? '' : 'row-hidden'}>
       {index === 0 && (
@@ -35,7 +58,10 @@ function ProductRows({ product }) {
       <td>{packSize.active && product.active ? <span className="status-dot">Active</span> : <span className="status-dot status-dot-off">Hidden</span>}</td>
       {index === 0 && (
         <td rowSpan={product.packSizes.length}>
-          <Link to={`/admin/products/${product.id}`} className="icon-button" aria-label={`Edit ${product.name}`}><Icon name="edit" /></Link>
+          <div className="row-actions">
+            <Link to={`/admin/products/${product.id}`} className="icon-button" aria-label={`Edit ${product.name}`}><Icon name="edit" /></Link>
+            {isOwner && <DeleteProductButton product={product} onDeleted={onDeleted} />}
+          </div>
         </td>
       )}
     </tr>
@@ -59,13 +85,14 @@ function ProductFilters({ searchText, onSearchTextChange, categoryId, onCategory
   );
 }
 
-function ProductTable({ data, onPageChange }) {
+function ProductTable({ data, onPageChange, onDeleted }) {
+  const { account } = useAuthentication();
   return (
     <div className="table-box">
       <div className="table-scroll">
         <table className="admin-table">
           <thead><tr><th>Product</th><th>Category</th><th>Pack</th><th className="number">MRP</th><th className="number">Price</th><th className="number">Stock</th><th>Best before</th><th>Status</th><th /></tr></thead>
-          <tbody>{data.products.map((product) => <ProductRows key={product.id} product={product} />)}</tbody>
+          <tbody>{data.products.map((product) => <ProductRows key={product.id} product={product} isOwner={account.role === 'owner'} onDeleted={onDeleted} />)}</tbody>
         </table>
       </div>
       <TablePager page={data.page} pageCount={data.pageCount} pageSize={data.pageSize} total={data.total} shownCount={data.products.length} onChange={onPageChange} />
@@ -92,7 +119,7 @@ export function AdminProductsPage() {
         categoryId={filters.categoryId} onCategoryIdChange={(categoryId) => changeFilters({ categoryId })} />
       <LoadingOrError loading={loading && !data} error={error} onRetry={reload} />
       {data && data.total === 0 && <p className="hint centered">No products found. Add one, or upload a spreadsheet.</p>}
-      {data && data.total > 0 && <ProductTable data={data} onPageChange={(changes) => setFilters((previous) => ({ ...previous, ...changes }))} />}
+      {data && data.total > 0 && <ProductTable data={data} onPageChange={(changes) => setFilters((previous) => ({ ...previous, ...changes }))} onDeleted={reload} />}
     </div>
   );
 }

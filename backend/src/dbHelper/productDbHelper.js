@@ -101,6 +101,12 @@ export async function updateProduct(executor, productId, product) {
   return result.rowCount > 0;
 }
 
+// Its pack sizes go with it. Returns false when the product does not exist.
+export async function deleteProduct(executor, productId) {
+  const result = await executor.query('delete from products where id = $1', [productId]);
+  return result.rowCount > 0;
+}
+
 export async function setProductImagePath(executor, productId, imagePath) {
   await executor.query('update products set image_path = $2 where id = $1', [productId, imagePath]);
 }

@@ -242,3 +242,11 @@ test('notify me works for coming-soon categories only, after an address is saved
   assert.equal(alreadyAvailable.status, 400);
   assert.deepEqual((await callApi('/api/account', { token: 'customer-token' })).body.notifyMeCategoryIds, [fruitsId]);
 });
+
+test('the owner deletes a product that was never ordered', { skip }, async () => {
+  const created = await callApi('/api/admin/products', { token: 'owner-token', method: 'POST', body: { ...sunflowerOilForm(), name: 'Delete me' } });
+  const productPath = `/api/admin/products/${created.body.product.id}`;
+  assert.equal((await callApi(productPath, { token: 'packer-token', method: 'DELETE' })).status, 403);
+  assert.equal((await callApi(productPath, { token: 'owner-token', method: 'DELETE' })).status, 200);
+  assert.equal((await callApi(productPath, { token: 'owner-token', method: 'DELETE' })).status, 404);
+});

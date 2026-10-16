@@ -78,7 +78,7 @@ export function AdminLayout() {
           <div className="admin-account">
             <span className="admin-avatar" aria-hidden="true">{account.staffName?.charAt(0).toUpperCase()}</span>
             <span className="admin-account-text"><strong>{account.staffName}</strong><small>{roleLabels[account.role]}</small></span>
-            <button type="button" className="icon-button admin-sign-out" onClick={signOut} aria-label="Sign out" title="Sign out"><Icon name="logout" size={18} /></button>
+            <button type="button" className="icon-button admin-sign-out" onClick={signOut} aria-label="Logout" title="Logout"><Icon name="logout" size={18} /></button>
           </div>
         </div>
       </aside>
