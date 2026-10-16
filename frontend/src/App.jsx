@@ -30,6 +30,7 @@ import { AdminCustomersPage } from './pages/admin/AdminCustomersPage.jsx';
 import { AdminCashCheckPage } from './pages/admin/AdminCashCheckPage.jsx';
 import { AdminReportsPage } from './pages/admin/AdminReportsPage.jsx';
 import { AdminDashboardPage } from './pages/admin/AdminDashboardPage.jsx';
+import { AdminReviewsPage } from './pages/admin/AdminReviewsPage.jsx';
 
 const ownerOnly = (page) => <RequireRole allowedRoles={['owner']}>{page}</RequireRole>;
 const riderOnly = (page) => <RequireRole allowedRoles={['rider']}>{page}</RequireRole>;
@@ -47,6 +48,7 @@ function adminRoutes() {
       <Route path="products/import" element={ownerOnly(<AdminBulkImportPage />)} />
       <Route path="products/:productId" element={ownerOnly(<AdminProductFormPage />)} />
       <Route path="categories" element={ownerOnly(<AdminCategoriesPage />)} />
+      <Route path="reviews" element={ownerOnly(<AdminReviewsPage />)} />
       <Route path="stock" element={<AdminStockPage />} />
       <Route path="zones" element={ownerOnly(<AdminZonesPage />)} />
       <Route path="store-settings" element={ownerOnly(<AdminStoreSettingsPage />)} />

@@ -20,6 +20,7 @@ import { createDeliveryService } from './services/deliveryService.js';
 import { createMoneyService } from './services/moneyService.js';
 import { createNotificationService } from './services/notificationService.js';
 import { createPushSubscriptionService } from './services/pushSubscriptionService.js';
+import { createReviewService } from './services/reviewService.js';
 import { createPublicRouter } from './routes/publicRoutes.js';
 import { createAccountRouter } from './routes/accountRoutes.js';
 import { createAdminProductRouter } from './routes/adminProductRoutes.js';
@@ -29,6 +30,7 @@ import { createAdminZoneRouter } from './routes/adminZoneRoutes.js';
 import { createAdminOrderRouter } from './routes/adminOrderRoutes.js';
 import { createAdminPeopleRouter } from './routes/adminPeopleRoutes.js';
 import { createAdminMoneyRouter } from './routes/adminMoneyRoutes.js';
+import { createAdminReviewRouter } from './routes/adminReviewRoutes.js';
 import { createRiderRouter } from './routes/riderRoutes.js';
 import { createPushRouter } from './routes/pushRoutes.js';
 import { createCheckoutRouter } from './routes/checkoutRoutes.js';
@@ -51,6 +53,7 @@ function createServices(dependencies) {
     deliveryService: createDeliveryService(dependencies),
     moneyService: createMoneyService(dependencies),
     pushSubscriptionService: createPushSubscriptionService(dependencies),
+    reviewService: createReviewService(dependencies),
   };
 }
 
@@ -100,7 +103,7 @@ export function createApplication({ database, verifyAccessToken, productImageSto
   application.use('/api/orders', signedIn, createCustomerOrderRouter(services));
   application.use('/api/admin', signedIn, requireRole('owner', 'packer'),
     createAdminStockRouter(services), createAdminProductRouter(services), createAdminCategoryRouter(services), createAdminZoneRouter(services),
-    createAdminOrderRouter(services), createAdminPeopleRouter(services), createAdminMoneyRouter(services));
+    createAdminOrderRouter(services), createAdminPeopleRouter(services), createAdminMoneyRouter(services), createAdminReviewRouter(services));
   application.use('/api/rider', signedIn, requireRole('rider'), createRiderRouter(services));
   application.use('/api/push', signedIn, createPushRouter(services));
 

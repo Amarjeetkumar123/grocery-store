@@ -2,7 +2,7 @@
 
 Online ordering for nearby housing societies and local areas: scheduled
 delivery slots, pay at the door (cash or UPI). The full plan is in
-[grocerystoreplan.txt](grocerystoreplan.txt); the screen designs are in [mockups/](mockups/).
+[grocerystoreplan.txt](grocerystoreplan.txt).
 
 ```
 backend/

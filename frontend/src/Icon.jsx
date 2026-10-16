@@ -8,6 +8,7 @@ const iconShapes = {
   building: <path d="M4 21V4h10v17M14 9h6v12M2 21h20M7 8h1M10 8h1M7 12h1M10 12h1M7 16h1M10 16h1" />,
   home: <path d="M3 10.5 12 3l9 7.5M5 9v11h14V9M10 20v-6h4v6" />,
   check: <path d="m5 12.5 4.5 4.5L19 7.5" />,
+  star: <path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.8l-5.2 2.8 1-5.8-4.3-4.1 5.9-.9z" />,
   clock: (
     <>
       <circle cx="12" cy="12" r="9" />

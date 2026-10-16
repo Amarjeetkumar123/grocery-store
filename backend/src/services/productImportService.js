@@ -22,6 +22,7 @@ const fieldsByHeader = {
   productname: 'productName',
   brand: 'brand',
   packsize: 'label',
+  packtype: 'packType',
   maximumretailpricemrp: 'maximumRetailPrice',
   mrp: 'maximumRetailPrice',
   price: 'price',

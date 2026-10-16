@@ -4,7 +4,7 @@ import { callApi } from '../../../apiClient.js';
 let nextRowKey = 1;
 
 function emptyPackSize() {
-  return { rowKey: nextRowKey++, id: null, label: '', maximumRetailPrice: '', price: '', stock: '0', lowStockLevel: '5', bestBefore: '', active: true };
+  return { rowKey: nextRowKey++, id: null, label: '', packType: '', maximumRetailPrice: '', price: '', stock: '0', lowStockLevel: '5', bestBefore: '', active: true };
 }
 
 function toPackSizeRow(packSize) {
@@ -12,6 +12,7 @@ function toPackSizeRow(packSize) {
     rowKey: nextRowKey++,
     id: packSize.id,
     label: packSize.label,
+    packType: packSize.packType ?? '',
     maximumRetailPrice: String(packSize.maximumRetailPrice),
     price: String(packSize.price),
     stock: String(packSize.stock),

@@ -5,7 +5,7 @@ import { Icon } from '../../Icon.jsx';
 import { AdminPageHeader } from './AdminLayout.jsx';
 
 const templateColumns = [
-  ['Category', true], ['Product name', true], ['Brand', false], ['Pack size', true], ['MRP', true], ['Price', true],
+  ['Category', true], ['Product name', true], ['Brand', false], ['Pack size', true], ['Pack type', false], ['MRP', true], ['Price', true],
   ['Stock', true], ['Low stock alert', false], ['Best before', false], ['Manufacturer', false], ['Description', false],
 ];
 

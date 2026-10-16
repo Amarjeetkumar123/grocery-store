@@ -21,12 +21,16 @@ function productsWithPackSizesQuery({ whereClause, includeHidden, values }, page
            product.description, product.manufacturer, product.country_of_origin, product.image_path, product.active,
            coalesce(
              json_agg(json_build_object(
-               'id', pack.id, 'label', pack.label, 'maximumRetailPrice', pack.maximum_retail_price,
+               'id', pack.id, 'label', pack.label, 'packType', pack.pack_type, 'maximumRetailPrice', pack.maximum_retail_price,
                'price', pack.price, 'stock', pack.stock, 'lowStockLevel', pack.low_stock_level,
                'bestBefore', pack.best_before, 'active', pack.active
              ) order by pack.sort_order, pack.price) filter (where pack.id is not null),
              '[]'
-           ) as pack_sizes
+           ) as pack_sizes,
+           (select round(avg(review.rating), 1) from product_reviews review
+             where review.product_id = product.id and not review.hidden) as rating_average,
+           (select count(*)::int from product_reviews review
+             where review.product_id = product.id and not review.hidden) as rating_count
     from products product
     join categories category on category.id = product.category_id
     left join pack_sizes pack on pack.product_id = product.id ${packSizeCondition}
@@ -50,6 +54,7 @@ function toProduct(row) {
     imagePath: row.image_path,
     active: row.active,
     packSizes: row.pack_sizes,
+    rating: { average: row.rating_average, count: row.rating_count },
   };
 }
 

@@ -35,6 +35,7 @@ export function validatePackSizeInput(input, errorPrefix, fieldErrors) {
   const packSize = {
     id: input.id === undefined || input.id === null ? null : readPositiveInteger(input.id),
     label: readRequiredText(input, 'label', 'Pack size', 30, fieldErrors, `${errorPrefix}label`),
+    packType: readOptionalText(input, 'packType', 'Pack type', 20, fieldErrors, `${errorPrefix}packType`),
     maximumRetailPrice: readMoney(input.maximumRetailPrice),
     price: readMoney(input.price),
     stock: readWholeNumber(input.stock ?? 0),

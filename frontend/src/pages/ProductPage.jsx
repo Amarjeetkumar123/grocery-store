@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { useApiData } from '../useApiData.js';
-import { formatMonthYear, formatRupees } from '../formatting.js';
+import { formatMonthYear, formatRupees, packSizeName } from '../formatting.js';
 import { PageBar } from '../components/PageBar.jsx';
 import { LoadingOrError } from '../components/LoadingOrError.jsx';
 import { PriceLine, ProductCard, ProductImage, StockStatus } from '../components/ProductCard.jsx';
@@ -9,6 +9,8 @@ import { QuantityStepper } from '../components/QuantityStepper.jsx';
 import { useCartSummary } from '../components/CartBar.jsx';
 import { useCart } from '../cart/CartContext.jsx';
 import { Icon } from '../Icon.jsx';
+import { StarIcon } from '../components/Rating.jsx';
+import { ProductReviews } from './product/ProductReviews.jsx';
 
 function PackSizeChoices({ packSizes, chosenPackSize, onChoose }) {
   return (
@@ -16,7 +18,7 @@ function PackSizeChoices({ packSizes, chosenPackSize, onChoose }) {
       {packSizes.map((packSize) => (
         <button key={packSize.id} type="button" className="chip" aria-pressed={packSize.id === chosenPackSize.id}
           onClick={() => onChoose(packSize.id)}>
-          {packSize.label}
+          {packSizeName(packSize)}
           <span className="chip-price">{formatRupees(packSize.price)}</span>
         </button>
       ))}
@@ -27,7 +29,7 @@ function PackSizeChoices({ packSizes, chosenPackSize, onChoose }) {
 // The details printed on the pack, which online sellers must also show.
 function PackDetails({ product, packSize }) {
   const rows = [
-    ['Net quantity', packSize.label],
+    ['Net quantity', packSizeName(packSize)],
     ['Manufacturer', product.manufacturer],
     ['Best before', formatMonthYear(packSize.bestBefore)],
     ['Country of origin', product.countryOfOrigin],
@@ -98,8 +100,19 @@ function SimilarProducts({ product }) {
   );
 }
 
+// "4.4 ★ · 128 ratings" under the name; a tap scrolls to the reviews.
+function TitleRating({ rating }) {
+  if (!rating?.count) return null;
+  return (
+    <a href="#reviews" className="title-rating">
+      <span className="rating-chip">{rating.average.toFixed(1)} <StarIcon size={10} /></span>
+      {rating.count} {rating.count === 1 ? 'rating' : 'ratings'}
+    </a>
+  );
+}
+
 // Phones: picture on top, Add to cart fixed at the bottom. Computers: picture on the left, details on the right.
-function ProductDetails({ product, packSize, onChoosePackSize }) {
+function ProductDetails({ product, packSize, onChoosePackSize, onRatingsChanged }) {
   return (
     <div className="product-layout">
       <ProductHero product={product} />
@@ -107,6 +120,7 @@ function ProductDetails({ product, packSize, onChoosePackSize }) {
         <div>
           {product.brand && <p className="brand-name">{product.brand}</p>}
           <h1 className="product-title">{product.name}</h1>
+          <TitleRating rating={product.rating} />
         </div>
         <PackSizeChoices packSizes={product.packSizes} chosenPackSize={packSize} onChoose={onChoosePackSize} />
         <PriceLine packSize={packSize} />
@@ -114,6 +128,7 @@ function ProductDetails({ product, packSize, onChoosePackSize }) {
         <BuyBar product={product} packSize={packSize} />
         {product.description && <p className="hint">{product.description}</p>}
         <PackDetails product={product} packSize={packSize} />
+        <ProductReviews product={product} onRatingsChanged={onRatingsChanged} />
         <SimilarProducts product={product} />
       </div>
     </div>
@@ -131,8 +146,8 @@ export function ProductPage() {
     <main className="app-shell product-page">
       {!product && <PageBar title="Product" />}
       <div className="page-body">
-        <LoadingOrError loading={loading} error={error} onRetry={reload} />
-        {product && <ProductDetails key={product.id} product={product} packSize={packSize} onChoosePackSize={setChosenPackSizeId} />}
+        <LoadingOrError loading={loading && !product} error={product ? null : error} onRetry={reload} />
+        {product && <ProductDetails key={product.id} product={product} packSize={packSize} onChoosePackSize={setChosenPackSizeId} onRatingsChanged={reload} />}
       </div>
     </main>
   );

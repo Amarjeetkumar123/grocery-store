@@ -17,6 +17,7 @@ const navigationGroups = [
   { title: 'Catalogue', items: [
     { path: '/admin/products', label: 'Products', icon: 'tag', roles: ['owner'] },
     { path: '/admin/categories', label: 'Categories', icon: 'grid', roles: ['owner'] },
+    { path: '/admin/reviews', label: 'Reviews', icon: 'star', roles: ['owner'] },
     { path: '/admin/stock', label: 'Stock', icon: 'layers', roles: ['owner', 'packer'] },
   ] },
   { title: 'Setup', items: [

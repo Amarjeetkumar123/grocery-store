@@ -17,6 +17,9 @@ function PackSizeCell({ packSize, index, fieldName, label, fieldErrors, onChange
   );
 }
 
+// Suggestions only: any word up to 20 letters is fine. Empty shows just "1 L" in the shop.
+const packTypeChoices = ['Bottle', 'Pouch', 'Jar', 'Tin', 'Can', 'Packet', 'Bag', 'Box', 'Tetra pack'];
+
 // "10% off" once both prices are filled in.
 function DiscountCell({ packSize }) {
   const discount = percentOff(Number(packSize.maximumRetailPrice), Number(packSize.price));
@@ -43,6 +46,7 @@ function PackSizeRow({ packSize, index, fieldErrors, updatePackSize, removePackS
   return (
     <tr className={packSize.active ? '' : 'row-hidden'}>
       <PackSizeCell {...cellProperties} fieldName="label" label="Pack size" placeholder="e.g. 1 kg" maxLength={30} />
+      <PackSizeCell {...cellProperties} fieldName="packType" label="Pack type" placeholder="e.g. Bottle" maxLength={20} list="pack-type-choices" />
       <PackSizeCell {...cellProperties} fieldName="maximumRetailPrice" label="MRP" inputMode="decimal" placeholder="0" prefix="₹" />
       <PackSizeCell {...cellProperties} fieldName="price" label="Selling price" inputMode="decimal" placeholder="0" prefix="₹" />
       <DiscountCell packSize={packSize} />
@@ -64,9 +68,10 @@ export function PackSizeEditor({ formValues, fieldErrors, updatePackSize, addPac
         <p className="hint">{editing ? 'Stock changes go through the Stock page, so every change is logged.' : 'Stock is how many you have now; later changes go through the Stock page.'}</p>
       </header>
       {fieldErrors.packSizes && <p className="field-error form-panel-error">{fieldErrors.packSizes}</p>}
+      <datalist id="pack-type-choices">{packTypeChoices.map((choice) => <option key={choice} value={choice} />)}</datalist>
       <div className="table-scroll">
         <table className="admin-table pack-size-table">
-          <thead><tr><th>Pack size</th><th>MRP</th><th>Price</th><th>Discount</th><th>Stock</th><th>Low stock alert</th><th>Best before</th><th /></tr></thead>
+          <thead><tr><th>Pack size</th><th>Pack type</th><th>MRP</th><th>Price</th><th>Discount</th><th>Stock</th><th>Low stock alert</th><th>Best before</th><th /></tr></thead>
           <tbody>
             {formValues.packSizes.map((packSize, index) => (
               <PackSizeRow key={packSize.rowKey} packSize={packSize} index={index} fieldErrors={fieldErrors}

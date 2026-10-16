@@ -1,10 +1,10 @@
 export async function insertPackSize(executor, productId, packSize, sortOrder) {
   const result = await executor.query(
     `insert into pack_sizes (product_id, label, maximum_retail_price, price, stock, low_stock_level,
-                             best_before, active, sort_order)
-     values ($1, $2, $3, $4, $5, $6, $7, $8, $9) returning id`,
+                             best_before, active, sort_order, pack_type)
+     values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) returning id`,
     [productId, packSize.label, packSize.maximumRetailPrice, packSize.price, packSize.stock,
-      packSize.lowStockLevel, packSize.bestBefore, packSize.active, sortOrder],
+      packSize.lowStockLevel, packSize.bestBefore, packSize.active, sortOrder, packSize.packType],
   );
   return result.rows[0].id;
 }
@@ -16,10 +16,10 @@ export async function updatePackSize(executor, productId, packSize, sortOrder) {
   const result = await executor.query(
     `update pack_sizes
      set label = $3, maximum_retail_price = $4, price = $5, low_stock_level = $6, best_before = $7,
-         active = $8, sort_order = $9
+         active = $8, sort_order = $9, pack_type = $10
      where id = $1 and product_id = $2`,
     [packSize.id, productId, packSize.label, packSize.maximumRetailPrice, packSize.price,
-      packSize.lowStockLevel, packSize.bestBefore, packSize.active, sortOrder],
+      packSize.lowStockLevel, packSize.bestBefore, packSize.active, sortOrder, packSize.packType],
   );
   return result.rowCount > 0;
 }
@@ -36,14 +36,15 @@ export async function hidePackSizesExcept(executor, productId, keptPackSizeIds) 
 // Returns true when a new pack size was created, false when one was updated.
 export async function upsertImportedPackSize(executor, productId, packSize) {
   const result = await executor.query(
-    `insert into pack_sizes (product_id, label, maximum_retail_price, price, stock, low_stock_level, best_before)
-     values ($1, $2, $3, $4, $5, $6, $7)
+    `insert into pack_sizes (product_id, label, maximum_retail_price, price, stock, low_stock_level, best_before, pack_type)
+     values ($1, $2, $3, $4, $5, $6, $7, $8)
      on conflict (product_id, label) do update set
        maximum_retail_price = excluded.maximum_retail_price, price = excluded.price, stock = excluded.stock,
-       low_stock_level = excluded.low_stock_level, best_before = excluded.best_before, active = true
+       low_stock_level = excluded.low_stock_level, best_before = excluded.best_before, active = true,
+       pack_type = coalesce(excluded.pack_type, pack_sizes.pack_type)
      returning (xmax = 0) as inserted`,
     [productId, packSize.label, packSize.maximumRetailPrice, packSize.price, packSize.stock,
-      packSize.lowStockLevel, packSize.bestBefore],
+      packSize.lowStockLevel, packSize.bestBefore, packSize.packType],
   );
   return result.rows[0].inserted;
 }

@@ -10,6 +10,11 @@ export function formatRupees(amount) {
   return rupeeFormatter.format(amount);
 }
 
+// "1 L · Bottle", or just "1 L" when the pack has no type.
+export function packSizeName(packSize) {
+  return packSize.packType ? `${packSize.label} · ${packSize.packType}` : packSize.label;
+}
+
 // Whole-number discount, e.g. MRP 1050, price 899 -> 14. 0 when no discount.
 export function percentOff(maximumRetailPrice, price) {
   if (!maximumRetailPrice || price >= maximumRetailPrice) return 0;
@@ -83,6 +88,16 @@ export function formatCutoff(cutoffAt) {
 // "2026-09-28T10:20:00Z" -> "28 Sep"
 export function formatShortDate(isoTimestamp) {
   return new Date(isoTimestamp).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', timeZone: 'Asia/Kolkata' });
+}
+
+// "2 days ago", "3 weeks ago", "4 months ago": for reviews.
+export function formatDaysAgo(isoTimestamp) {
+  const days = Math.floor((Date.now() - new Date(isoTimestamp).getTime()) / 86400000);
+  if (days < 1) return 'today';
+  if (days < 2) return 'yesterday';
+  if (days < 14) return `${days} days ago`;
+  if (days < 60) return `${Math.floor(days / 7)} weeks ago`;
+  return `${Math.floor(days / 30)} months ago`;
 }
 
 // "just now", "9 min ago", "3 h ago", or the date for older times.

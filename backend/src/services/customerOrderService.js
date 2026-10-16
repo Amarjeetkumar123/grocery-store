@@ -1,6 +1,7 @@
 import { withTransaction } from '../dbHelper/databaseConnection.js';
 import { findCustomerWithProfileByUserId } from '../dbHelper/customerDbHelper.js';
 import { findCustomerOrder, findCustomerOrders, lockOrder } from '../dbHelper/orderDbHelper.js';
+import { findCustomerRatings } from '../dbHelper/reviewDbHelper.js';
 import { cancelLockedOrder } from './orderCancellation.js';
 import { readPositiveInteger } from '../validators/commonValidation.js';
 import { ServiceError } from './serviceError.js';
@@ -23,7 +24,13 @@ async function getMyOrder({ database }, user, orderNumberInput) {
   const customerId = await findCustomerId(database, user);
   const order = orderNumber && customerId ? await findCustomerOrder(database, customerId, orderNumber) : null;
   if (!order) throw ServiceError.notFound('Order not found.');
-  return { order };
+  return { order: order.status === 'delivered' ? await withMyRatings(database, customerId, order) : order };
+}
+
+// A delivered order lists the customer's rating of each item (null = not rated yet).
+async function withMyRatings(database, customerId, order) {
+  const ratings = await findCustomerRatings(database, customerId, order.items.map((item) => item.productId));
+  return { ...order, items: order.items.map((item) => ({ ...item, myRating: ratings[item.productId] ?? null })) };
 }
 
 function checkCanCancel(order) {

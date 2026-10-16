@@ -10,6 +10,8 @@ import { PageBar } from '../components/PageBar.jsx';
 import { LoadingOrError } from '../components/LoadingOrError.jsx';
 import { AlertsToggle } from '../components/AlertsToggle.jsx';
 import { useDialog } from '../components/DialogProvider.jsx';
+import { ReviewSheet } from '../components/ReviewSheet.jsx';
+import { StarIcon } from '../components/Rating.jsx';
 import { useToast } from '../components/ToastProvider.jsx';
 import { OrderProgress, ReorderButton, StatusPill, cancellableStatuses, deliveryWindowOf } from './orders/OrderParts.jsx';
 
@@ -54,15 +56,43 @@ function OrderFacts({ order }) {
   );
 }
 
-function OrderItems({ order }) {
+// Delivered orders: tap a star under an item to rate it, or "Rated 4 ★" to change it.
+function ItemRating({ item, onRate }) {
+  if (item.myRating) {
+    return (
+      <button type="button" className="item-rated" onClick={() => onRate(null)}>
+        <Icon name="check" size={14} /> Rated {item.myRating} <StarIcon size={11} /> · Edit
+      </button>
+    );
+  }
+  return (
+    <div className="item-rate-stars" role="group" aria-label={`Rate ${item.productName}`}>
+      {[1, 2, 3, 4, 5].map((star) => (
+        <button key={star} type="button" onClick={() => onRate(star)} aria-label={`${star} out of 5`}><StarIcon size={20} /></button>
+      ))}
+    </div>
+  );
+}
+
+function OrderItems({ order, onRated }) {
+  const [rating, setRating] = useState(null);
+  const delivered = order.status === 'delivered';
   return (
     <section className="card detail-list">
+      {delivered && <p className="items-rate-hint">How were your items?</p>}
       {order.items.map((item) => (
-        <div key={item.packSizeId} className="detail-row">
-          <span>{item.productName} · {item.packLabel} × {item.quantity}</span>
-          <span>{formatRupees(item.unitPrice * item.quantity)}</span>
+        <div key={item.packSizeId} className="order-item">
+          <div className="detail-row">
+            <span>{item.productName} · {item.packLabel} × {item.quantity}</span>
+            <span>{formatRupees(item.unitPrice * item.quantity)}</span>
+          </div>
+          {delivered && item.productId && <ItemRating item={item} onRate={(stars) => setRating({ item, stars })} />}
         </div>
       ))}
+      {rating && (
+        <ReviewSheet productId={rating.item.productId} productName={rating.item.productName} initialRating={rating.stars}
+          onClose={() => setRating(null)} onSaved={onRated} />
+      )}
       <div className="detail-row"><span>Delivery</span><span>{order.deliveryCharge > 0 ? formatRupees(order.deliveryCharge) : 'FREE'}</span></div>
       <div className="detail-row bill-total"><span>Amount</span><span>{formatRupees(order.total)}</span></div>
     </section>
@@ -114,7 +144,7 @@ export function OrderDetailPage() {
             <div className="column-stack">
               {justPlaced ? <OrderPlacedHeader orderNumber={order.orderNumber} /> : <StatusPill status={order.status} />}
               {order.status !== 'cancelled' && <section className="card"><OrderProgress status={order.status} /></section>}
-              <OrderItems order={order} />
+              <OrderItems order={order} onRated={reload} />
             </div>
             <div className="column-stack column-side">
               <OrderFacts order={order} />

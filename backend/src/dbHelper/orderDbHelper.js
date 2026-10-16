@@ -15,6 +15,7 @@ const insertOrderItemsQuery = `
 export const orderItemsJson = `
   (select json_agg(json_build_object(
             'packSizeId', item.pack_size_id, 'productName', item.product_name, 'packLabel', item.pack_label,
+            'productId', (select pack.product_id from pack_sizes pack where pack.id = item.pack_size_id),
             'quantity', item.quantity, 'unitPrice', item.unit_price) order by item.id)
    from order_items item where item.order_id = placed.id)`;
 

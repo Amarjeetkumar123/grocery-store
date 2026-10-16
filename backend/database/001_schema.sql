@@ -129,6 +129,7 @@ create table pack_sizes (
   id              bigint generated always as identity primary key,
   product_id      bigint not null references products(id) on delete cascade,
   label           text not null,  -- e.g. '5 L', '10 kg'
+  pack_type       text,           -- e.g. 'Bottle', 'Pouch'; shown as '1 L · Bottle'
   maximum_retail_price             numeric(10,2) not null check (maximum_retail_price > 0),
   price           numeric(10,2) not null check (price > 0 and price <= maximum_retail_price),
   stock           int not null default 0 check (stock >= 0),
@@ -225,6 +226,22 @@ create table notify_me (
   unique (customer_id, category_id)
 );
 
+-- One rating per customer per product, only from customers who received it.
+create table product_reviews (
+  id          bigint generated always as identity primary key,
+  product_id  bigint not null references products(id) on delete cascade,
+  customer_id bigint not null references customers(id) on delete cascade,
+  rating      smallint not null check (rating between 1 and 5),
+  tags        text[] not null default '{}',
+  body        text,
+  pack_label  text,                            -- what they bought, e.g. '1 L'
+  hidden      boolean not null default false,  -- hidden by the owner, kept for the record
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now(),
+  unique (product_id, customer_id)
+);
+create index product_reviews_product_index on product_reviews (product_id) where not hidden;
+
 create table push_subscriptions (
   id         bigint generated always as identity primary key,
   user_id    uuid not null,
@@ -250,3 +267,4 @@ alter table payments           enable row level security;
 alter table cash_handovers     enable row level security;
 alter table notify_me          enable row level security;
 alter table push_subscriptions enable row level security;
+alter table product_reviews    enable row level security;

@@ -1,9 +1,0 @@
-Category photos for the UI refresh preview, from Wikimedia Commons.
-Preview use only. Check the licence before using any of them in the live app (CC BY / BY-SA need credit).
-
-oils-ghee.jpg — File:Bottle of olive oil.jpg — CC0 — https://commons.wikimedia.org/wiki/File:Bottle_of_olive_oil.jpg
-atta-flours.jpg — File:Wheat-flour.jpg — CC BY-SA 4.0 — https://commons.wikimedia.org/wiki/File:Wheat-flour.jpg
-rice.jpg — File:Uncooked ST25 rice on bamboo surface.jpg — CC BY-SA 4.0 — https://commons.wikimedia.org/wiki/File:Uncooked_ST25_rice_on_bamboo_surface.jpg
-dals-pulses.jpg — File:Musuro Ko Dal.jpg — CC BY-SA 4.0 — https://commons.wikimedia.org/wiki/File:Musuro_Ko_Dal.jpg
-grains-millets.jpg — File:Millet grains sold at Kargil Bazaar.jpg — CC BY-SA 4.0 — https://commons.wikimedia.org/wiki/File:Millet_grains_sold_at_Kargil_Bazaar.jpg
-fruits-vegetables.jpg — File:Fruits and Vegetables in Boquete, Panama.jpg — CC BY-SA 4.0 — https://commons.wikimedia.org/wiki/File:Fruits_and_Vegetables_in_Boquete,_Panama.jpg

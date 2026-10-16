@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { categoryImageFor } from '../categoryImages.js';
-import { formatRupees, percentOff } from '../formatting.js';
+import { formatRupees, packSizeName, percentOff } from '../formatting.js';
 import { QuantityStepper } from './QuantityStepper.jsx';
+import { RatingLine } from './Rating.jsx';
 
 export function ProductImage({ product, className }) {
   const fallback = categoryImageFor(product.categoryName);
@@ -28,41 +29,60 @@ export function StockStatus({ packSize }) {
   return null;
 }
 
-// One product in a list: picture, name, pack size picker and price.
+function CardPhoto({ product, packSize }) {
+  const discount = percentOff(packSize.maximumRetailPrice, packSize.price);
+  return (
+    <Link to={`/product/${product.id}`} className="product-card-media" aria-label={product.name}>
+      <ProductImage product={product} className="product-card-image" />
+      {packSize.inStock && discount > 0 && <span className="discount-badge">{discount}% OFF</span>}
+      {packSize.inStock && packSize.fewLeft && <span className="product-card-few">Only a few left</span>}
+      {!packSize.inStock && <span className="product-card-out">Out of stock</span>}
+    </Link>
+  );
+}
+
+// "Save ₹16" over the Add button; the button greys out when the pack is out of stock.
+function CardBottom({ product, packSize }) {
+  const saving = packSize.maximumRetailPrice - packSize.price;
+  return (
+    <div className="product-card-bottom">
+      {packSize.inStock && saving > 0 && <span className="product-card-save">Save {formatRupees(saving)}</span>}
+      {packSize.inStock
+        ? <QuantityStepper packSize={packSize} productName={product.name} />
+        : <button type="button" className="product-card-sold-out" disabled>Out of stock</button>}
+    </div>
+  );
+}
+
+// One product in a list: photo, brand, name, rating, pack size, price, Add.
+// The Add buttons sit at the bottom, so they line up across a row.
 export function ProductCard({ product }) {
   const [chosenPackSizeId, setChosenPackSizeId] = useState(product.packSizes[0].id);
   const packSize = product.packSizes.find((candidate) => candidate.id === chosenPackSizeId) ?? product.packSizes[0];
-  const discount = percentOff(packSize.maximumRetailPrice, packSize.price);
   return (
     <article className={packSize.inStock ? 'product-card' : 'product-card product-card-unavailable'}>
-      <Link to={`/product/${product.id}`} className="product-card-image-link" aria-label={product.name}>
-        <ProductImage product={product} className="product-card-image" />
-        {discount > 0 && packSize.inStock && <span className="discount-badge">{discount}% OFF</span>}
-      </Link>
+      <CardPhoto product={product} packSize={packSize} />
       <div className="product-card-details">
-        {product.brand && <p className="brand-name">{product.brand}</p>}
+        {product.brand && <p className="product-card-brand">{product.brand}</p>}
         <Link to={`/product/${product.id}`} className="product-card-name">{product.name}</Link>
+        <RatingLine rating={product.rating} />
         <PackSizePicker product={product} chosenPackSizeId={packSize.id} onChoose={setChosenPackSizeId} />
-        <div className="price-row">
-          <PriceLine packSize={packSize} showDiscount={false} />
-          <QuantityStepper packSize={packSize} productName={product.name} />
-        </div>
-        <StockStatus packSize={packSize} />
+        <p className="product-card-price">
+          <strong>{formatRupees(packSize.price)}</strong>
+          {packSize.maximumRetailPrice > packSize.price && <s>{formatRupees(packSize.maximumRetailPrice)}</s>}
+        </p>
+        <CardBottom product={product} packSize={packSize} />
       </div>
     </article>
   );
 }
 
 function PackSizePicker({ product, chosenPackSizeId, onChoose }) {
-  if (product.packSizes.length === 1) return <span className="pack-label">{product.packSizes[0].label}</span>;
+  if (product.packSizes.length === 1) return <span className="product-card-pack">{packSizeName(product.packSizes[0])}</span>;
   return (
-    <select
-      className="pack-select"
-      value={chosenPackSizeId}
-      onChange={(event) => onChoose(Number(event.target.value))}
-      aria-label={`Pack size for ${product.name}`}
-    >
-      {product.packSizes.map((packSize) => <option key={packSize.id} value={packSize.id}>{packSize.label}</option>)}
+    <select className="product-card-pack product-card-pack-select" value={chosenPackSizeId}
+      onChange={(event) => onChoose(Number(event.target.value))} aria-label={`Pack size for ${product.name}`}>
+      {product.packSizes.map((packSize) => <option key={packSize.id} value={packSize.id}>{packSizeName(packSize)}</option>)}
     </select>
   );
 }
