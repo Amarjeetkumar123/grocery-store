@@ -141,7 +141,7 @@ Deploy Backend → Run workflow.
 1. GitHub → this repository → Settings → Secrets and variables → Actions:
    add `VPS_HOST`, `VPS_USER`, `VPS_SSH_KEY`, `VPS_PORT` (the same values
    as car-loans-and-sales).
-2. A free name for the API, needed for HTTPS (the Netlify site is HTTPS and
+2. A free name for the API, needed for HTTPS (the Vercel site is HTTPS and
    browsers block calls from it to a plain `http://IP`): sign in at
    [duckdns.org](https://www.duckdns.org), create `grocerystorewebapp`, and
    set its IP to the VPS IP. You get `grocerystorewebapp.duckdns.org`.
@@ -155,7 +155,7 @@ Deploy Backend → Run workflow.
    around values in this file):
 
    ```
-   ALLOWED_ORIGINS=https://your-site.netlify.app
+   ALLOWED_ORIGINS=https://your-site.vercel.app
    TRUST_PROXY=1
    PORT=3000
    DATABASE_CA_CERTIFICATE_PATH=./supabase-ca.crt
@@ -187,23 +187,26 @@ On the VPS: `docker logs -f grocery-store-backend` shows the API's log. To go
 back to an earlier version, run the same `docker run` line from the workflow
 with an older image tag (each run's commit id is a tag).
 
-### 2. App on Netlify
+### 2. App on Vercel
 
-Netlify → Add new site → Import from Git → this repository. `netlify.toml`
-already sets the folder, build command and Node version. Add environment
-variables (Site configuration → Environment variables):
+Vercel → Add New → Project → import this repository. Set **Root Directory**
+to `frontend`; Vercel finds Vite (build `npm run build`, output `dist`) and
+Node 24 (`engines` in `frontend/package.json`) by itself. `frontend/vercel.json`
+sends every page to `index.html` and sets the cache headers. Add environment
+variables (Settings → Environment Variables):
 
 - `VITE_SUPABASE_URL` and `VITE_SUPABASE_PUBLISHABLE_KEY` (same as local)
 - `VITE_API_URL=https://grocerystorewebapp.duckdns.org` (your API name, no slash at the end)
 
-Netlify then deploys the app by itself on every push. Put the site's
-address in the API's `ALLOWED_ORIGINS` (in `/root/envs/grocerystore.backend.prod.env`)
-and run the backend workflow once more so the container reads it.
+Vercel then deploys the app by itself on every push. Put the site's
+address in the API's `ALLOWED_ORIGINS` (in `/root/envs/grocerystore.backend.prod.env`;
+several addresses are separated by commas) and run the backend workflow once
+more so the container reads it.
 
 ### 3. Supabase for the live site
 
 Authentication → URL Configuration: set **Site URL** to the live address and
-add `https://your-site.netlify.app/**` to Redirect URLs (keep the localhost
+add `https://your-site.vercel.app/**` to Redirect URLs (keep the localhost
 ones for development).
 
 ### Before real customers
