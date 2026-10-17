@@ -1,5 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router';
 import { RequireRole, RequireSignedIn } from './RouteGuards.jsx';
+import { InstallAppBar } from './components/InstallAppBar.jsx';
 import { LoginPage } from './pages/LoginPage.jsx';
 import { ResetPasswordPage } from './pages/ResetPasswordPage.jsx';
 import { HomePage } from './pages/HomePage.jsx';
@@ -62,27 +63,30 @@ function adminRoutes() {
 
 export function App() {
   return (
-    <Routes>
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/reset-password" element={<ResetPasswordPage />} />
-      <Route element={<RequireSignedIn />}>
-        <Route element={<ShopLayout />}>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/address" element={<AddressPage />} />
-          <Route path="/category/:categoryId" element={<CategoryPage />} />
-          <Route path="/product/:productId" element={<ProductPage />} />
-          <Route path="/search" element={<SearchPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/cart" element={<OpenCartRoute />} />
-          <Route path="/orders" element={<OrdersPage />} />
-          <Route path="/orders/:orderNumber" element={<OrderDetailPage />} />
+    <>
+      <InstallAppBar />
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route element={<RequireSignedIn />}>
+          <Route element={<ShopLayout />}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/address" element={<AddressPage />} />
+            <Route path="/category/:categoryId" element={<CategoryPage />} />
+            <Route path="/product/:productId" element={<ProductPage />} />
+            <Route path="/search" element={<SearchPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/cart" element={<OpenCartRoute />} />
+            <Route path="/orders" element={<OrdersPage />} />
+            <Route path="/orders/:orderNumber" element={<OrderDetailPage />} />
+          </Route>
+          {adminRoutes()}
+          <Route path="/rider" element={riderOnly(<RiderHomePage />)} />
+          <Route path="/rider/orders/:orderNumber" element={riderOnly(<RiderOrderPage />)} />
+          <Route path="/rider/orders/:orderNumber/pay" element={riderOnly(<RiderPaymentPage />)} />
         </Route>
-        {adminRoutes()}
-        <Route path="/rider" element={riderOnly(<RiderHomePage />)} />
-        <Route path="/rider/orders/:orderNumber" element={riderOnly(<RiderOrderPage />)} />
-        <Route path="/rider/orders/:orderNumber/pay" element={riderOnly(<RiderPaymentPage />)} />
-      </Route>
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
   );
 }
