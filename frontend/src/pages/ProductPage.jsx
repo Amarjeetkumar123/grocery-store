@@ -4,13 +4,14 @@ import { useApiData } from '../useApiData.js';
 import { formatMonthYear, formatRupees, packSizeName } from '../formatting.js';
 import { PageBar } from '../components/PageBar.jsx';
 import { LoadingOrError } from '../components/LoadingOrError.jsx';
-import { PriceLine, ProductCard, ProductImage, StockStatus } from '../components/ProductCard.jsx';
+import { PriceLine, ProductCard, StockStatus } from '../components/ProductCard.jsx';
 import { QuantityStepper } from '../components/QuantityStepper.jsx';
 import { useCartSummary } from '../components/CartBar.jsx';
 import { useCart } from '../cart/CartContext.jsx';
 import { Icon } from '../Icon.jsx';
 import { StarIcon } from '../components/Rating.jsx';
 import { ProductReviews } from './product/ProductReviews.jsx';
+import { ProductGallery } from './product/ProductGallery.jsx';
 
 function PackSizeChoices({ packSizes, chosenPackSize, onChoose }) {
   return (
@@ -41,20 +42,21 @@ function PackDetails({ product, packSize }) {
   );
 }
 
-// Photo with back and cart buttons floating over it, instead of a top bar.
+// Photos with back and cart buttons floating over them, instead of a top bar.
 function ProductHero({ product }) {
   const navigate = useNavigate();
   const { itemCount, openCart } = useCart();
   return (
     <div className="product-hero">
-      <ProductImage product={product} className="product-hero-image" />
-      <button type="button" className="hero-button hero-button-back" onClick={() => navigate(-1)} aria-label="Go back">
-        <Icon name="back" />
-      </button>
-      <button type="button" className="hero-button hero-button-cart" onClick={openCart} aria-label={`Cart, ${itemCount} ${itemCount === 1 ? 'item' : 'items'}`}>
-        <Icon name="cart" />
-        {itemCount > 0 && <span className="tab-badge">{itemCount}</span>}
-      </button>
+      <ProductGallery product={product}>
+        <button type="button" className="hero-button hero-button-back" onClick={() => navigate(-1)} aria-label="Go back">
+          <Icon name="back" />
+        </button>
+        <button type="button" className="hero-button hero-button-cart" onClick={openCart} aria-label={`Cart, ${itemCount} ${itemCount === 1 ? 'item' : 'items'}`}>
+          <Icon name="cart" />
+          {itemCount > 0 && <span className="tab-badge">{itemCount}</span>}
+        </button>
+      </ProductGallery>
     </div>
   );
 }

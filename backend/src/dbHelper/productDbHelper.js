@@ -27,6 +27,8 @@ function productsWithPackSizesQuery({ whereClause, includeHidden, values }, page
              ) order by pack.sort_order, pack.price) filter (where pack.id is not null),
              '[]'
            ) as pack_sizes,
+           (select coalesce(json_agg(json_build_object('id', photo.id, 'path', photo.image_path) order by photo.sort_order, photo.id), '[]')
+             from product_photos photo where photo.product_id = product.id) as photos,
            (select round(avg(review.rating), 1) from product_reviews review
              where review.product_id = product.id and not review.hidden) as rating_average,
            (select count(*)::int from product_reviews review
@@ -54,6 +56,7 @@ function toProduct(row) {
     imagePath: row.image_path,
     active: row.active,
     packSizes: row.pack_sizes,
+    photos: row.photos,
     rating: { average: row.rating_average, count: row.rating_count },
   };
 }
@@ -110,10 +113,6 @@ export async function updateProduct(executor, productId, product) {
 export async function deleteProduct(executor, productId) {
   const result = await executor.query('delete from products where id = $1', [productId]);
   return result.rowCount > 0;
-}
-
-export async function setProductImagePath(executor, productId, imagePath) {
-  await executor.query('update products set image_path = $2 where id = $1', [productId, imagePath]);
 }
 
 // Same category, name and brand (ignoring capital letters) = same product.

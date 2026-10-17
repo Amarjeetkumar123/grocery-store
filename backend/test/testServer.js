@@ -12,7 +12,7 @@ export const fakeProductImageStorage = {
   publicUrlFor: (imagePath) => (imagePath ? `https://storage.test/${imagePath}` : null),
   async uploadProductImage(productId, bytes, contentType) {
     this.uploadedImages.push({ productId, size: bytes.length, contentType });
-    return `products/${productId}-test.${contentType.split('/')[1]}`;
+    return `products/${productId}-${this.uploadedImages.length}.${contentType.split('/')[1]}`;
   },
   async uploadCategoryImage(categoryId, bytes, contentType) {
     this.uploadedImages.push({ categoryId, size: bytes.length, contentType });

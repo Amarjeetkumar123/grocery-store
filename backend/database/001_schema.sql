@@ -120,10 +120,20 @@ create table products (
   description       text,
   manufacturer      text,
   country_of_origin text not null default 'India',
-  image_path        text,
+  image_path        text,  -- the cover: always the first of product_photos
   active            boolean not null default true,
   created_at        timestamptz not null default now()
 );
+
+-- Up to 6 photos per product, in the order the owner set; the first is the cover.
+create table product_photos (
+  id          bigint generated always as identity primary key,
+  product_id  bigint not null references products(id) on delete cascade,
+  image_path  text not null,
+  sort_order  int not null default 0,
+  created_at  timestamptz not null default now()
+);
+create index product_photos_product_index on product_photos (product_id, sort_order);
 
 create table pack_sizes (
   id              bigint generated always as identity primary key,
@@ -268,3 +278,4 @@ alter table cash_handovers     enable row level security;
 alter table notify_me          enable row level security;
 alter table push_subscriptions enable row level security;
 alter table product_reviews    enable row level security;
+alter table product_photos     enable row level security;

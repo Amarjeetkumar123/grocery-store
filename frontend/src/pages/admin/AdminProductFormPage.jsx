@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, useLocation, useNavigate, useParams } from 'react-router';
 import { useApiData } from '../../useApiData.js';
 import { categoryImageFor } from '../../categoryImages.js';
@@ -7,31 +7,19 @@ import { AdminPageHeader } from './AdminLayout.jsx';
 import { useProductForm } from './productForm/useProductForm.js';
 import { ProductDetailsFields } from './productForm/ProductDetailsFields.jsx';
 import { PackSizeEditor } from './productForm/PackSizeEditor.jsx';
-import { ProductPhotoCard, uploadProductPhoto } from './productForm/ProductPhotoUpload.jsx';
+import { ProductPhotosPanel } from './productForm/ProductPhotosPanel.jsx';
+import { uploadProductPhoto, usePhotoList } from './productForm/usePhotoList.js';
 import { ShopPreview, VisibilityCard } from './productForm/ProductSidePanels.jsx';
 
 const formId = 'product-form';
 
-// A photo chosen before the product exists: shown at once, uploaded right after the product is added.
-function usePendingPhoto() {
-  const [pendingPhoto, setPendingPhoto] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null);
-  useEffect(() => {
-    if (!pendingPhoto) return undefined;
-    const url = URL.createObjectURL(pendingPhoto);
-    setPreviewUrl(url);
-    return () => URL.revokeObjectURL(url);
-  }, [pendingPhoto]);
-  return { pendingPhoto, previewUrl: pendingPhoto ? previewUrl : null, setPendingPhoto };
-}
-
-function ProductForm({ product, savedMessage, onSaved, onPhotoUploaded }) {
-  const photo = usePendingPhoto();
-  const form = useProductForm(product, (saved) => onSaved(saved, photo.pendingPhoto));
+// Photos of a new product wait in the browser and upload, in order, right after it is added.
+function ProductForm({ product, savedMessage, onSaved, onPhotosChanged }) {
+  const photoList = usePhotoList(product, onPhotosChanged);
+  const form = useProductForm(product, (saved) => onSaved(saved, product ? [] : photoList.photos.map((photo) => photo.image)));
   const categories = useApiData('/api/categories');
   const categoryName = categories.data?.categories.find((category) => String(category.id) === form.formValues.categoryId)?.name;
-  const imageUrl = product?.imageUrl ?? photo.previewUrl;
-  const choosePhoto = async (image) => (product ? onPhotoUploaded(await uploadProductPhoto(product.id, image)) : photo.setPendingPhoto(image));
+  const imageUrl = photoList.photos[0]?.url ?? null;
   return (
     <>
       <AdminPageHeader title={<ProductTitle product={product} />} subtitle={<><Link to="/admin/products">Products</Link> / {product ? product.name : 'New product'}</>}>
@@ -46,7 +34,7 @@ function ProductForm({ product, savedMessage, onSaved, onPhotoUploaded }) {
             addPackSize={form.addPackSize} removePackSize={form.removePackSize} editing={Boolean(product)} />
         </div>
         <aside className="product-form-side">
-          <ProductPhotoCard photo={{ imageUrl, fallbackUrl: categoryImageFor(categoryName), hasPhoto: Boolean(imageUrl) }} onPhotoChosen={choosePhoto} />
+          <ProductPhotosPanel list={photoList} fallbackUrl={categoryImageFor(categoryName)} />
           <VisibilityCard shown={form.formValues.active} onChange={(shown) => form.updateField('active', shown)} />
           <ShopPreview formValues={form.formValues} imageUrl={imageUrl ?? categoryImageFor(categoryName)} isPhoto={Boolean(imageUrl)} />
         </aside>
@@ -70,7 +58,7 @@ function ProductTitle({ product }) {
   return <>{product.name} <span className={product.active ? 'pill pill-green' : 'pill pill-gray'}>{product.active ? 'Shown in shop' : 'Hidden'}</span></>;
 }
 
-// After adding: upload the photo chosen while adding, then open the new product.
+// After adding: upload the photos chosen while adding, then open the new product.
 function useSavedProduct(productId) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -79,18 +67,25 @@ function useSavedProduct(productId) {
   const [formVersion, setFormVersion] = useState(0);
   const [savedMessage, setSavedMessage] = useState(location.state?.addedMessage ?? null);
 
-  async function handleSaved(newProduct, pendingPhoto) {
+  async function handleSaved(newProduct, pendingImages) {
     if (productId) {
       setSavedProduct(newProduct);
       setFormVersion((version) => version + 1);
       setSavedMessage('Changes saved.');
       return;
     }
-    let addedMessage = 'Product added.';
-    if (pendingPhoto) await uploadProductPhoto(newProduct.id, pendingPhoto).catch((error) => { addedMessage = `Product added, but the photo was not saved: ${error.message}`; });
+    const addedMessage = await uploadPendingPhotos(newProduct.id, pendingImages);
     navigate(`/admin/products/${newProduct.id}`, { replace: true, state: { addedMessage } });
   }
   return { savedProduct, setSavedProduct, formVersion, savedMessage, handleSaved };
+}
+
+// One at a time, so they keep their order. Returns the message for the product page.
+async function uploadPendingPhotos(productId, images) {
+  let failedCount = 0;
+  for (const image of images) await uploadProductPhoto(productId, image).catch(() => { failedCount += 1; });
+  if (failedCount === 0) return 'Product added.';
+  return `Product added, but ${failedCount} ${failedCount === 1 ? 'photo was' : 'photos were'} not saved. Add ${failedCount === 1 ? 'it' : 'them'} again below.`;
 }
 
 // /admin/products/new to add, /admin/products/:productId to edit.
@@ -103,6 +98,6 @@ export function AdminProductFormPage() {
   if (productId && !product) return <LoadingOrError loading={loaded.loading} error={loaded.error} onRetry={loaded.reload} />;
   return (
     <ProductForm key={product ? `${product.id}-${saved.formVersion}` : 'new'} product={product} savedMessage={saved.savedMessage}
-      onSaved={saved.handleSaved} onPhotoUploaded={saved.setSavedProduct} />
+      onSaved={saved.handleSaved} onPhotosChanged={saved.setSavedProduct} />
   );
 }

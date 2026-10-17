@@ -131,17 +131,32 @@ test('stock can be added and removed but never below zero', { skip }, async () =
   assert.ok(searched.body.stockItems.every((item) => item.productName.includes('Sunflower')));
 });
 
-test('photo upload accepts real images only', { skip }, async () => {
+test('photos: real images only, up to 6, the first is the cover', { skip }, async () => {
   const jpegBytes = Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(100)]);
-  const upload = (rawBody, contentType) => callApi(`/api/admin/products/${sunflowerOil.id}/image`, {
-    token: 'owner-token', method: 'POST', rawBody, contentType,
-  });
-  const fakeJpeg = await upload(Buffer.from('this is not an image at all'), 'image/jpeg');
-  assert.equal(fakeJpeg.status, 400);
-  const realJpeg = await upload(jpegBytes, 'image/jpeg');
-  assert.equal(realJpeg.status, 200, JSON.stringify(realJpeg.body));
-  assert.match(realJpeg.body.product.imageUrl, /^https:\/\/storage\.test\/products\//);
-  assert.equal(fakeProductImageStorage.uploadedImages.length, 1);
+  const photosPath = `/api/admin/products/${sunflowerOil.id}/photos`;
+  const asOwner = (path, options) => callApi(path, { token: 'owner-token', ...options });
+  const upload = (rawBody, path = photosPath, method = 'POST') => asOwner(path, { method, rawBody, contentType: 'image/jpeg' });
+  assert.equal((await upload(Buffer.from('this is not an image at all'))).status, 400);
+  const first = await upload(jpegBytes);
+  assert.equal(first.status, 201, JSON.stringify(first.body));
+  assert.equal(first.body.product.imageUrl, first.body.product.photos[0].url);
+  for (let count = 2; count <= 6; count += 1) assert.equal((await upload(jpegBytes)).status, 201);
+  assert.equal((await upload(jpegBytes)).status, 400);
+
+  const photoIds = (await asOwner(`/api/admin/products/${sunflowerOil.id}`)).body.product.photos.map((photo) => photo.id);
+  const reordered = await asOwner(`${photosPath}/order`, { method: 'PUT', body: { photoIds: [...photoIds].reverse() } });
+  assert.equal(reordered.body.product.photos[0].id, photoIds[5]);
+  assert.equal(reordered.body.product.imageUrl, reordered.body.product.photos[0].url);
+  assert.equal((await asOwner(`${photosPath}/order`, { method: 'PUT', body: { photoIds: photoIds.slice(1) } })).status, 409);
+
+  const recropped = await upload(jpegBytes, `${photosPath}/${photoIds[5]}`, 'PUT');
+  assert.equal(recropped.body.product.photos[0].id, photoIds[5]);
+  assert.notEqual(recropped.body.product.imageUrl, reordered.body.product.imageUrl);
+  const afterDelete = await asOwner(`${photosPath}/${photoIds[5]}`, { method: 'DELETE' });
+  assert.equal(afterDelete.body.product.photos.length, 5);
+  assert.equal(afterDelete.body.product.imageUrl, afterDelete.body.product.photos[0].url);
+  const shop = (await callApi(`/api/products/${sunflowerOil.id}`)).body.product;
+  assert.equal(shop.photos.length, 5);
 });
 
 const bulkImportCsv = [

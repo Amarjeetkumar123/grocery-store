@@ -72,16 +72,27 @@ function useZoom(crop, setCrop, fitted) {
   return { coverZoom, zoomTo };
 }
 
-function CropHeader({ crop, fitted, zoom }) {
+function CropHeader({ crop, fitted, zoom, step }) {
   const isFill = Boolean(fitted) && Math.abs(crop.zoom - zoom.coverZoom) < 0.005;
   return (
     <div className="crop-header">
-      <span>Crop to square</span>
+      {step ? <QueueSteps step={step} /> : <span>Crop to square</span>}
       <div className="segmented crop-modes" role="group" aria-label="Photo size">
         <button type="button" aria-pressed={crop.zoom === 1} disabled={!fitted} onClick={() => zoom.zoomTo(1)}>Fit</button>
         <button type="button" aria-pressed={isFill} disabled={!fitted || zoom.coverZoom === 1} onClick={() => zoom.zoomTo(zoom.coverZoom)}>Fill</button>
       </div>
     </div>
+  );
+}
+
+// "Photo 2 of 3" as a short bar per photo: done, this one, still to come.
+function QueueSteps({ step }) {
+  return (
+    <span className="crop-steps" aria-label={`Photo ${step.number} of ${step.total}`}>
+      {Array.from({ length: step.total }, (unused, index) => (
+        <i key={index} className={index + 1 < step.number ? 'crop-step-done' : index + 1 === step.number ? 'crop-step-now' : undefined} />
+      ))}
+    </span>
   );
 }
 
@@ -113,38 +124,50 @@ function CropStage({ sourceUrl, imageRef, fitted, crop, drag, onLoad, onError })
   );
 }
 
+const wholePhoto = { zoom: 1, offset: { x: 0, y: 0 } };
+
+function CropActions({ step, saving, canSave, onCancel, onSkip, onSave }) {
+  const many = step?.total > 1;
+  return (
+    <div className="crop-actions">
+      {many && <button type="button" className="text-button crop-skip" onClick={onSkip} disabled={!canSave || saving}>Skip</button>}
+      <button type="button" className="button button-outline button-compact" onClick={onCancel} disabled={saving}>{many ? 'Cancel all' : 'Cancel'}</button>
+      <button type="button" className="button button-compact" onClick={onSave} disabled={!canSave || saving}>
+        {saving ? <><span className="spinner" aria-hidden="true" /> Saving…</> : <><Icon name="check" size={16} /> {step && step.number < step.total ? 'Use & next' : 'Use photo'}</>}
+      </button>
+    </div>
+  );
+}
+
 // Square crop in the photo panel. sourceUrl: the chosen file or the saved photo.
-// onDone(image) gets the cropped picture, ready to upload.
-export function PhotoCropper({ sourceUrl, onCancel, onDone }) {
+// onDone(image) gets the cropped picture, ready to upload. step: { number, total } when
+// several photos are cropped one after another; Skip then keeps the whole photo on white.
+export function PhotoCropper({ sourceUrl, step, onCancel, onDone }) {
   const imageRef = useRef(null);
   const [fitted, setFitted] = useState(null);
   const [crop, setCrop] = useState({ zoom: 1, offset: { x: 0, y: 0 } });
   const [state, setState] = useState({ saving: false, error: null });
   const drag = useCropDrag(crop, setCrop, fitted);
   const zoom = useZoom(crop, setCrop, fitted);
-  async function savePhoto() {
+  async function savePhoto(chosenCrop = crop) {
     setState({ saving: true, error: null });
     try {
-      await onDone(await cropToImage(imageRef.current, crop));
+      await onDone(await cropToImage(imageRef.current, chosenCrop));
     } catch (error) {
       setState({ saving: false, error: error.message ?? 'This photo could not be cropped. Choose it again.' });
     }
   }
   return (
     <div className="photo-cropper">
-      <CropHeader crop={crop} fitted={fitted} zoom={zoom} />
+      <CropHeader crop={crop} fitted={fitted} zoom={zoom} step={step} />
       <CropStage sourceUrl={sourceUrl} imageRef={imageRef} fitted={fitted} crop={crop} drag={drag}
         onLoad={(event) => setFitted(fittedSizeOf(event.currentTarget))}
         onError={() => setState({ saving: false, error: 'This photo could not be opened. Choose it again.' })} />
       <ZoomRow crop={crop} fitted={fitted} zoom={zoom} />
       <p className="hint crop-note">Drag to move · saved as {outputSize} × {outputSize} px</p>
       {state.error && <p className="field-error" role="alert">{state.error}</p>}
-      <div className="crop-actions">
-        <button type="button" className="button button-outline button-compact" onClick={onCancel} disabled={state.saving}>Cancel</button>
-        <button type="button" className="button button-compact" onClick={savePhoto} disabled={!fitted || state.saving}>
-          {state.saving ? <><span className="spinner" aria-hidden="true" /> Saving…</> : <><Icon name="check" size={16} /> Use photo</>}
-        </button>
-      </div>
+      <CropActions step={step} saving={state.saving} canSave={Boolean(fitted)} onCancel={onCancel}
+        onSkip={() => savePhoto(wholePhoto)} onSave={() => savePhoto()} />
     </div>
   );
 }

@@ -1,24 +1,28 @@
 import { foreignKeyViolationErrorCode, uniqueViolationErrorCode, withTransaction } from '../dbHelper/databaseConnection.js';
 import { categoryExists } from '../dbHelper/categoryDbHelper.js';
 import {
-  countProducts, deleteProduct as deleteProductRow, findProducts, insertProduct, productExists, setProductImagePath, updateProduct as updateProductRow,
+  countProducts, deleteProduct as deleteProductRow, findProducts, insertProduct, updateProduct as updateProductRow,
 } from '../dbHelper/productDbHelper.js';
 import { hidePackSizesExcept, insertPackSize, updatePackSize } from '../dbHelper/packSizeDbHelper.js';
 import { buildProductFilter } from '../filters/productFilters.js';
 import { readPositiveInteger } from '../validators/commonValidation.js';
 import { validateProductInput } from '../validators/productValidation.js';
 import { readPage } from '../validators/pagingValidation.js';
-import { isRealImage } from '../storage/productImageStorage.js';
 import { ServiceError, throwIfFieldErrors } from './serviceError.js';
 
 class PackSizeNotInProductError extends Error {}
 
-function toAdminProduct(product, productImageStorage) {
-  const { imagePath, ...visibleProduct } = product;
-  return { ...visibleProduct, imageUrl: productImageStorage.publicUrlFor(imagePath) };
+// photos: [{ id, url }] in order; imageUrl is the cover (the first photo).
+export function photosWithUrls(photos, productImageStorage) {
+  return photos.map((photo) => ({ id: photo.id, url: productImageStorage.publicUrlFor(photo.path) }));
 }
 
-async function findAdminProduct({ database, productImageStorage }, productId) {
+function toAdminProduct(product, productImageStorage) {
+  const { imagePath, photos, ...visibleProduct } = product;
+  return { ...visibleProduct, imageUrl: productImageStorage.publicUrlFor(imagePath), photos: photosWithUrls(photos, productImageStorage) };
+}
+
+export async function findAdminProduct({ database, productImageStorage }, productId) {
   const [product] = productId
     ? await findProducts(database, buildProductFilter({ productId, includeHidden: true }))
     : [];
@@ -104,22 +108,6 @@ async function updateProduct(dependencies, productIdInput, body) {
   return findAdminProduct(dependencies, productId);
 }
 
-async function uploadProductImage(dependencies, productIdInput, imageBytes, contentType) {
-  const { database, productImageStorage } = dependencies;
-  if (!productImageStorage.isConfigured) {
-    throw ServiceError.unavailable('Photo upload is not set up yet (SUPABASE_SECRET_KEY is missing).');
-  }
-  if (!Buffer.isBuffer(imageBytes) || !isRealImage(imageBytes, contentType)) {
-    throw ServiceError.badRequest('Please choose a JPG, PNG or WebP photo (up to 3 MB).');
-  }
-  const productId = readPositiveInteger(productIdInput);
-  if (!productId || !(await productExists(database, productId))) throw ServiceError.notFound('Product not found.');
-
-  const imagePath = await productImageStorage.uploadProductImage(productId, imageBytes, contentType);
-  await setProductImagePath(database, productId, imagePath);
-  return findAdminProduct(dependencies, productId);
-}
-
 // A product never ordered is removed with its pack sizes. One in past orders
 // stays, so those orders keep their items; the owner hides it instead.
 // ponytail: its photo stays in storage; remove it too if storage space matters.
@@ -141,7 +129,5 @@ export function createProductService(dependencies) {
     createProduct: (body) => createProduct(dependencies, body),
     updateProduct: (productIdInput, body) => updateProduct(dependencies, productIdInput, body),
     deleteProduct: (productIdInput) => deleteProduct(dependencies, productIdInput),
-    uploadProductImage: (productIdInput, imageBytes, contentType) =>
-      uploadProductImage(dependencies, productIdInput, imageBytes, contentType),
   };
 }

@@ -4,15 +4,17 @@ import { buildProductFilter } from '../filters/productFilters.js';
 import { readPositiveInteger } from '../validators/commonValidation.js';
 import { ServiceError } from './serviceError.js';
 import { withCategoryImageUrl } from './categoryService.js';
+import { photosWithUrls } from './productService.js';
 
 const minimumSearchLength = 2;
 
 // Customers see whether a pack is in stock, not the exact count.
 function toCustomerProduct(product, productImageStorage) {
-  const { active, imagePath, ...visibleProduct } = product;
+  const { active, imagePath, photos, ...visibleProduct } = product;
   return {
     ...visibleProduct,
     imageUrl: productImageStorage.publicUrlFor(imagePath),
+    photos: photosWithUrls(photos, productImageStorage),
     packSizes: product.packSizes.map(({ stock, lowStockLevel, active: packSizeActive, ...packSize }) => ({
       ...packSize,
       inStock: stock > 0,

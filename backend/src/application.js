@@ -21,6 +21,7 @@ import { createMoneyService } from './services/moneyService.js';
 import { createNotificationService } from './services/notificationService.js';
 import { createPushSubscriptionService } from './services/pushSubscriptionService.js';
 import { createReviewService } from './services/reviewService.js';
+import { createProductPhotoService } from './services/productPhotoService.js';
 import { createPublicRouter } from './routes/publicRoutes.js';
 import { createAccountRouter } from './routes/accountRoutes.js';
 import { createAdminProductRouter } from './routes/adminProductRoutes.js';
@@ -54,6 +55,7 @@ function createServices(dependencies) {
     moneyService: createMoneyService(dependencies),
     pushSubscriptionService: createPushSubscriptionService(dependencies),
     reviewService: createReviewService(dependencies),
+    productPhotoService: createProductPhotoService(dependencies),
   };
 }
 

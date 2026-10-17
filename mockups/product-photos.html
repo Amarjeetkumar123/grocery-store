@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Product photos</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600&display=swap">
+<style>
+  :root {
+    --green: #1e6b45; --green-dark: #163f2a; --green-light: #e3f1e8; --green-text: #17583a; --green-bright: #2a8a5b; --yellow: #f4c95d;
+    --background: #f7f6f1; --card: #fff; --text: #1b1f1a; --text-secondary: #5f6b62; --muted: #8a928b; --border: #e4e2da; --line: #e7e5de;
+    --error: #9b1c12; --error-light: #fbe4e1; --star: #e8a317;
+    font-family: 'Noto Sans', system-ui, sans-serif; color: var(--text);
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #e9e7df; padding: 24px 16px 48px; }
+  b, strong { font-weight: 600; }
+  h1 { font-size: 20px; font-weight: 600; margin: 0 0 4px; }
+  .intro { margin: 0 0 22px; color: var(--text-secondary); font-size: 13px; max-width: 920px; line-height: 1.5; }
+  .screens { display: flex; gap: 24px; flex-wrap: wrap; align-items: flex-start; }
+  .screen { width: 360px; max-width: 100%; }
+  .screen.wide { width: 760px; }
+  .screen h2 { font-size: 15px; font-weight: 600; margin: 0 0 2px; }
+  .screen p.note { margin: 0 0 10px; font-size: 12.5px; color: var(--text-secondary); line-height: 1.45; min-height: 54px; }
+  svg { display: block; flex: none; }
+  img { display: block; }
+  .icon { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ── Admin panel ── */
+  .admin-frame { background: #f7f6f1; border-radius: 14px; padding: 14px; box-shadow: 0 8px 24px rgba(22,63,42,.12); }
+  .panel { background: #fff; border: 1px solid var(--line); border-radius: 12px; }
+  .panel-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+  .panel-head h3 { margin: 0; font-size: 14px; font-weight: 600; }
+  .count { font-size: 12px; color: var(--muted); }
+  .panel-body { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+  .photo-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .photo-tile { position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); background: #fff; }
+  .photo-tile img { width: 100%; height: 100%; object-fit: cover; }
+  .photo-tile.cover { grid-column: span 2; grid-row: span 2; border: 2px solid var(--green); }
+  .cover-tag { position: absolute; top: 0; left: 0; background: var(--green); color: #fff; font-size: 10.5px; font-weight: 600; padding: 3px 8px; border-radius: 0 0 8px 0; }
+  .tile-tools { position: absolute; right: 4px; top: 4px; display: flex; gap: 4px; }
+  .tile-tools span { width: 24px; height: 24px; border-radius: 7px; background: rgba(255,255,255,.94); color: var(--text-secondary); display: flex; align-items: center; justify-content: center; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
+  .tile-tools span.danger { color: var(--error); }
+  .tile-tools .icon { width: 13px; height: 13px; }
+  .drag { position: absolute; left: 4px; bottom: 4px; width: 22px; height: 22px; border-radius: 6px; background: rgba(255,255,255,.94); color: var(--muted); display: flex; align-items: center; justify-content: center; font-size: 12px; letter-spacing: -1px; }
+  .uploading { position: absolute; inset: 0; background: rgba(255,255,255,.75); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; font-size: 11px; color: var(--green-text); font-weight: 500; }
+  .bar { width: 70%; height: 4px; border-radius: 999px; background: #e3e0d6; overflow: hidden; }
+  .bar i { display: block; width: 62%; height: 100%; background: var(--green); }
+  .add-tile { aspect-ratio: 1; border-radius: 10px; border: 1.5px dashed #c9c5b8; background: #faf9f6; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--green); font-size: 12px; font-weight: 500; }
+  .add-tile .icon { width: 18px; height: 18px; }
+  .hint { margin: 0; font-size: 12px; color: var(--text-secondary); line-height: 1.45; }
+  .menu { position: absolute; z-index: 2; right: 30px; top: 30px; background: #fff; border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 8px 24px rgba(22,63,42,.16); padding: 4px; width: 150px; }
+  .menu div { display: flex; align-items: center; gap: 8px; padding: 7px 8px; border-radius: 6px; font-size: 12.5px; }
+  .menu div:hover, .menu div.active { background: #f4f3ef; }
+  .menu .danger { color: var(--error); }
+
+  /* ── Crop queue ── */
+  .crop-head { display: flex; align-items: center; justify-content: space-between; font-size: 13px; font-weight: 500; }
+  .steps { display: flex; gap: 4px; }
+  .steps i { width: 18px; height: 4px; border-radius: 999px; background: #e3e0d6; }
+  .steps i.done { background: var(--green); } .steps i.now { background: var(--green-bright); width: 26px; }
+  .seg { display: flex; background: #ecebe6; border-radius: 8px; padding: 3px; }
+  .seg span { padding: 3px 12px; border-radius: 6px; font-size: 12.5px; font-weight: 500; color: var(--text-secondary); }
+  .seg span.on { background: #fff; color: var(--green); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+  .crop-square { position: relative; aspect-ratio: 1; border-radius: 10px; overflow: hidden; border: 1px solid var(--line); background: #fff; }
+  .crop-square img { width: 100%; height: 100%; object-fit: cover; }
+  .corner { position: absolute; width: 18px; height: 18px; border: 0 solid var(--green); }
+  .tl { top: 6px; left: 6px; border-top-width: 2.5px; border-left-width: 2.5px; border-top-left-radius: 4px; }
+  .tr { top: 6px; right: 6px; border-top-width: 2.5px; border-right-width: 2.5px; border-top-right-radius: 4px; }
+  .bl { bottom: 6px; left: 6px; border-bottom-width: 2.5px; border-left-width: 2.5px; border-bottom-left-radius: 4px; }
+  .br { bottom: 6px; right: 6px; border-bottom-width: 2.5px; border-right-width: 2.5px; border-bottom-right-radius: 4px; }
+  .zoom { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary); }
+  .zoom .track { flex: 1; height: 4px; border-radius: 999px; background: linear-gradient(var(--green), var(--green)) 0 / 30% 100% no-repeat, #e7e5de; position: relative; }
+  .zoom .track::after { content: ''; position: absolute; left: 30%; top: 50%; width: 16px; height: 16px; margin: -8px 0 0 -8px; border-radius: 50%; background: #fff; border: 2px solid var(--green); }
+  .queue { display: flex; gap: 6px; }
+  .queue img { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; border: 1px solid var(--line); opacity: .55; }
+  .queue img.now { opacity: 1; outline: 2px solid var(--green); outline-offset: 1px; }
+  .queue img.done { opacity: 1; }
+  .actions { display: flex; gap: 8px; }
+  .btn { flex: 1; height: 34px; border-radius: 8px; border: 1px solid var(--line); background: #fff; font: inherit; font-size: 13px; font-weight: 500; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+  .btn.primary { background: var(--green); border-color: var(--green); color: #fff; }
+  .btn.quiet { flex: none; padding: 0 12px; border: 0; background: none; color: var(--text-secondary); }
+
+  /* ── Phone product page ── */
+  .phone { background: var(--background); border-radius: 26px; overflow: hidden; box-shadow: 0 8px 24px rgba(22,63,42,.12); position: relative; }
+  .gallery { position: relative; background: #fff; }
+  .slides { display: flex; overflow: hidden; }
+  .slides img { width: 100%; aspect-ratio: 1; object-fit: cover; flex: none; }
+  .hero-btn { position: absolute; top: 12px; width: 38px; height: 38px; border-radius: 50%; background: rgba(255,255,255,.92); box-shadow: 0 2px 8px rgba(0,0,0,.12); display: flex; align-items: center; justify-content: center; }
+  .hero-btn.left { left: 12px; } .hero-btn.right { right: 12px; }
+  .counter { position: absolute; right: 12px; bottom: 12px; background: rgba(27,31,26,.6); color: #fff; font-size: 11.5px; font-weight: 500; padding: 2px 9px; border-radius: 999px; }
+  .dots { position: absolute; left: 0; right: 0; bottom: 14px; display: flex; justify-content: center; gap: 5px; }
+  .dots i { width: 6px; height: 6px; border-radius: 999px; background: rgba(255,255,255,.7); box-shadow: 0 0 0 1px rgba(0,0,0,.08); }
+  .dots i.on { width: 18px; background: #fff; }
+  .badge { position: absolute; top: 60px; left: 0; background: var(--green); color: #fff; font-size: 10.5px; font-weight: 600; padding: 4px 9px; border-radius: 0 8px 8px 0; }
+  .thumbs { display: flex; gap: 8px; padding: 10px 14px; background: #fff; border-bottom: 1px solid var(--line); overflow-x: auto; }
+  .thumbs img { width: 52px; height: 52px; border-radius: 10px; object-fit: cover; border: 1px solid var(--line); flex: none; }
+  .thumbs img.on { border: 2px solid var(--green); }
+  .details { padding: 14px; display: flex; flex-direction: column; gap: 6px; }
+  .brand { font-size: 12px; color: var(--muted); }
+  .title { margin: 0; font-size: 19px; font-weight: 600; line-height: 1.3; }
+  .rating { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; color: var(--text-secondary); }
+  .chip { display: inline-flex; align-items: center; gap: 3px; padding: 1px 6px; border-radius: 6px; background: var(--green-light); color: var(--green-text); font-size: 11.5px; font-weight: 600; }
+  .price { font-size: 22px; font-weight: 600; } .price s { font-size: 13px; color: var(--muted); font-weight: 400; margin-left: 6px; }
+
+  /* ── Full screen viewer ── */
+  .viewer { background: #0f1210; border-radius: 26px; overflow: hidden; position: relative; height: 640px; display: flex; flex-direction: column; box-shadow: 0 8px 24px rgba(0,0,0,.3); }
+  .viewer-top { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px; color: #fff; font-size: 13px; }
+  .viewer-top span:last-child { width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,.12); display: flex; align-items: center; justify-content: center; }
+  .viewer-stage { flex: 1; display: flex; align-items: center; justify-content: center; }
+  .viewer-stage img { width: 100%; aspect-ratio: 1; object-fit: cover; }
+  .viewer-hint { text-align: center; color: rgba(255,255,255,.55); font-size: 11.5px; padding: 6px 0 4px; }
+  .viewer-thumbs { display: flex; justify-content: center; gap: 8px; padding: 10px 0 18px; }
+  .viewer-thumbs img { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; opacity: .45; }
+  .viewer-thumbs img.on { opacity: 1; outline: 2px solid #fff; outline-offset: 1px; }
+
+  /* ── Desktop product page ── */
+  .desktop { background: var(--background); border-radius: 14px; padding: 20px; box-shadow: 0 8px 24px rgba(22,63,42,.12); display: grid; grid-template-columns: 64px 1fr 1fr; gap: 14px; align-items: start; }
+  .side-thumbs { display: flex; flex-direction: column; gap: 8px; }
+  .side-thumbs img { width: 64px; height: 64px; border-radius: 10px; object-fit: cover; border: 1px solid var(--line); background: #fff; }
+  .side-thumbs img.on { border: 2px solid var(--green); }
+  .big { position: relative; border-radius: 16px; overflow: hidden; border: 1px solid var(--line); background: #fff; }
+  .big img { width: 100%; aspect-ratio: 1; object-fit: cover; }
+  .big .arrows { position: absolute; inset: 50% 10px auto; display: flex; justify-content: space-between; transform: translateY(-50%); }
+  .big .arrows span { width: 34px; height: 34px; border-radius: 50%; background: rgba(255,255,255,.92); box-shadow: 0 2px 8px rgba(0,0,0,.12); display: flex; align-items: center; justify-content: center; }
+  .big .zoom-hint { position: absolute; right: 10px; bottom: 10px; background: rgba(255,255,255,.92); border-radius: 999px; padding: 3px 10px; font-size: 11.5px; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="crop" viewBox="0 0 24 24"><path d="M6 2v14a2 2 0 0 0 2 2h14M18 22V8a2 2 0 0 0-2-2H2"/></symbol>
+  <symbol id="star" viewBox="0 0 24 24"><path d="m12 3.5 2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.8l-5.2 2.8 1-5.8-4.3-4.1 5.9-.9z"/></symbol>
+  <symbol id="trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></symbol>
+  <symbol id="more" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/></symbol>
+  <symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="back" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+  <symbol id="right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+  <symbol id="cart" viewBox="0 0 24 24"><path d="M3 4h2l2.4 11h10.2L20 8H6.2M10 20h.01M17 20h.01"/></symbol>
+  <symbol id="close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+  <symbol id="expand" viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></symbol>
+</svg>
+
+<h1>Product photos: design</h1>
+<p class="intro">Up to 6 photos per product. The first one is the cover: it shows on product cards, the cart and search. Every photo goes through the same square crop you already have, so they all line up. The shop shows the cover only on cards; the product page gets a swipeable gallery. Your green and yellow, one font, no bigger text.</p>
+
+<div class="screens">
+  <section class="screen">
+    <h2>1. Admin: Photos panel (add and edit product)</h2>
+    <p class="note">Big cover tile, smaller tiles after it. "+ Add photos" picks several at once. Each photo: crop, make cover, delete; drag ⋮⋮ to change the order. Works while adding a new product too.</p>
+    <div class="admin-frame">
+      <div class="panel">
+        <div class="panel-head"><h3>Photos</h3><span class="count">4 of 6</span></div>
+        <div class="panel-body" style="position:relative">
+          <div class="photo-grid">
+            <div class="photo-tile cover"><img src="peanut-oil-fill.jpg" alt=""><span class="cover-tag">Cover</span>
+              <div class="tile-tools"><span><svg class="icon"><use href="#crop"/></svg></span><span><svg class="icon"><use href="#more"/></svg></span></div><span class="drag">⋮⋮</span></div>
+            <div class="photo-tile"><img src="peanut-oil-label.jpg" alt=""><div class="tile-tools"><span><svg class="icon"><use href="#more"/></svg></span></div><span class="drag">⋮⋮</span></div>
+            <div class="photo-tile"><img src="peanut-oil-fit.jpg" alt=""><div class="tile-tools"><span><svg class="icon"><use href="#more"/></svg></span></div><span class="drag">⋮⋮</span></div>
+            <div class="photo-tile"><img src="../frontend/src/assets/categories/oils-ghee.png" alt="" style="object-fit:contain;padding:18%"><div class="uploading">Uploading…<span class="bar"><i></i></span></div></div>
+            <div class="add-tile"><svg class="icon"><use href="#plus"/></svg>Add photos</div>
+          </div>
+          <div class="menu" style="right: 18px; top: 62px;">
+            <div><svg class="icon"><use href="#crop"/></svg>Crop</div>
+            <div class="active"><svg class="icon"><use href="#star"/></svg>Make cover</div>
+            <div class="danger"><svg class="icon"><use href="#trash"/></svg>Delete</div>
+          </div>
+          <p class="hint">The first photo is the cover. Drag to change the order. Square photos, up to 6.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen">
+    <h2>2. Picked 3 photos: crop each one</h2>
+    <p class="note">The panel turns into the cropper and goes through the photos one by one. "Skip" keeps a photo as it is (fitted on white); the strip shows which are done.</p>
+    <div class="admin-frame">
+      <div class="panel">
+        <div class="panel-head"><h3>Photos</h3><span class="count">Photo 2 of 3</span></div>
+        <div class="panel-body">
+          <div class="crop-head"><span class="steps"><i class="done"></i><i class="now"></i><i></i></span><span class="seg"><span>Fit</span><span class="on">Fill</span></span></div>
+          <div class="crop-square"><img src="peanut-oil-label.jpg" alt=""><span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span></div>
+          <div class="zoom">–<span class="track"></span>+<span style="min-width:36px;text-align:right">130%</span></div>
+          <div class="queue"><img class="done" src="peanut-oil-fill.jpg" alt=""><img class="now" src="peanut-oil-label.jpg" alt=""><img src="peanut-oil-fit.jpg" alt=""></div>
+          <div class="actions"><span class="btn quiet">Skip</span><span class="btn">Cancel all</span><span class="btn primary"><svg class="icon"><use href="#check"/></svg>Use &amp; next</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen">
+    <h2>3. Product page on a phone</h2>
+    <p class="note">Swipe the big photo left and right; dots and "2 / 4" show where you are. Thumbnails under it jump to a photo. Tap the photo to open it full screen.</p>
+    <div class="phone">
+      <div class="gallery">
+        <div class="slides"><img src="peanut-oil-label.jpg" alt=""></div>
+        <span class="hero-btn left"><svg class="icon"><use href="#back"/></svg></span>
+        <span class="hero-btn right"><svg class="icon"><use href="#cart"/></svg></span>
+        <span class="badge">8% OFF</span>
+        <span class="dots"><i></i><i class="on"></i><i></i><i></i></span>
+        <span class="counter">2 / 4</span>
+      </div>
+      <div class="thumbs"><img src="peanut-oil-fill.jpg" alt=""><img class="on" src="peanut-oil-label.jpg" alt=""><img src="peanut-oil-fit.jpg" alt=""><img src="../frontend/src/assets/categories/oils-ghee.png" alt="" style="object-fit:contain;padding:8px;background:#fff"></div>
+      <div class="details">
+        <span class="brand">Dhara</span>
+        <h3 class="title">Pure Peanut Oil</h3>
+        <span class="rating"><span class="chip">4.4 <svg width="10" height="10" fill="currentColor"><use href="#star"/></svg></span>128 ratings</span>
+        <span class="price">₹199<s>MRP ₹216</s></span>
+      </div>
+    </div>
+  </section>
+
+  <section class="screen">
+    <h2>4. Tap a photo: full screen</h2>
+    <p class="note">Dark background, swipe between photos, pinch to zoom, × or swipe down to close.</p>
+    <div class="viewer">
+      <div class="viewer-top"><span>2 / 4</span><span><svg class="icon"><use href="#close"/></svg></span></div>
+      <div class="viewer-stage"><img src="peanut-oil-label.jpg" alt=""></div>
+      <div class="viewer-hint">Pinch to zoom · swipe for more</div>
+      <div class="viewer-thumbs"><img src="peanut-oil-fill.jpg" alt=""><img class="on" src="peanut-oil-label.jpg" alt=""><img src="peanut-oil-fit.jpg" alt=""><img src="peanut-oil-fill.jpg" alt=""></div>
+    </div>
+  </section>
+
+  <section class="screen wide">
+    <h2>5. Product page on a computer</h2>
+    <p class="note">Thumbnails down the left, the big photo with arrows; hover a thumbnail to switch, click the photo for full screen.</p>
+    <div class="desktop">
+      <div class="side-thumbs"><img src="peanut-oil-fill.jpg" alt=""><img class="on" src="peanut-oil-label.jpg" alt=""><img src="peanut-oil-fit.jpg" alt=""><img src="../frontend/src/assets/categories/oils-ghee.png" alt="" style="object-fit:contain;padding:8px"></div>
+      <div class="big"><img src="peanut-oil-label.jpg" alt=""><div class="arrows"><span><svg class="icon"><use href="#back"/></svg></span><span><svg class="icon"><use href="#right"/></svg></span></div><span class="zoom-hint"><svg class="icon" style="width:12px;height:12px"><use href="#expand"/></svg>Click to enlarge</span></div>
+      <div class="details" style="padding:0 0 0 6px">
+        <span class="brand">Dhara</span>
+        <h3 class="title">Pure Peanut Oil</h3>
+        <span class="rating"><span class="chip">4.4 <svg width="10" height="10" fill="currentColor"><use href="#star"/></svg></span>128 ratings</span>
+        <span class="price">₹199<s>MRP ₹216</s></span>
+        <p class="hint" style="margin-top:6px">Pack sizes, Add to cart and the rest of the page stay as they are.</p>
+      </div>
+    </div>
+  </section>
+</div>
+</body>
+</html>
